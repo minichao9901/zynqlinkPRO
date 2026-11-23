@@ -1,0 +1,1666 @@
+{
+  "configuration": {
+    "target": "H743 CDC Golden",
+    "hclk_hz": 60000000,
+    "fixture_read_address": {
+      "swd": "0x24043020",
+      "jtag": "0x2000b020"
+    },
+    "sram_bytes": 4032,
+    "sram_queue_depth": 4,
+    "rtt_ring_bytes": 8192,
+    "window_seconds": 2
+  },
+  "loaded_hashes": {
+    "probe.bit": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc",
+    "application.elf": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "points": [
+    {
+      "pass": "perf-raw4",
+      "id": "jtag100",
+      "transport": "jtag",
+      "requested_hz": 100000000,
+      "tap": 16,
+      "slot": 28,
+      "idle": 37,
+      "restored": true,
+      "failure": "native channel 1 operation 6 status 1, detail 0000000002000000"
+    },
+    {
+      "pass": "perf-raw4",
+      "id": "jtag50",
+      "transport": "jtag",
+      "requested_hz": 50000000,
+      "tap": 16,
+      "slot": 28,
+      "idle": 33,
+      "memory": {
+        "address": "0x2000b020",
+        "read_write_bytes": 4032,
+        "rtt_down": 14,
+        "clock": {
+          "wire_hz": 49999999,
+          "reference_hz": 199999996,
+          "divider": 4,
+          "timing": "0x6084e4",
+          "tap": 16,
+          "source": "PS clock tree and PL queue registers"
+        },
+        "invalid_axi_status": 1
+      },
+      "sram_performance": {
+        "read": {
+          "clock": {
+            "wire_hz": 49999999,
+            "reference_hz": 199999996,
+            "divider": 4,
+            "timing": "0x6084e4",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 1216,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 2.0066522999986773,
+          "MBps": 2.443329120846313
+        },
+        "write": {
+          "clock": {
+            "wire_hz": 49999999,
+            "reference_hz": 199999996,
+            "divider": 4,
+            "timing": "0x6084e4",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 1200,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 2.008502900003805,
+          "MBps": 2.4089584336626224
+        }
+      },
+      "rtt_performance": {
+        "bytes": 1135616,
+        "window_bytes": 1134592,
+        "seconds": 2.000140799995279,
+        "MBps": 0.5672560651743508,
+        "sha256": "d7302eca32ab197adcce5d473661dd0767d5812e4a84df2e0b1647a471554f51",
+        "stop": [
+          65536,
+          536904192,
+          536904216,
+          1135616,
+          72680533,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          822084608
+        ],
+        "chunk_bytes": 1024
+      },
+      "scope_single": {
+        "definition": {
+          "link_hz": 49999999,
+          "period_ticks": 192,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 2019,
+        "groups": 250051,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 250051,
+          "skipped": 0,
+          "frame_count": 2019,
+          "read_errors": 0
+        },
+        "requested_ticks": 192,
+        "window_seconds": 2.0001368999946862,
+        "host_groups_per_second": 125016.94259061183,
+        "skipped_fraction": 0.0
+      },
+      "scope": {
+        "definition": {
+          "link_hz": 49999999,
+          "period_ticks": 640,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000880c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000881c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 5004,
+        "groups": 75016,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 75016,
+          "skipped": 0,
+          "frame_count": 5004,
+          "read_errors": 0
+        },
+        "requested_ticks": 640,
+        "window_seconds": 2.000078199998825,
+        "host_groups_per_second": 37506.5334945624,
+        "skipped_fraction": 0.0
+      },
+      "passed": true,
+      "restored": true
+    },
+    {
+      "pass": "perf-raw4",
+      "id": "jtag73",
+      "transport": "jtag",
+      "requested_hz": 73000000,
+      "tap": 16,
+      "slot": 28,
+      "idle": 33,
+      "restored": true,
+      "failure": "native channel 1 operation 6 status 1, detail 0000000002000000"
+    },
+    {
+      "pass": "perf-raw4",
+      "id": "swd100",
+      "transport": "swd",
+      "requested_hz": 100000000,
+      "tap": 8,
+      "slot": 25,
+      "idle": 8,
+      "memory": {
+        "address": "0x24043020",
+        "read_write_bytes": 4032,
+        "rtt_down": 14,
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x21965",
+          "tap": 8,
+          "source": "PS clock tree and PL queue registers"
+        },
+        "invalid_axi_status": null
+      },
+      "sram_performance": {
+        "read": {
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x21965",
+            "tap": 8,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 2240,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 2.013336400006665,
+          "MBps": 4.485926941950734
+        },
+        "write": {
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x21965",
+            "tap": 8,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 2288,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 2.007481700013159,
+          "MBps": 4.595417233412155
+        }
+      },
+      "rtt_performance": {
+        "bytes": 1500160,
+        "window_bytes": 1499136,
+        "seconds": 2.000045799999498,
+        "MBps": 0.7495508352860601,
+        "sha256": "5e6d703623a7defd1ac187577c2e2d65df2bd04af77981bfba000d9a08d52cae",
+        "stop": [
+          65536,
+          604242432,
+          604242456,
+          1500160,
+          96011705,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1660945408
+        ],
+        "chunk_bytes": 1024
+      },
+      "scope_single": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 32,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 12102,
+        "groups": 1500202,
+        "timeline_skips": 2,
+        "stat": {
+          "produced": 1500202,
+          "skipped": 2,
+          "frame_count": 12102,
+          "read_errors": 0
+        },
+        "requested_ticks": 32,
+        "window_seconds": 2.0001152000040747,
+        "host_groups_per_second": 750057.7966693836,
+        "skipped_fraction": 1.3331520246579799e-06
+      },
+      "scope": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 288,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404080c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404081c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 11117,
+        "groups": 166712,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 166712,
+          "skipped": 0,
+          "frame_count": 11117,
+          "read_errors": 0
+        },
+        "requested_ticks": 288,
+        "window_seconds": 2.000177599999006,
+        "host_groups_per_second": 83348.5986444818,
+        "skipped_fraction": 0.0
+      },
+      "passed": true,
+      "restored": true
+    },
+    {
+      "pass": "perf-raw4",
+      "id": "swd50",
+      "transport": "swd",
+      "requested_hz": 50000000,
+      "tap": 8,
+      "slot": 24,
+      "idle": 4,
+      "memory": {
+        "address": "0x24043020",
+        "read_write_bytes": 4032,
+        "rtt_down": 14,
+        "clock": {
+          "wire_hz": 49999999,
+          "reference_hz": 199999996,
+          "divider": 4,
+          "timing": "0x11860",
+          "tap": 8,
+          "source": "PS clock tree and PL queue registers"
+        },
+        "invalid_axi_status": null
+      },
+      "sram_performance": {
+        "read": {
+          "clock": {
+            "wire_hz": 49999999,
+            "reference_hz": 199999996,
+            "divider": 4,
+            "timing": "0x11860",
+            "tap": 8,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 1792,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 2.003904400000465,
+          "MBps": 3.605633083094345
+        },
+        "write": {
+          "clock": {
+            "wire_hz": 49999999,
+            "reference_hz": 199999996,
+            "divider": 4,
+            "timing": "0x11860",
+            "tap": 8,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 1760,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 2.0169296999956714,
+          "MBps": 3.518377462543801
+        }
+      },
+      "rtt_performance": {
+        "bytes": 1470464,
+        "window_bytes": 1468416,
+        "seconds": 2.0001616000081412,
+        "MBps": 0.7341486807836043,
+        "sha256": "920692f071276647486ba83cea526cb6ff0825b3163b46a44e6b3901f3b001cd",
+        "stop": [
+          65536,
+          604242432,
+          604242456,
+          1470464,
+          94111132,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          822084608
+        ],
+        "chunk_bytes": 1024
+      },
+      "scope_single": {
+        "definition": {
+          "link_hz": 49999999,
+          "period_ticks": 32,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 12102,
+        "groups": 1500200,
+        "timeline_skips": 4,
+        "stat": {
+          "produced": 1500200,
+          "skipped": 4,
+          "frame_count": 12102,
+          "read_errors": 0
+        },
+        "requested_ticks": 32,
+        "window_seconds": 2.000120999990031,
+        "host_groups_per_second": 750054.6216991259,
+        "skipped_fraction": 2.6663040493159598e-06
+      },
+      "scope": {
+        "definition": {
+          "link_hz": 49999999,
+          "period_ticks": 288,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404080c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404081c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 11167,
+        "groups": 167453,
+        "timeline_skips": 1,
+        "stat": {
+          "produced": 167453,
+          "skipped": 1,
+          "frame_count": 11167,
+          "read_errors": 0
+        },
+        "requested_ticks": 288,
+        "window_seconds": 2.000099999990198,
+        "host_groups_per_second": 83722.31388471609,
+        "skipped_fraction": 5.971789267500328e-06
+      },
+      "passed": true,
+      "restored": true
+    },
+    {
+      "pass": "perf-raw4",
+      "id": "swd73",
+      "transport": "swd",
+      "requested_hz": 73000000,
+      "tap": 8,
+      "slot": 22,
+      "idle": 6,
+      "memory": {
+        "address": "0x24043020",
+        "read_write_bytes": 4032,
+        "rtt_down": 14,
+        "clock": {
+          "wire_hz": 72727272,
+          "reference_hz": 145454544,
+          "divider": 2,
+          "timing": "0x19659",
+          "tap": 8,
+          "source": "PS clock tree and PL queue registers"
+        },
+        "invalid_axi_status": null
+      },
+      "restored": true,
+      "failure": "RTT UP STOP totals: (65536, 0, 0, 0, 0, 279, 0, 0, 0, 0, 0, 1224737792)"
+    },
+    {
+      "pass": "perf-raw4-followup",
+      "id": "jtag100-idle65",
+      "transport": "jtag",
+      "requested_hz": 100000000,
+      "tap": 16,
+      "slot": 28,
+      "idle": 65,
+      "memory": {
+        "address": "0x2000b020",
+        "read_write_bytes": 4032,
+        "rtt_down": 14,
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x7904e2",
+          "tap": 16,
+          "source": "PS clock tree and PL queue registers"
+        },
+        "invalid_axi_status": 1
+      },
+      "sram_performance": {
+        "read": {
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x7904e2",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 1696,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 2.0163683999999193,
+          "MBps": 3.3913802656301666
+        },
+        "write": {
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x7904e2",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 1664,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 2.019067300003371,
+          "MBps": 3.3229442128990936
+        }
+      },
+      "rtt_performance": {
+        "bytes": 1249280,
+        "window_bytes": 1247232,
+        "seconds": 2.000070099995355,
+        "chunk_bytes": 2048,
+        "MBps": 0.6235941430267352,
+        "sha256": "fce20b35e2d22c30b06c59841c1390d8225762ab59b9b351fd0339aa3e2ff458",
+        "stop": [
+          65536,
+          536904192,
+          536904216,
+          1249280,
+          39977570,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1660946432
+        ]
+      },
+      "scope_single": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 144,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 2691,
+        "groups": 333383,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 333383,
+          "skipped": 0,
+          "frame_count": 2691,
+          "read_errors": 0
+        },
+        "requested_ticks": 144,
+        "window_seconds": 2.0000829999917187,
+        "host_groups_per_second": 166684.58259051267,
+        "skipped_fraction": 0.0
+      },
+      "scope": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 544,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000880c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000881c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 5966,
+        "groups": 89450,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 89450,
+          "skipped": 0,
+          "frame_count": 5966,
+          "read_errors": 0
+        },
+        "requested_ticks": 544,
+        "window_seconds": 2.0001425000082236,
+        "host_groups_per_second": 44721.81357059921,
+        "skipped_fraction": 0.0
+      },
+      "passed": true,
+      "restored": true
+    },
+    {
+      "pass": "perf-raw4-followup",
+      "id": "jtag100-scope",
+      "transport": "jtag",
+      "requested_hz": 100000000,
+      "tap": 16,
+      "slot": 28,
+      "idle": 65,
+      "scope_single": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 144,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 2691,
+        "groups": 333427,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 333427,
+          "skipped": 0,
+          "frame_count": 2691,
+          "read_errors": 0
+        },
+        "requested_ticks": 144,
+        "window_seconds": 2.0002557000116212,
+        "host_groups_per_second": 166692.18840274413,
+        "skipped_fraction": 0.0
+      },
+      "scope": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 544,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000880c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000881c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 5966,
+        "groups": 89449,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 89449,
+          "skipped": 0,
+          "frame_count": 5966,
+          "read_errors": 0
+        },
+        "requested_ticks": 544,
+        "window_seconds": 2.000074700001278,
+        "host_groups_per_second": 44722.829602285776,
+        "skipped_fraction": 0.0
+      },
+      "passed": true,
+      "restored": true
+    },
+    {
+      "pass": "perf-raw4-followup",
+      "id": "jtag73-slot26",
+      "transport": "jtag",
+      "requested_hz": 73000000,
+      "tap": 16,
+      "slot": 26,
+      "idle": 65,
+      "memory": {
+        "address": "0x2000b020",
+        "read_write_bytes": 4032,
+        "rtt_down": 14,
+        "clock": {
+          "wire_hz": 72727272,
+          "reference_hz": 145454544,
+          "divider": 2,
+          "timing": "0x7904d2",
+          "tap": 16,
+          "source": "PS clock tree and PL queue registers"
+        },
+        "invalid_axi_status": 1
+      },
+      "sram_performance": {
+        "read": {
+          "clock": {
+            "wire_hz": 72727272,
+            "reference_hz": 145454544,
+            "divider": 2,
+            "timing": "0x7904d2",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 1248,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 2.0112274999992223,
+          "MBps": 2.501922830710074
+        },
+        "write": {
+          "clock": {
+            "wire_hz": 72727272,
+            "reference_hz": 145454544,
+            "divider": 2,
+            "timing": "0x7904d2",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 1232,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 2.017345000000205,
+          "MBps": 2.462357207120991
+        }
+      },
+      "rtt_performance": {
+        "bytes": 1153024,
+        "window_bytes": 1150976,
+        "seconds": 2.0000296000071103,
+        "chunk_bytes": 2048,
+        "MBps": 0.5754794829016072,
+        "sha256": "b6821c4de526c5c263240a717518d072ba43f01139618059f062af401624ae17",
+        "stop": [
+          65536,
+          536904192,
+          536904216,
+          1153024,
+          36897331,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1207961600
+        ]
+      },
+      "scope_single": {
+        "definition": {
+          "link_hz": 72727272,
+          "period_ticks": 160,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 2423,
+        "groups": 300036,
+        "timeline_skips": 1,
+        "stat": {
+          "produced": 300036,
+          "skipped": 1,
+          "frame_count": 2423,
+          "read_errors": 0
+        },
+        "requested_ticks": 160,
+        "window_seconds": 2.000011900003301,
+        "host_groups_per_second": 150017.10739796338,
+        "skipped_fraction": 3.3329222729196734e-06
+      },
+      "scope": {
+        "definition": {
+          "link_hz": 72727272,
+          "period_ticks": 576,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000880c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000881c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 5560,
+        "groups": 83356,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 83356,
+          "skipped": 0,
+          "frame_count": 5560,
+          "read_errors": 0
+        },
+        "requested_ticks": 576,
+        "window_seconds": 2.00012890000653,
+        "host_groups_per_second": 41675.31402587496,
+        "skipped_fraction": 0.0
+      },
+      "passed": true,
+      "restored": true
+    },
+    {
+      "pass": "perf-raw4-followup",
+      "id": "swd100-idle4",
+      "transport": "swd",
+      "requested_hz": 100000000,
+      "tap": 8,
+      "slot": 25,
+      "idle": 4,
+      "memory": {
+        "address": "0x24043020",
+        "read_write_bytes": 4032,
+        "rtt_down": 14,
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x11965",
+          "tap": 8,
+          "source": "PS clock tree and PL queue registers"
+        },
+        "invalid_axi_status": null
+      },
+      "sram_performance": {
+        "read": {
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x11965",
+            "tap": 8,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 2448,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 2.0032635999959894,
+          "MBps": 4.927127912681966
+        },
+        "write": {
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x11965",
+            "tap": 8,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 2352,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 2.006586999996216,
+          "MBps": 4.726066699334683
+        }
+      },
+      "rtt_performance": {
+        "bytes": 1511424,
+        "window_bytes": 1509376,
+        "seconds": 2.0000384000013582,
+        "chunk_bytes": 2048,
+        "MBps": 0.7546735102680903,
+        "sha256": "35f19926c7c24ff3d6b1eff1c439410dbe048efadc31a4476be3df6e05b0d7d2",
+        "stop": [
+          65536,
+          604242432,
+          604242456,
+          1511424,
+          48366306,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1660946432
+        ]
+      },
+      "scope_single": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 24,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 16367,
+        "groups": 2029081,
+        "timeline_skips": 3,
+        "stat": {
+          "produced": 2029081,
+          "skipped": 3,
+          "frame_count": 16367,
+          "read_errors": 0
+        },
+        "requested_ticks": 24,
+        "window_seconds": 2.00019260001136,
+        "host_groups_per_second": 1014442.8091517168,
+        "skipped_fraction": 1.4784996579737457e-06
+      },
+      "scope": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 192,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404080c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404081c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 109069,
+        "groups": 109067,
+        "timeline_skips": 141022,
+        "stat": {
+          "produced": 109067,
+          "skipped": 141023,
+          "frame_count": 109069,
+          "read_errors": 0
+        },
+        "requested_ticks": 192,
+        "window_seconds": 2.000472500003525,
+        "host_groups_per_second": 54520.61950354619,
+        "skipped_fraction": 0.5638889999600144
+      },
+      "passed": true,
+      "restored": true
+    },
+    {
+      "pass": "perf-raw4-followup",
+      "id": "swd73-slot24",
+      "transport": "swd",
+      "requested_hz": 73000000,
+      "tap": 8,
+      "slot": 24,
+      "idle": 8,
+      "restored": true,
+      "failure": "native channel 1 operation 6 status 1, detail 00000000f9640200"
+    },
+    {
+      "pass": "perf-raw4-refine",
+      "id": "jtag100-128-480",
+      "transport": "jtag",
+      "requested_hz": 100000000,
+      "tap": 16,
+      "slot": 28,
+      "idle": 65,
+      "scope_single": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 128,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 3028,
+        "groups": 375073,
+        "timeline_skips": 1,
+        "stat": {
+          "produced": 375073,
+          "skipped": 1,
+          "frame_count": 3028,
+          "read_errors": 0
+        },
+        "requested_ticks": 128,
+        "window_seconds": 2.0001410999975633,
+        "host_groups_per_second": 187523.2702335135,
+        "skipped_fraction": 2.6661405482651424e-06
+      },
+      "scope": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 480,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000880c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000881c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 6670,
+        "groups": 100014,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 100014,
+          "skipped": 0,
+          "frame_count": 6670,
+          "read_errors": 0
+        },
+        "requested_ticks": 480,
+        "window_seconds": 2.0000434999965364,
+        "host_groups_per_second": 50005.91237149252,
+        "skipped_fraction": 0.0
+      },
+      "passed": true,
+      "restored": true
+    },
+    {
+      "pass": "perf-raw4-refine",
+      "id": "jtag100-idle53",
+      "transport": "jtag",
+      "requested_hz": 100000000,
+      "tap": 16,
+      "slot": 28,
+      "idle": 53,
+      "restored": true,
+      "failure": "native channel 1 operation 6 status 1, detail 0000000002000000"
+    },
+    {
+      "pass": "perf-raw4-refine",
+      "id": "swd100-20-256",
+      "transport": "swd",
+      "requested_hz": 100000000,
+      "tap": 8,
+      "slot": 25,
+      "idle": 4,
+      "scope_single": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 20,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 109853,
+        "groups": 109851,
+        "timeline_skips": 2290832,
+        "stat": {
+          "produced": 109851,
+          "skipped": 2290839,
+          "frame_count": 109853,
+          "read_errors": 0
+        },
+        "requested_ticks": 20,
+        "window_seconds": 2.0003894999972545,
+        "host_groups_per_second": 54914.80534173508,
+        "skipped_fraction": 0.9542419054521825
+      },
+      "scope": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 256,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404080c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404081c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 12639,
+        "groups": 189548,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 189548,
+          "skipped": 0,
+          "frame_count": 12639,
+          "read_errors": 0
+        },
+        "requested_ticks": 256,
+        "window_seconds": 2.000147200000356,
+        "host_groups_per_second": 94767.02514693233,
+        "skipped_fraction": 0.0
+      },
+      "passed": true,
+      "restored": true
+    },
+    {
+      "pass": "perf-raw4-refine",
+      "id": "swd100-24-224",
+      "transport": "swd",
+      "requested_hz": 100000000,
+      "tap": 8,
+      "slot": 25,
+      "idle": 4,
+      "scope_single": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 24,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 16134,
+        "groups": 2000245,
+        "timeline_skips": 3,
+        "stat": {
+          "produced": 2000245,
+          "skipped": 3,
+          "frame_count": 16134,
+          "read_errors": 0
+        },
+        "requested_ticks": 24,
+        "window_seconds": 2.0000481000024593,
+        "host_groups_per_second": 1000098.4476311047,
+        "skipped_fraction": 1.4998140230611405e-06
+      },
+      "scope": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 224,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404080c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404081c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 14292,
+        "groups": 214322,
+        "timeline_skips": 1,
+        "stat": {
+          "produced": 214322,
+          "skipped": 1,
+          "frame_count": 14292,
+          "read_errors": 0
+        },
+        "requested_ticks": 224,
+        "window_seconds": 2.0000160000054166,
+        "host_groups_per_second": 107160.14271856804,
+        "skipped_fraction": 4.665854807930087e-06
+      },
+      "passed": true,
+      "restored": true
+    },
+    {
+      "pass": "perf-raw4-refine",
+      "id": "swd73-slot22",
+      "transport": "swd",
+      "requested_hz": 73000000,
+      "tap": 8,
+      "slot": 22,
+      "idle": 6,
+      "memory": {
+        "address": "0x24043020",
+        "read_write_bytes": 4032,
+        "rtt_down": 14,
+        "clock": {
+          "wire_hz": 72727272,
+          "reference_hz": 145454544,
+          "divider": 2,
+          "timing": "0x19659",
+          "tap": 8,
+          "source": "PS clock tree and PL queue registers"
+        },
+        "invalid_axi_status": null
+      },
+      "sram_performance": {
+        "read": {
+          "clock": {
+            "wire_hz": 72727272,
+            "reference_hz": 145454544,
+            "divider": 2,
+            "timing": "0x19659",
+            "tap": 8,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 2416,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 2.004490599996643,
+          "MBps": 4.859744415871201
+        },
+        "write": {
+          "clock": {
+            "wire_hz": 72727272,
+            "reference_hz": 145454544,
+            "divider": 2,
+            "timing": "0x19659",
+            "tap": 8,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 2208,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 2.0103238000010606,
+          "MBps": 4.42846868747975
+        }
+      },
+      "rtt_performance": {
+        "bytes": 1429504,
+        "window_bytes": 1428480,
+        "seconds": 2.00012450000213,
+        "chunk_bytes": 1024,
+        "MBps": 0.7141955413267919,
+        "sha256": "04b1117d93098e21c65d8b5a4e6afba7e4755356768c3125496ff0e673b374e4",
+        "stop": [
+          65536,
+          604242432,
+          604242456,
+          1429504,
+          91489652,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1207960576
+        ]
+      },
+      "scope_single": {
+        "definition": {
+          "link_hz": 72727272,
+          "period_ticks": 32,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 12158,
+        "groups": 1507138,
+        "timeline_skips": 3,
+        "stat": {
+          "produced": 1507138,
+          "skipped": 3,
+          "frame_count": 12158,
+          "read_errors": 0
+        },
+        "requested_ticks": 32,
+        "window_seconds": 2.000072900002124,
+        "host_groups_per_second": 753541.533410307,
+        "skipped_fraction": 1.990523779792335e-06
+      },
+      "scope": {
+        "definition": {
+          "link_hz": 72727272,
+          "period_ticks": 288,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404080c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404081c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 11119,
+        "groups": 166741,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 166741,
+          "skipped": 0,
+          "frame_count": 11119,
+          "read_errors": 0
+        },
+        "requested_ticks": 288,
+        "window_seconds": 2.0001486999972258,
+        "host_groups_per_second": 83364.30186427203,
+        "skipped_fraction": 0.0
+      },
+      "passed": true,
+      "restored": true
+    }
+  ]
+}

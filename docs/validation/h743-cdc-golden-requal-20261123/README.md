@@ -49,3 +49,20 @@ PS 曾允许整个 H743 AXI SRAM，PL JTAG 队列的 AXI SRAM 窗口为 `0x24050
 在旧 ETM400 加地址保护的配对上，如果沿用同一个已执行原生内存和 RTT 的低速 JTAG DAP 会话，HSS 首次启动返回 `-7`。按独立 CLI 的连接流程重新连接后复验通过。最终配对的功能验收也使用该流程，直接跨服务的长寿命 DAP 会话继续跟踪。
 
 临时 SRAM、GPIO、定时器、目标时钟和核心状态均有恢复回执。JTAG 验收可用 `python -X utf8 tools/verify_selectio_usb_split_h743.py --transport jtag --execute --seconds 3 --out build/h743-raw4-jtag-new` 复测，SWD 将 transport 改为 `swd`。 [功能计数与哈希](raw4-functional-evidence.json)
+
+## H743 HCLK60 短窗性能
+
+SRAM 使用 4,032 B 跨 1 KiB 页、WinUSB 队列深度 4，每方向约 2 秒，回读最终数据和前后保护字。RTT 是运行态序号源、8 KiB 环和 EP7 独立转发，逐字校验，主机吞吐不含 STOP 尾部。吞吐以十进制 MB/s 计。J-Scope 的速率按 24 MHz 计时和通过的请求周期列出。以下均为单点短筛，链路用寄存器实际读回。
+
+| 调试链路实速 | tap / slot / idle | SRAM 读／写 MB/s | RTT MB/s | J-Scope 单／八变量合格短窗 |
+|---|---|---:|---:|---:|
+| SWD 49.999999 MHz | 8 / 24 / 4 | 3.606 / 3.518 | 0.734 | 750 / 83.33 k 组/s |
+| SWD 72.727272 MHz | 8 / 22 / 6 | 4.860 / 4.428 | 0.714 | 750 / 83.33 k 组/s |
+| SWD 99.999998 MHz | 8 / 25 / 4 | **4.927 / 4.726** | **0.755** | 1,000 / 107.14 k 组/s |
+| JTAG 49.999999 MHz | 16 / 28 / 33 | 2.443 / 2.409 | 0.567 | 125 / 37.50 k 组/s |
+| JTAG 72.727272 MHz | 16 / 26 / 65 | 2.502 / 2.462 | 0.575 | 150 / 41.67 k 组/s |
+| JTAG 99.999998 MHz | 16 / 28 / 65 | **3.391 / 3.323** | **0.624** | 187.50 / 50.00 k 组/s |
+
+SWD 测 AXI SRAM，JTAG 测 DTCM。所列 RTT 上限为单请求主机拉取的实测值，50 MHz 及 SWD 72.727 MHz 用 1,024 B chunk，JTAG 72.727 MHz 及两路 100 MHz 用 2,048 B chunk。首轮 SWD 72.727 MHz 的 RTT UP 扫描报错，保持 slot22/idle6、分别建立采样与 RTT 的 DAP 会话后通过。slot24 的 SRAM 首次写失败。JTAG 72.727 MHz 的 slot28/idle33 和 100 MHz 的 slot28/idle37、idle53 均发生首笔 WAIT。SWD 100 MHz 下，20 tick 的单变量和 192 tick 的八变量短筛的跳拍率分别约 95.4% 与 56.4%。
+
+原定 HCLK96/128 档位与使用 CDC Golden 的 HCLK60 工况分开记。SWO 最高速任意码序列和 SPI 100 MHz 四模式双向实板仍需独立夹具。 [全部通过和失败短窗](raw4-performance-screen.json) · [原绩效用例表](../../selectio/fusion-performance-cases.md)

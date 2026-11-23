@@ -15,6 +15,7 @@ import usb.util
 from benchmark_rtt_forward import core_read, core_write
 from dap_pipeline_bench import cmd, open_dap, setup
 from selectio_native import NativeStatusError, native_connection
+from selectio_pipeline_bench import measure_window
 from selectio_rtt import Ring
 from selectio_scope import export_scope
 from target_snapshot import same_clock_configuration, snapshot
@@ -103,33 +104,49 @@ def rtt_only(native, mem, profile, clock_hz, base):
     mem.write(ring + length - tail, payload[:tail])
     mem.write(ring, payload[tail:])
     mem.write(base + CONTROL_OFFSET + 36, struct.pack("<II", len(payload) - tail, length - tail))
+    result, received = capture_rtt(native, profile, clock_hz, base, 3, limit=len(payload))
+    require(received == payload, "RTT UP wrap mismatch")
+    return {name: result[name] for name in ("bytes", "sha256", "stop")}
+
+
+def capture_rtt(native, profile, clock_hz, base, seconds, limit=None, chunk=1024):
     native.exchange(0, 2, bytes(profile))
     channel = 2
     native.exchange(channel, 0, b"\1")
     started = False
     try:
-        for op, data in ((12, bytes((profile[0],))), (7, struct.pack("<IHBB", clock_hz, 1024, 0, 1)),
+        for op, data in ((12, bytes((profile[0],))), (7, struct.pack("<IHBB", clock_hz, chunk, 0, 1)),
                          (1, struct.pack("<IIB", base + CONTROL_OFFSET, 256, 0))):
             rc, _ = native.control(channel, op, data)
             require(rc == 0, f"RTT UP control {op}: {rc}")
         started = True
         received = bytearray()
-        until = time.monotonic() + 3
-        while len(received) < len(payload) and time.monotonic() < until:
+        start = time.monotonic()
+        while time.monotonic() < start + seconds and (limit is None or len(received) < limit):
             received.extend(native.exchange(channel, 1))
-        require(received == payload, "RTT UP wrap mismatch")
-        rc, status = native.control(channel, 0)
-        require(rc == 0 and status[3] == len(payload), f"RTT UP STOP: {rc}, {status}")
+        elapsed = time.monotonic() - start
+        window_bytes = len(received)
+        stop_end = time.monotonic() + 3
+        while True:
+            rc, status = native.control(channel, 0)
+            if rc == 0:
+                break
+            require(rc == -7 and time.monotonic() < stop_end, f"RTT UP STOP: {rc}, {status}")
+            received.extend(native.exchange(channel, 1))
         started = False
-        require(not native.exchange(channel, 1), "unexpected RTT UP tail")
-        return dict(bytes=len(received), sha256=hashlib.sha256(received).hexdigest(), stop=list(status))
+        while data := native.exchange(channel, 1):
+            received.extend(data)
+        require(status[3] == len(received) and not status[5], f"RTT UP STOP totals: {status}")
+        return dict(bytes=len(received), window_bytes=window_bytes, seconds=elapsed, chunk_bytes=chunk,
+                    MBps=window_bytes / elapsed / 1e6, sha256=hashlib.sha256(received).hexdigest(),
+                    stop=list(status)), received
     finally:
         if started:
             native.control(channel, 0)
         native.exchange(channel, 0, b"\0")
 
 
-def scope_only(native, folder, seconds, profile, clock_hz, count, base):
+def scope_only(native, folder, seconds, profile, clock_hz, count, base, ticks=24000):
     native.exchange(0, 2, bytes(profile))
     channel = 3
     record = folder / f"scope-{count}.hss"
@@ -144,15 +161,16 @@ def scope_only(native, folder, seconds, profile, clock_hz, count, base):
     try:
         control(12, bytes((profile[0],)))
         control(3, struct.pack("<I", clock_hz))
-        plan = struct.pack("<IBB", 24000, 0, count)
+        plan = struct.pack("<IBB", ticks, 0, count)
         plan += b"".join(struct.pack("<IBB", base + SAMPLES_OFFSET + 4*i, 4, 4) for i in range(count))
         control(10, plan)
         control(1)
         started = True
         with record.open("xb") as fh:
-            end = time.monotonic() + seconds
-            while time.monotonic() < end:
+            start = time.monotonic()
+            while time.monotonic() < start + seconds:
                 fh.write(native.exchange(channel, 1))
+            elapsed = time.monotonic() - start
             stop_end = time.monotonic() + 3
             while control(0, busy=True)[0]:
                 require(time.monotonic() < stop_end, "HSS STOP did not retire")
@@ -163,6 +181,10 @@ def scope_only(native, folder, seconds, profile, clock_hz, count, base):
         state = control(2)[1]
         check = export_scope(record, expected=struct.pack(f"<{count}I", *VALUES[:count]))
         require(state[2] == check["groups"] and check["groups"] > 0, "HSS STOP group total mismatch")
+        groups = check["groups"]
+        skipped = check["stat"]["skipped"]
+        check.update(requested_ticks=ticks, window_seconds=elapsed, host_groups_per_second=groups / elapsed,
+                     skipped_fraction=skipped / (groups + skipped))
         return check
     finally:
         if started:
@@ -234,6 +256,29 @@ def combo(native, mem, folder, seconds, sample_hz, profile, clock_hz, base):
             native.exchange(6, 3)
 
 
+def sram_throughput(native, mem, profile, clock_hz, base, seconds):
+    address, n, depth = base + 0x3020, 4032, 4
+    guards = (mem.word(address - 4), mem.word(address + n))
+    rows = {}
+    for direction in ("read", "write"):
+        expected = hashlib.shake_256(direction.encode()).digest(n)
+        with native.memory(*profile, clock_hz):
+            native.bulk(address, n, expected)
+            require(native.bulk(address, n) == expected, "speed test prefill failed")
+            before = native.memory_stats()
+            count, elapsed, _, _, expected = measure_window(
+                native, direction, address, n, depth, seconds, 0, 0, expected)
+            after = native.memory_stats()
+            clock = native.memory_clock(profile[0], 200_000_000, clock_hz)
+        require(after[f"{direction}_bytes"] - before[f"{direction}_bytes"] == count * n,
+                "SRAM counter differs from host")
+        require(mem.read(address, n) == expected, "SRAM performance readback differs")
+        require((mem.word(address - 4), mem.word(address + n)) == guards, "SRAM performance guard differs")
+        rows[direction] = dict(clock=clock, requests=count, transaction_bytes=n, depth=depth,
+                               seconds=elapsed, MBps=count * n / elapsed / 1e6)
+    return rows
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--serial", default="12345678")
@@ -245,10 +290,19 @@ def main():
     parser.add_argument("--slot", type=int, choices=range(64))
     parser.add_argument("--idle", type=int, choices=range(256))
     parser.add_argument("--combo-hz", type=int, default=250, help="combined RTT/HSS sample groups per second")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--performance", action="store_true", help="time verified SRAM and standalone RTT")
+    mode.add_argument("--scope-only", action="store_true", help="validate only the guarded single/eight-variable HSS streams")
+    parser.add_argument("--rtt-chunk", type=int, choices=(1024, 2048), default=1024,
+                        help="standalone performance RTT maximum reads per dequeue in bytes")
+    parser.add_argument("--scope-ticks", type=int, nargs=2, default=(24000, 24000), metavar=("ONE", "EIGHT"),
+                        help="24 MHz sample period ticks for single and eight variable plans")
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
     if args.seconds <= 0 or not 1 <= args.combo_hz <= 24000 or not 50_000_000 <= args.clock <= 100_000_000:
         parser.error("seconds must be positive, combo-hz must be 1..24000, clock must be 50..100 MHz")
+    if any(not 1 <= ticks <= 0xffffffff for ticks in args.scope_ticks):
+        parser.error("scope ticks must be positive u32 values")
     port, tap, slot, idle = DEFAULT_PROFILES[args.transport]
     profile = (port, tap if args.tap is None else args.tap,
                slot if args.slot is None else args.slot, idle if args.idle is None else args.idle)
@@ -261,7 +315,7 @@ def main():
     base = AXI_BASE if port == 1 else DTCM_BASE
     # Execute the producer from AXI SRAM while JTAG serves DTCM data.
     code_base = base if port == 1 else 0x24050000
-    producer = build_producer(args.out, code_base, base)
+    producer = None if args.scope_only else build_producer(args.out, code_base, base)
     report = dict(transport=args.transport, requested_hz=args.clock, tap=profile[1], slot=profile[2], idle=profile[3])
     dev, out, inp = open_dap(args.serial)
     mem = Memory(out, inp)
@@ -282,7 +336,7 @@ def main():
         (args.out / "backup.bin").write_bytes(original)
         recovery = dict(base=base-4, sha256=hashlib.sha256(original).hexdigest(),
                         registers=registers, dhcsr=initial, dcrdr=dcrdr, clocks=clocks)
-        if code_base != base:
+        if producer is not None and code_base != base:
             original_code = mem.read(code_base, 512)
             require(original_code == mem.read(code_base, 512), "unstable producer backup")
             (args.out / "backup-code.bin").write_bytes(original_code)
@@ -295,15 +349,25 @@ def main():
             mem.write(base, fixture(base))
             if port == 2:
                 setup(out, inp, 1000, "jtag")
-            report["memory"] = memory_and_down(native, mem, profile, args.clock, base)
-            report["rtt_up"] = rtt_only(native, mem, profile, args.clock, base)
+            if not args.scope_only:
+                report["memory"] = memory_and_down(native, mem, profile, args.clock, base)
+            if args.performance:
+                report["sram_performance"] = sram_throughput(native, mem, profile, args.clock, base, args.seconds)
             # Match the public CLI's fresh DAP connection for each standalone scope session.
             cmd(out, inp, [3])
             setup(out, inp, 1000, args.transport)
-            report["scope_single"] = scope_only(native, args.out, args.seconds, profile, args.clock, 1, base)
+            report["scope_single"] = scope_only(native, args.out, args.seconds, profile, args.clock, 1, base,
+                                                args.scope_ticks[0])
             cmd(out, inp, [3])
             setup(out, inp, 1000, args.transport)
-            report["scope"] = scope_only(native, args.out, args.seconds, profile, args.clock, 8, base)
+            report["scope"] = scope_only(native, args.out, args.seconds, profile, args.clock, 8, base,
+                                         args.scope_ticks[1])
+            if producer is None:
+                report["passed"] = True
+                return 0
+            cmd(out, inp, [3])
+            setup(out, inp, 1000, args.transport)
+            report["rtt_up"] = rtt_only(native, mem, profile, args.clock, base)
             mem.write(base, fixture(base, running=True))
             mem.write(code_base, producer)
             require(mem.read(code_base, len(producer)) == producer, "RTT producer readback differs")
@@ -313,7 +377,15 @@ def main():
             core_write(mem, 20, 1)
             core_write(mem, 15, code_base + 1)
             mem.write_word(DHCSR, 0xa05f0001)
-            report["combo"] = combo(native, mem, args.out, args.seconds, args.combo_hz, profile, args.clock, base)
+            if args.performance:
+                rate, data = capture_rtt(native, profile, args.clock, base, args.seconds, chunk=args.rtt_chunk)
+                require(len(data) >= 4096 and len(data) % 4 == 0, "insufficient continuous RTT data")
+                words = np.frombuffer(data, dtype="<u4")
+                require(np.array_equal(words, np.arange(len(words), dtype="<u4")), "RTT producer sequence differs")
+                report["rtt_performance"] = rate
+                halt(mem)
+            else:
+                report["combo"] = combo(native, mem, args.out, args.seconds, args.combo_hz, profile, args.clock, base)
         report["passed"] = True
     except BaseException as error:
         report["failure"] = str(error)
