@@ -65,4 +65,17 @@ SRAM 使用 4,032 B 跨 1 KiB 页、WinUSB 队列深度 4，每方向约 2 秒�
 
 SWD 测 AXI SRAM，JTAG 测 DTCM。所列 RTT 上限为单请求主机拉取的实测值，50 MHz 及 SWD 72.727 MHz 用 1,024 B chunk，JTAG 72.727 MHz 及两路 100 MHz 用 2,048 B chunk。首轮 SWD 72.727 MHz 的 RTT UP 扫描报错，保持 slot22/idle6、分别建立采样与 RTT 的 DAP 会话后通过。slot24 的 SRAM 首次写失败。JTAG 72.727 MHz 的 slot28/idle33 和 100 MHz 的 slot28/idle37、idle53 均发生首笔 WAIT。SWD 100 MHz 下，20 tick 的单变量和 192 tick 的八变量短筛的跳拍率分别约 95.4% 与 56.4%。
 
-原定 HCLK96/128 档位与使用 CDC Golden 的 HCLK60 工况分开记。SWO 最高速任意码序列和 SPI 100 MHz 四模式双向实板仍需独立夹具。 [全部通过和失败短窗](raw4-performance-screen.json) · [原绩效用例表](../../selectio/fusion-performance-cases.md)
+原定 HCLK96/128 档位与使用 CDC Golden 的 HCLK60 工况分开记。SWO 最高速任意码序列和 SPI 100 MHz 四模式双向实板仍需独立夹具。 [全部通过和失败短窗](raw4-performance-screen.json) · [原定性能用例表](../../selectio/fusion-performance-cases.md)
+
+## J-Scope 100 MHz 长窗
+
+HCLK60、SWD tap8/slot25/idle4、JTAG tap16/slot28/idle65。各宽度独立跑 3×60 秒，按样值、时间网格、序号、尾帧和读错误核对。12 个窗口全过，目标在每轮后恢复。
+
+| 链路 | 变量数 | 周期（24 MHz tick） | 实收组/s（样本时间网格） | 三轮跳拍 | 最差跳拍率 |
+|---|---:|---:|---:|---:|---:|
+| SWD | 1 | 24 | 999,999.95 | 3 / 3 / 3 | 0.00000501% |
+| SWD | 8 | 208 | 115,384.60 | 1 / 1 / 1 | 0.00001445% |
+| JTAG | 1 | 112 | 214,285.70 | 1 / 1 / 1 | 0.00000778% |
+| JTAG | 8 | 416 | 57,692.31 | 0 / 0 / 0 | 0% |
+
+最差跳拍率小于验收上限 0.1%。原始 `.hss` 保存于本机 `build/h743-cdc-golden-requal-20261123/scope-raw4-confirm`，每窗 SHA-256、实际组数和计时见 [长窗证据](raw4-hss-60s.json)。

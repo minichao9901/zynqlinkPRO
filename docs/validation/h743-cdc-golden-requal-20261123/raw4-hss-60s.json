@@ -1,0 +1,850 @@
+{
+  "hclk_hz": 60000000,
+  "loaded_hashes": {
+    "probe.bit": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc",
+    "application.elf": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "trials": [
+    {
+      "transport": "swd",
+      "tap": 8,
+      "slot": 25,
+      "idle": 4,
+      "scope_single": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 24,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 16134,
+        "groups": 2000157,
+        "timeline_skips": 3,
+        "stat": {
+          "produced": 2000157,
+          "skipped": 3,
+          "frame_count": 16134,
+          "read_errors": 0
+        },
+        "requested_ticks": 24,
+        "window_seconds": 2.0000021000014385,
+        "host_groups_per_second": 1000077.4499179582,
+        "skipped_fraction": 1.499880009599232e-06
+      },
+      "scope": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 208,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404080c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404081c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 15391,
+        "groups": 230808,
+        "timeline_skips": 1,
+        "stat": {
+          "produced": 230808,
+          "skipped": 1,
+          "frame_count": 15391,
+          "read_errors": 0
+        },
+        "requested_ticks": 208,
+        "window_seconds": 2.000067200002377,
+        "host_groups_per_second": 115400.12255574498,
+        "skipped_fraction": 4.332586684228085e-06
+      }
+    },
+    {
+      "transport": "jtag",
+      "tap": 16,
+      "slot": 28,
+      "idle": 65,
+      "scope_single": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 112,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 3460,
+        "groups": 428645,
+        "timeline_skips": 1,
+        "stat": {
+          "produced": 428645,
+          "skipped": 1,
+          "frame_count": 3460,
+          "read_errors": 0
+        },
+        "requested_ticks": 112,
+        "window_seconds": 2.0001052000006894,
+        "host_groups_per_second": 214311.22722937388,
+        "skipped_fraction": 2.3329274039650434e-06
+      },
+      "scope": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 416,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000880c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000881c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 7697,
+        "groups": 115413,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 115413,
+          "skipped": 0,
+          "frame_count": 7697,
+          "read_errors": 0
+        },
+        "requested_ticks": 416,
+        "window_seconds": 2.0000594000011915,
+        "host_groups_per_second": 57704.78616781644,
+        "skipped_fraction": 0.0
+      }
+    }
+  ],
+  "waves": [
+    {
+      "failure": null,
+      "one": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 24,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 484038,
+        "groups": 60020270,
+        "timeline_skips": 3,
+        "stat": {
+          "produced": 60020270,
+          "skipped": 3,
+          "frame_count": 484038,
+          "read_errors": 0
+        },
+        "requested_ticks": 24,
+        "window_seconds": 60.000121199991554,
+        "host_groups_per_second": 1000335.8126551326,
+        "skipped_fraction": 4.998311153966261e-08,
+        "record": {
+          "file": "scope-1.hss",
+          "bytes": 247827456,
+          "sha256": "5013dc26f5891c2cd7d1f5be9b86cda8d391e1f06a80e6b7d37058cafa9135f3"
+        },
+        "timeline_groups_per_second": 999999.9500168876
+      },
+      "round": 1,
+      "passed": true,
+      "eight": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 208,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404080c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404081c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 461490,
+        "groups": 6922305,
+        "timeline_skips": 1,
+        "stat": {
+          "produced": 6922305,
+          "skipped": 1,
+          "frame_count": 461490,
+          "read_errors": 0
+        },
+        "requested_ticks": 208,
+        "window_seconds": 60.00003500000457,
+        "host_groups_per_second": 115371.68269984296,
+        "skipped_fraction": 1.444605309271217e-07,
+        "record": {
+          "file": "scope-8.hss",
+          "bytes": 236282880,
+          "sha256": "0a5c55147dd2a0817fa9940a017f6affdd25cf1ed3655feabcfd992234d3ebf9"
+        },
+        "timeline_groups_per_second": 115384.59871609017
+      },
+      "restored": true,
+      "transport": "swd"
+    },
+    {
+      "failure": null,
+      "one": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 112,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 103679,
+        "groups": 12855734,
+        "timeline_skips": 1,
+        "stat": {
+          "produced": 12855734,
+          "skipped": 1,
+          "frame_count": 103679,
+          "read_errors": 0
+        },
+        "requested_ticks": 112,
+        "window_seconds": 60.000078800003394,
+        "host_groups_per_second": 214261.95193595768,
+        "skipped_fraction": 7.778629537712157e-08,
+        "record": {
+          "file": "scope-1.hss",
+          "bytes": 53083648,
+          "sha256": "8f0ce3c1662cc3a64ae5f9089082fd6ba3ebaf25feb156b204c4a448284ea8fc"
+        },
+        "timeline_groups_per_second": 214285.69761722113
+      },
+      "round": 1,
+      "passed": true,
+      "eight": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 416,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000880c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000881c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 230747,
+        "groups": 3461161,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 3461161,
+          "skipped": 0,
+          "frame_count": 230747,
+          "read_errors": 0
+        },
+        "requested_ticks": 416,
+        "window_seconds": 60.00001419999171,
+        "host_groups_per_second": 57686.00301432059,
+        "skipped_fraction": 0.0,
+        "record": {
+          "file": "scope-8.hss",
+          "bytes": 118142464,
+          "sha256": "40c70a2986dc3f97d8ea64125bb184e393fe323352bc034c1be64a8e3313c541"
+        },
+        "timeline_groups_per_second": 57692.307692307695
+      },
+      "restored": true,
+      "transport": "jtag"
+    },
+    {
+      "failure": null,
+      "one": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 24,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 483822,
+        "groups": 59993456,
+        "timeline_skips": 3,
+        "stat": {
+          "produced": 59993456,
+          "skipped": 3,
+          "frame_count": 483822,
+          "read_errors": 0
+        },
+        "requested_ticks": 24,
+        "window_seconds": 60.00001730000076,
+        "host_groups_per_second": 999890.645031518,
+        "skipped_fraction": 5.00054514276298e-08,
+        "record": {
+          "file": "scope-1.hss",
+          "bytes": 247716864,
+          "sha256": "9f1662a4923f1089fe2c92c0f4f4ffc361550345da4985addd8ecf59c0ca7ad3"
+        },
+        "timeline_groups_per_second": 999999.9499945478
+      },
+      "round": 2,
+      "passed": true,
+      "eight": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 208,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404080c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404081c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 461490,
+        "groups": 6922300,
+        "timeline_skips": 1,
+        "stat": {
+          "produced": 6922300,
+          "skipped": 1,
+          "frame_count": 461490,
+          "read_errors": 0
+        },
+        "requested_ticks": 208,
+        "window_seconds": 60.00000359999831,
+        "host_groups_per_second": 115371.65974437034,
+        "skipped_fraction": 1.4446063527142203e-07,
+        "record": {
+          "file": "scope-8.hss",
+          "bytes": 236282880,
+          "sha256": "9adf95dfeccc41d6fe6780e63bb6af715342ac7b2197249a6b771381db15a8b0"
+        },
+        "timeline_groups_per_second": 115384.59871607814
+      },
+      "restored": true,
+      "transport": "swd"
+    },
+    {
+      "failure": null,
+      "one": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 112,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 103708,
+        "groups": 12859413,
+        "timeline_skips": 1,
+        "stat": {
+          "produced": 12859413,
+          "skipped": 1,
+          "frame_count": 103708,
+          "read_errors": 0
+        },
+        "requested_ticks": 112,
+        "window_seconds": 60.00018979999004,
+        "host_groups_per_second": 214322.8720253504,
+        "skipped_fraction": 7.776404119192367e-08,
+        "record": {
+          "file": "scope-1.hss",
+          "bytes": 53098496,
+          "sha256": "14f0c66b9c0edf44ca66f716438670f544f9509aa407104e40cfd9fcb1594c90"
+        },
+        "timeline_groups_per_second": 214285.69762198988
+      },
+      "round": 2,
+      "passed": true,
+      "eight": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 416,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000880c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000881c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 230747,
+        "groups": 3461170,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 3461170,
+          "skipped": 0,
+          "frame_count": 230747,
+          "read_errors": 0
+        },
+        "requested_ticks": 416,
+        "window_seconds": 60.00020210001094,
+        "host_groups_per_second": 57685.97236107258,
+        "skipped_fraction": 0.0,
+        "record": {
+          "file": "scope-8.hss",
+          "bytes": 118142464,
+          "sha256": "a549fb7b5de13b438653d4a4d2b0d5792bb4b228e6d8256ebaf56a3e1c645928"
+        },
+        "timeline_groups_per_second": 57692.307692307695
+      },
+      "restored": true,
+      "transport": "jtag"
+    },
+    {
+      "failure": null,
+      "one": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 24,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 483821,
+        "groups": 59993388,
+        "timeline_skips": 3,
+        "stat": {
+          "produced": 59993388,
+          "skipped": 3,
+          "frame_count": 483821,
+          "read_errors": 0
+        },
+        "requested_ticks": 24,
+        "window_seconds": 60.000129399995785,
+        "host_groups_per_second": 999887.643575719,
+        "skipped_fraction": 5.000550810671795e-08,
+        "record": {
+          "file": "scope-1.hss",
+          "bytes": 247716352,
+          "sha256": "9c18c9cb26b63f318171859068a668f8555e2d54871d61859321495419450c8a"
+        },
+        "timeline_groups_per_second": 999999.9499944911
+      },
+      "round": 3,
+      "passed": true,
+      "eight": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 208,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x24040800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404080c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x24040818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2404081c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 461562,
+        "groups": 6923382,
+        "timeline_skips": 1,
+        "stat": {
+          "produced": 6923382,
+          "skipped": 1,
+          "frame_count": 461562,
+          "read_errors": 0
+        },
+        "requested_ticks": 208,
+        "window_seconds": 60.00008430000162,
+        "host_groups_per_second": 115389.53787769617,
+        "skipped_fraction": 1.444380586773836e-07,
+        "record": {
+          "file": "scope-8.hss",
+          "bytes": 236319744,
+          "sha256": "7e0445b44712360808de0b6f5ef8a917c95ae67d70898810a0f4729cb34e99ec"
+        },
+        "timeline_groups_per_second": 115384.59871868313
+      },
+      "restored": true,
+      "transport": "swd"
+    },
+    {
+      "failure": null,
+      "one": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 112,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 103680,
+        "groups": 12855839,
+        "timeline_skips": 1,
+        "stat": {
+          "produced": 12855839,
+          "skipped": 1,
+          "frame_count": 103680,
+          "read_errors": 0
+        },
+        "requested_ticks": 112,
+        "window_seconds": 60.00007779999578,
+        "host_groups_per_second": 214263.70550474362,
+        "skipped_fraction": 7.778566005799698e-08,
+        "record": {
+          "file": "scope-1.hss",
+          "bytes": 53084160,
+          "sha256": "97789d34b089cb4baf26185f7b316e6384022e712f0350ccee5d9011542ebb95"
+        },
+        "timeline_groups_per_second": 214285.69761735728
+      },
+      "round": 3,
+      "passed": true,
+      "eight": {
+        "definition": {
+          "link_hz": 99999998,
+          "period_ticks": 416,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000880c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000881c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 230747,
+        "groups": 3461169,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 3461169,
+          "skipped": 0,
+          "frame_count": 230747,
+          "read_errors": 0
+        },
+        "requested_ticks": 416,
+        "window_seconds": 60.000167100006365,
+        "host_groups_per_second": 57685.98934451355,
+        "skipped_fraction": 0.0,
+        "record": {
+          "file": "scope-8.hss",
+          "bytes": 118142464,
+          "sha256": "d81d29a24dde9d1639becbb0793b7d0e511f887b01d52e8add2bfdfe624c7ab8"
+        },
+        "timeline_groups_per_second": 57692.307692307695
+      },
+      "restored": true,
+      "transport": "jtag"
+    }
+  ]
+}
