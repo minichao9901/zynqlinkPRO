@@ -44,3 +44,8 @@ PnPUtil added ftdibus.inf as oem6.inf; FTDI 2.12.28.0, Microsoft WHCP signature.
 Matching device: USB\VID_0403&PID_6014\210299008529; driver status: Best Ranked.
 Post-install device state: Disconnected, IsPresent=False. XSCT JTAG and processor target lists empty.
 Original H743 F055:7431 enumerated as COM33. No bitstream, PS ELF or H743 Flash download.
+
+2026-11-24, after the user moved HS3 to another USB port
+Windows: IsPresent=True, status OK, oem6.inf, FTDI 2.12.28.0, service FTDIBUS.
+XSCT: Digilent JTAG-HS3 210299008529, arm_dap 0x4ba00477, xc7z020 0x23727093.
+The two Cortex-A9 targets were Running. H743 COM33 present. J7 USB not enumerated.

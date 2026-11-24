@@ -17,3 +17,5 @@
 ## HS3 驱动复装
 
 2026-11-24，按用户要求只恢复 HS3 驱动，SPI 验收暂缓。使用 Xilinx SDK 2018.3 随附的 Digilent 签名安装程序。Windows 驱动库已导入同包的 Microsoft 签名 FTDI `ftdibus.inf` 2.12.28.0，发布名 `oem6.inf`，并确认为 `0403:6014`、序列号 `210299008529` 的最佳匹配。复查时该设备实例仍显示 `Disconnected`，XSCT 未列出 JTAG 目标。H743 原固件仍枚举为 `COM33`，Zynq 装载、目标 Flash 和 SPI 实板验收留待恢复后继续。
+
+同日，更换 USB 端口后，Windows 已将 `oem6.inf` / `FTDIBUS` 绑定到 HS3，状态正常。XSCT 枚举到 `Digilent JTAG-HS3 210299008529`、`arm_dap` 和 `xc7z020`，两颗 Cortex-A9 显示 Running。此次只核对 JTAG 枚举，J7 探针 USB 仍未出现。
