@@ -16,7 +16,9 @@ param(
     [switch]$StandaloneEtm,
     [ValidateSet(24, 48, 72)][int]$CpuMHz = 72,
     [switch]$TraceWorkload,
-    [switch]$Ram
+    [switch]$Ram,
+    [string]$OutputDir,
+    [switch]$NoPublish
 )
 $ErrorActionPreference = 'Stop'
 $explicitCpuMHz = $PSBoundParameters.ContainsKey('CpuMHz')
@@ -34,7 +36,7 @@ if (($CpuMHz -in @(24, 48) -and ($explicitCpuMHz -or $StandaloneEtm -or $TraceWo
     ($Chip -eq 'ze' -and $CpuMHz -eq 72)) { $variant += "-$CpuMHz" }
 if ($TraceWorkload) { $variant += '-workload' }
 if ($Ram) { $variant += '-ram' }
-$out  = Join-Path $root "build\$variant"
+$out  = if ($OutputDir) { [IO.Path]::GetFullPath($OutputDir) } else { Join-Path $root "build\$variant" }
 New-Item -ItemType Directory -Path $out -Force | Out-Null
 
 # ---------- 构建前准备：解开 ST 启动文件的 USB 中断弱别名锁定 ----------
@@ -139,7 +141,7 @@ Write-Output (Invoke-Tool -Exe "$bin\arm-none-eabi-size.exe" -Args @($elf)).Stdo
 (Invoke-Tool -Exe "$bin\arm-none-eabi-nm.exe" -Args @('-n', '-S', $elf)).Stdout | Set-Content -LiteralPath "$out\fw.symbols.txt" -Encoding utf8
 (Invoke-Tool -Exe "$bin\arm-none-eabi-objdump.exe" -Args @('-d', '-S', $elf)).Stdout | Set-Content -LiteralPath "$out\fw.disasm.txt" -Encoding utf8
 
-foreach ($ext in @('elf','bin','hex')) {
+foreach ($ext in $(if ($NoPublish) { @() } else { @('elf','bin','hex') })) {
     Copy-Item -LiteralPath "$out\fw.$ext" -Destination "$root\fw-$variant.$ext" -Force
 }
 

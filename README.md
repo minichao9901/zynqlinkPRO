@@ -30,6 +30,8 @@ ETM 采集时同时声明探针 bit、探针 PS ELF 和目标 MCU ELF。目标 E
 
 [功能验证](docs/validation/h743-cdc-golden-requal-20261123/README.md) · [HCLK 对照及 JTAG 长窗](docs/validation/h743-hclk-ab-20261123/README.md) · [用例编号和判据](docs/selectio/fusion-performance-cases.md) · [当前问题](docs/项目问题跟踪列表.md)
 
+三块 MCU 的验收固件、构建入口、接线与极限测速条件见[目标固件总表](firmware/target/README.md)。
+
 ## 开发
 
 ```powershell

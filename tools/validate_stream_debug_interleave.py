@@ -76,7 +76,7 @@ def compile_producer(out, name):
     gcc = Path(shutil.which('arm-none-eabi-gcc'))
     objcopy = gcc.with_name('arm-none-eabi-objcopy.exe' if gcc.suffix == '.exe' else 'arm-none-eabi-objcopy')
     elf, binary = out / (name + '.elf'), out / (name + '.bin')
-    source = ROOT / f'firmware/target/probe_{name}_ram.S'
+    source = ROOT / f'tools/fixtures/target/probe_{name}_ram.S'
     subprocess.run([str(gcc), '-mcpu=cortex-m3', '-mthumb', '-nostdlib',
                     f'-Wl,-Ttext={BASE:#x}', f'-Wa,--defsym,FIXTURE_BASE={BASE:#x}', '-Wl,-e,producer', str(source), '-o', str(elf)], check=True)
     subprocess.run([str(objcopy), '-O', 'binary', str(elf), str(binary)], check=True)

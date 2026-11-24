@@ -37,7 +37,11 @@ ATTR_PLACE_AT_NONCACHEABLE_BSS volatile uint32_t g_stage;        /* 当前在第
 ATTR_PLACE_AT_NONCACHEABLE_BSS volatile uint32_t g_last_result;  /* 上一段返回值 */
 ATTR_PLACE_AT_NONCACHEABLE_BSS volatile uint32_t g_checksum;     /* 每轮算一次：代码真的在跑 */
 ATTR_PLACE_AT_NONCACHEABLE_BSS_WITH_ALIGNMENT(16) volatile uint32_t g_seq_slot[8];
+#ifndef FIXTURE_ACCEPTANCE
 ATTR_PLACE_AT_NONCACHEABLE_BSS volatile uint32_t g_mchtmr_hz;    /* MCHTMR 实测频率 */
+#else
+extern volatile uint32_t g_mchtmr_hz;
+#endif
 
 /* ---- 异常现场（第一次异常就记下来并停住，比"无限重试出错指令"好查得多）---- */
 ATTR_PLACE_AT_NONCACHEABLE_BSS volatile uint32_t g_trap_count;
@@ -76,11 +80,20 @@ static uint32_t stage_run(uint32_t s)
   }
 }
 
+#ifdef FIXTURE_ACCEPTANCE
+#include "fixture.h"
+#endif
+
 int main(void)
 {
   uint32_t hz, step, next, s;
 
+#ifdef FIXTURE_ACCEPTANCE
+  if (!target_clock_init()) for (;;) {}
+  debug_observables_init();
+#else
   board_init();
+#endif
   board_init_led_pins();
 
   hz = (uint32_t)clock_get_frequency(clock_mchtmr0);
@@ -99,6 +112,9 @@ int main(void)
       g_last_result = stage_run(s);
     }
     g_checksum = model_checksum() ^ g_seq_slot[7] ^ g_last_result;
+#ifdef FIXTURE_ACCEPTANCE
+    debug_observables_poll();
+#endif
 
     /* 等下一个 10 kHz 节拍：主循环周期固定，断点命中节奏可预期、可复现 */
     while ((int32_t)((uint32_t)mchtmr_get_count(HPM_MCHTMR) - next) < 0){ }

@@ -63,6 +63,7 @@ ALIASES={
  'etm.lane-calibrate':'tools/calibrate_etm_lanes.py',
  'etm.lane-package':'tools/package_etm_lane_delay.py',
  'deps.check':'tools/verify_dependencies.py',
+ 'target.acceptance-build':'tools/build_target_acceptance.py',
  'target.fixtures':'tools/build_f103_fixtures.py','target.cdc-build':'firmware/target/f103ze/etm/cdc/build.ps1',
  'target.cdc-tests':'firmware/target/f103ze/etm/cdc/tests/run_tests.ps1',
  'target.h743-build':'firmware/target/h743/etm/cdc/build.ps1',
