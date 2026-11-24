@@ -1,0 +1,39 @@
+2026-11-24, H743 SPI2 acceptance preflight. Both flash and probe load were withheld.
+PnP initially showed HS3 210299008529 and H743 F055:7431 H743CDC0001. J7 12345678 was absent.
+HS3 later dropped out. A follow-up XSCT probe-state request reported available targets: none.
+Windows reported USB port reset failure (Code 43). PnP device restart and scan cleared the error.
+After restarting the external hub and manually cycling its two root ports through the hub driver,
+F055:7431 COM43 returned; neither HS3 VID_0403&PID_6014 nor J7 VID_0D28&PID_0204 enumerated.
+The previous probe port reported NoDevice. An initial physical AP0 read of boot mode returned 0.
+The physical AP0 DDR boot marker read at 0x03ff0000 returned DAP status f0000021.
+
+SPI master RTL
+SPI_PASS CPOL/CPHA 0..3: full duplex 1, 5, 4096 bytes at 100 MHz
+
+SPI slave AUX RTL
+SPI_SLAVE_RING_PASS 100MHz continuous_bytes=73727 wrap=pass tail=pass overflow=7 frame_error=1 rearm=pass
+
+SPI CDC pump
+SPI_CDC_PUMP_PASS bytes=4194341 peak_ddr=1874900 submit_retries=10 short_packets=1
+SPI_CDC_PUMP_REARM_PASS mode=3 bytes=3
+SPI_CDC_PUMP_COUNTER_PASS bytes=4099 wrap=uint32
+
+CDC endpoints
+CDC_EVENT_PASS empty_descriptor=2 RX_lengths=12 TX_routes=2
+
+Host waveform
+H743 SPI host waveform check PASS, modes 0-3, three raw sample widths and all eight source divisors
+
+USB hub ports
+port 1 status 9 address 0 device 0000:0000 hub 0
+port 2 status 0 address 0 device 0000:0000 hub 0
+port 3 status 0 address 0 device 0000:0000 hub 0
+
+USB root targeted cycle
+port 2 status 1 address 4 device 05E3:0610 hub 1
+port 2 cycle result 0x00000000
+port 6 status 1 address 3 device 05E3:0626 hub 1
+port 6 cycle result 0x00000000
+
+Final targeted Disable/Enable and hardware rescan returned the original H743 COM43 only.
+The native CLI returned: expected one J7 with serial 12345678, found 0.

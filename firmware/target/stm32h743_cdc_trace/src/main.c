@@ -71,7 +71,12 @@ extern void probe_stage(uint32_t stage);
 #define CDC_INT_EP 0x83
 
 #define USBD_VID           0xF055
+#if H7_SPI_FIXTURE
+#include "spi_fixture.h"
+#define USBD_PID           0x7432
+#else
 #define USBD_PID           0x7431
+#endif
 #define USBD_MAX_POWER     100
 #define USBD_LANGID_STRING 1033
 
@@ -96,8 +101,13 @@ static const uint8_t device_quality_descriptor[] = {
 static const char *string_descriptors[] = {
     (const char[]){ 0x09, 0x04 },
     "web-etm-trace",
+#if H7_SPI_FIXTURE
+    "STM32H743 SPI2 Acceptance Fixture",
+    "H743SPI0001",
+#else
     "STM32H743 CDC ACM (CherryUSB)",
     "H743CDC0001",
+#endif
 };
 
 static const uint8_t *device_descriptor_callback(uint8_t speed)
@@ -137,30 +147,46 @@ static const struct usb_descriptor cdc_descriptor = {
 /* ======================= 端点缓冲（非缓存 + 32B 对齐） ======================= */
 static USB_NOCACHE_RAM_SECTION USB_MEM_ALIGNX uint8_t read_buffer[CDC_BUF_SIZE];
 static USB_NOCACHE_RAM_SECTION USB_MEM_ALIGNX uint8_t write_buffer[CDC_BUF_SIZE];
+#if !H7_SPI_FIXTURE
 static uint8_t snapshot[CDC_BUF_SIZE];
+#endif
 
 static volatile uint32_t rx_len;
 static volatile uint32_t rx_total;
 static volatile uint32_t tx_total;
 static volatile uint8_t ep_tx_busy_flag;
 static volatile uint8_t dtr_enable;
+#if !H7_SPI_FIXTURE
 static volatile uint8_t echo_enable = 1;
+#endif
 
+#if H7_SPI_FIXTURE
+static const char banner[] = "H743SPI/1 ready\r\n";
+#else
 static const char banner[] =
     "\r\n=== STM32H743 CherryUSB CDC ACM (etm-trace target) ===\r\n"
     "commands: PING | INFO | MARK | ECHO on|off | ECHO <text>\r\n";
+#endif
 
 /* ======================= 事件回调 ======================= */
 static void usbd_event_handler(uint8_t busid, uint8_t event)
 {
     switch (event) {
         case USBD_EVENT_RESET:
+#if H7_SPI_FIXTURE
+            dtr_enable = 0;
+            rx_len = 0;
+#endif
             USB_LOG_RAW("[usb] reset\r\n");
             break;
         case USBD_EVENT_CONNECTED:
             USB_LOG_RAW("[usb] connected\r\n");
             break;
         case USBD_EVENT_DISCONNECTED:
+#if H7_SPI_FIXTURE
+            dtr_enable = 0;
+            rx_len = 0;
+#endif
             USB_LOG_RAW("[usb] disconnected\r\n");
             break;
         case USBD_EVENT_RESUME:
@@ -185,7 +211,10 @@ void usbd_cdc_acm_bulk_out(uint8_t busid, uint8_t ep, uint32_t nbytes)
     rx_len = nbytes;
     rx_total += nbytes;
     g_trace.usb_rx = rx_total;
-    usbd_ep_start_read(busid, CDC_OUT_EP, read_buffer, CDC_BUF_SIZE);
+#if H7_SPI_FIXTURE
+    if (nbytes == 0)
+#endif
+        usbd_ep_start_read(busid, CDC_OUT_EP, read_buffer, CDC_BUF_SIZE);
 }
 
 void usbd_cdc_acm_bulk_in(uint8_t busid, uint8_t ep, uint32_t nbytes)
@@ -260,6 +289,51 @@ static void cdc_puts(const char *s)
     cdc_write((const uint8_t *)s, (uint32_t)strlen(s));
 }
 
+#if H7_SPI_FIXTURE
+static void service_spi_cdc(void)
+{
+    static char line[128];
+    static size_t length;
+    static uint32_t used;
+    static bool overflow;
+    if (!dtr_enable) {
+        spi_fixture_disconnect();
+        length = 0;
+        overflow = false;
+    }
+    uint32_t received = rx_len;
+    if (used > received)
+        used = 0;
+    while (used < received && (!dtr_enable || !ep_tx_busy_flag)) {
+        char ch = read_buffer[used++];
+        if (!dtr_enable || ch == '\r')
+            continue;
+        if (ch != '\n') {
+            if (length < sizeof line - 1u)
+                line[length++] = ch;
+            else
+                overflow = true;
+            continue;
+        }
+        if (overflow) {
+            cdc_puts("ERR command_too_long\r\n");
+        } else if (length) {
+            char reply[256];
+            line[length] = '\0';
+            spi_fixture_command(line, reply, sizeof reply);
+            cdc_puts(reply);
+        }
+        length = 0;
+        overflow = false;
+    }
+    if (received && used == received) {
+        rx_len = 0;
+        used = 0;
+        usbd_ep_start_read(0, CDC_OUT_EP, read_buffer, CDC_BUF_SIZE);
+    }
+}
+#endif
+
 /* ======================= RTT 日志 ======================= */
 int trace_log_printf(const char *fmt, ...)
 {
@@ -279,6 +353,7 @@ int trace_log_printf(const char *fmt, ...)
 }
 
 /* ======================= CDC 命令行 ======================= */
+#if !H7_SPI_FIXTURE
 static void handle_command(const uint8_t *buf, uint32_t len)
 {
     char line[128];
@@ -319,6 +394,8 @@ static void handle_command(const uint8_t *buf, uint32_t len)
         /* 普通文本已由主循环原样回显，不追加命令错误。 */
     }
 }
+
+#endif
 
 /* ======================= 时钟：480MHz ======================= */
 static void system_clock_init(void)
@@ -434,6 +511,10 @@ int main(void)
     /* I-Cache 开、D-Cache 关：USB 缓冲在 .noncacheable；关掉 D-Cache 后
      * SWD/ETM 工具读到的内存与 CPU 视图一致，排查省事。 */
     SCB_EnableICache();
+#if H7_SPI_FIXTURE
+    if (!spi_fixture_init())
+        g_clock_err |= 32u;
+#endif
     probe_stage(5);
 
     SEGGER_RTT_Init();
@@ -458,6 +539,10 @@ int main(void)
     for (;;) {
         g_trace.loops++;
 
+#if H7_SPI_FIXTURE
+        spi_fixture_poll();
+        service_spi_cdc();
+#else
         if (rx_len
 #if H7_CDC_BANNER_INTERVAL_MS > 0
             /* 周期 banner 占用 IN 端点时保留待回显数据，不交给忙即丢弃的发送函数。 */
@@ -475,6 +560,7 @@ int main(void)
             handle_command(snapshot, n);
             trace_log_printf("[cdc] rx %lu bytes\r\n", (unsigned long)n);
         }
+#endif
 
         if ((g_trace.loops & 0xFFFFFu) == 0u) {
             trace_hook_mark();

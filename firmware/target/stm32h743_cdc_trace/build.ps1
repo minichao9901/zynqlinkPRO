@@ -20,7 +20,8 @@ param(
     [string]$Gcc,
     [string]$SdkRoot,
     [string]$OutputDir,
-    [switch]$NoPublish
+    [switch]$NoPublish,
+    [switch]$SpiFixture
 )
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'tools\BuildTools.psm1') -Force
@@ -78,6 +79,7 @@ $h7Flags = @(
     "-DH7_CDC_USB_INTERNAL_REGULATOR=$h7UsbReg",
     "-DH7_DWC2_TRDT_FROM_CORE=$([int]($Trdt -eq 'Core'))",
     "-DH7_CDC_BANNER_INTERVAL_MS=$BannerEveryMs",
+    "-DH7_SPI_FIXTURE=$([int]$SpiFixture.IsPresent)",
     # SEGGER RTT 控制块固定到 .rtt_cb（链接脚本把它放在 DTCM 0x20002000）
     '-DRTT_CB_ATTR=__attribute__((section(".rtt_cb"),aligned(4)))',
     "-I$h7Root\src",
@@ -109,6 +111,8 @@ $h7Sources = @(
     "$h7Root\cherryusb\port\dwc2\usb_dc_dwc2.c",
     "$h7Root\cherryusb\port\dwc2\usb_glue_st_h7b0.c"
 )
+
+if ($SpiFixture) { $h7Sources += "$h7Root\src\spi_fixture.c" }
 
 # HAL：只挑这个 demo 用得上的（PCD 是必需项 —— CherryUSB 的 glue 走 HAL_PCD_MspInit）
 foreach ($h7Hal in @('hal', 'hal_cortex', 'hal_rcc', 'hal_rcc_ex', 'hal_pwr', 'hal_pwr_ex',
