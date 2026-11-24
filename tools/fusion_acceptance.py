@@ -6,6 +6,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+from fusion_evidence import Blocked
+
 ROOT = Path(__file__).resolve().parents[1]
 TOOLBOX = [sys.executable, '-X', 'utf8', str(ROOT / 'toolbox.py')]
 
@@ -156,7 +158,10 @@ def validate_point(case, profiles, args):
         if not any(point['transport'] == args.transport and args.rate in point['requestedHz']
                    for point in profile['links']):
             raise ValueError('Select a listed --transport and --rate in Hz')
-        if args.tap not in range(32) or args.slot not in range(64) or args.idle not in range(256):
+        if args.transport == 'riscv-jtag':
+            if any(value is not None for value in (args.tap, args.slot, args.idle)):
+                raise ValueError('RISC-V uses the HPM single-TAP profile. Omit ARM tap, slot and idle.')
+        elif args.tap not in range(32) or args.slot not in range(64) or args.idle not in range(256):
             raise ValueError('Provide --tap 0..31, --slot 0..63 and --idle 0..255 from the calibrated link')
         if args.transport == 'arm-jtag' and (args.slot < 16 or args.idle % 2 == 0):
             raise ValueError('ARM JTAG needs slot 16..63 and odd idle')
@@ -259,6 +264,9 @@ def main(argv=None):
                             failure = result['status'] in ('fail', 'blocked')
                 except KeyboardInterrupt:
                     result.update(status='blocked', reason='Interrupted. Confirm recorded restoration before continuing.')
+                    failure = True
+                except Blocked as error:
+                    result.update(status='blocked', reason=str(error))
                     failure = True
                 except Exception as error:
                     result.update(status='fail', reason=str(error))

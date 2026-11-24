@@ -276,7 +276,13 @@ def capture(args):
         variables=[variable(v) for v in args.var]
     if args.out.exists(): raise ValueError("capture output already exists")
     with connection(args.serial) as (tx,rx), native_connection(args.serial,tx.device) as native, args.out.open("xb") as output:
-        setup(tx,rx,1000,args.transport)
+        if args.riscv:
+            from benchmark_hpm5301 import setup as setup_riscv
+            from dap_pipeline_bench import drain
+            drain(rx)
+            setup_riscv(tx,rx,1_000_000,connect=True)
+        else:
+            setup(tx,rx,1000,args.transport)
         info=native.info()
         if args.tap is not None:
             native.exchange(0,2,bytes((PORTS[args.transport],args.tap,args.slot,args.idle)))
@@ -435,6 +441,7 @@ def main():
         else:
             sub.add_argument("--period",type=number,required=True,help="sample period in 24 MHz timer ticks")
             sub.add_argument("--var",action="append",required=True,help="address:size:type")
+        sub.add_argument("--riscv",action="store_true",help="use the qualified HPM single-TAP JTAG setup")
     for action in ("read", "write"):
         sub = commands.add_parser(action, help=f"{action} aligned F103 SRAM or H743 AXI SRAM")
         sub.add_argument("--clock",type=selectio_clock_number,default=100000000)
@@ -454,6 +461,8 @@ def main():
         profile = (args.tap,args.slot,args.idle)
         if any(value is not None for value in profile) and any(value is None for value in profile):
             parser.error("--tap, --slot and --idle must be supplied together")
+        if args.riscv and (args.transport != "jtag" or any(value is not None for value in profile)):
+            parser.error("--riscv uses JTAG and its own single-TAP timing setup")
     bulk_actions = ("read", "write", "rtt-send", "rtt-terminal", "combo", "rtt-queue")
     if args.action in (*bulk_actions, "profile", "rtt", "scope") and args.tap is not None:
         if not (0 <= args.tap <= 31 and 0 <= args.slot <= 63 and 0 <= args.idle <= 255):

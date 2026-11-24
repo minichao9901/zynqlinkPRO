@@ -802,6 +802,15 @@
           "--frame-bytes",
           "--manual-spi-switch"
         ]
+      },
+      "riscvPointArgs": {
+        "transport": "riscv-jtag",
+        "omit": [
+          "--tap",
+          "--slot",
+          "--idle"
+        ],
+        "basis": "HPM single-TAP DMI/SBA setup"
       }
     },
     "probe": {
@@ -1501,9 +1510,10 @@
         },
         "pass": "对每个内存区和时钟验证跨 1 KiB、非对齐及 8/16/32 位。纯读和交替逐字节比对。纯写核对 PC/探针方向计数及独立末块读回。记录各方向有效 MB/s 和三轮中位数。测试区和保护字均回读恢复。",
         "execution": {
-          "mode": "blocked",
-          "script": "tools/fusion_fixture.py",
-          "pending": "要求 RISC-V 原生高速数据面及各档实际 TCK。当前执行器只接入 ARM SWD/JTAG；SBA 可用于目标身份和调试读写。"
+          "mode": "scripted-point",
+          "script": "tools/fusion_hpm_sram.py",
+          "automated": "使用同一融合探针的标准 DAP DMI/SBA。逐档核对 TCK，测 AXI/AHB 三方向 32 位跨页并恢复 SRAM。",
+          "pending": "8/16 位、depth4 高速数据面及全部实板档位仍待验。"
         }
       },
       {
@@ -1527,9 +1537,10 @@
         },
         "pass": "上行连续 little-endian u32 全量对拍。主机实收、探针 STOP 字节、目标发布和环上剩余量对账。测有效 MB/s。",
         "execution": {
-          "mode": "blocked",
-          "script": "tools/fusion_fixture.py",
-          "pending": "要求 RISC-V 原生高速数据面及各档实际 TCK。当前执行器只接入 ARM SWD/JTAG；SBA 可用于目标身份和调试读写。"
+          "mode": "scripted-point",
+          "script": "tools/fusion_performance.py",
+          "automated": "当前融合 USB 的独立流路径，使用 HPM 单 TAP JTAG。按原始 RTT 序号或 HSS 波形与 STOP 对拍。",
+          "pending": "各档速率需实板证明。RTT 核对整数 MHz 字段并另存精确 TCK 测量；实际达不到请求档记 blocked。"
         }
       },
       {
@@ -1565,9 +1576,10 @@
         },
         "pass": "运行态真实波形。核对 g_scope 变化、帧序、时间戳和实际组速，读错与尾差为零，跳拍率严格低于 0.1%。",
         "execution": {
-          "mode": "blocked",
-          "script": "tools/fusion_fixture.py",
-          "pending": "要求 RISC-V 原生高速数据面及各档实际 TCK。当前执行器只接入 ARM SWD/JTAG；SBA 可用于目标身份和调试读写。"
+          "mode": "scripted-point",
+          "script": "tools/fusion_performance.py",
+          "automated": "当前融合 USB 的独立流路径，使用 HPM 单 TAP JTAG。按原始 RTT 序号或 HSS 波形与 STOP 对拍。",
+          "pending": "各档速率需实板证明。RTT 核对整数 MHz 字段并另存精确 TCK 测量；实际达不到请求档记 blocked。"
         }
       },
       {
@@ -1600,8 +1612,8 @@
         "pass": "同时取两流。RTT 连续、HSS 有变化，实际组速和尾部分别对账。先 250 再 1000 组/秒。停任一消费端的短窗另核对另一端仍持续。",
         "execution": {
           "mode": "blocked",
-          "script": "tools/fusion_fixture.py",
-          "pending": "要求 RISC-V 原生高速数据面及各档实际 TCK。当前执行器只接入 ARM SWD/JTAG；SBA 可用于目标身份和调试读写。"
+          "script": "firmware/xusbps_daplink_dma/selectio_combo.c",
+          "pending": "当前融合的并发引擎仅接受 ARM MEM-AP SRAM 地址和协议。需要融合 PS/PL 的 RISC-V 并发数据面后复验。"
         }
       },
       {
@@ -2234,7 +2246,7 @@
           "windowMs": 1000,
           "rounds": 3
         },
-        "pass": "按对应 SRAM ELF 的实际入口及装载身份取证。环形 Fault 例核对 UDF、触发、20 ms 窗口和异常返回恢复。",
+        "pass": "使用自带启动向量的 SRAM CDC 镜像。验证 72/72 MHz、36 MHz TRACECLK、USB 负载、1 秒 DDR 窗口严格解码及恢复原现场。",
         "requiresScopeApproval": "TRACECLK36 MHz 历史研究保持暂停，单独获得明确授权前记 blocked。",
         "execution": {
           "mode": "blocked",
@@ -2261,7 +2273,7 @@
           "windowMs": 1000,
           "rounds": 3
         },
-        "pass": "按对应 SRAM ELF 的实际入口及装载身份取证。环形 Fault 例核对 UDF、触发、20 ms 窗口和异常返回恢复。",
+        "pass": "保留 48/48 MHz，按 trace_entry 运行 SRAM 循环。验证 loop_count 递增，trace_even 与 trace_odd 交替的执行序列，严格解码 1 秒窗、24 MHz TRACECLK 和恢复原 SRAM/核心。",
         "execution": {
           "mode": "blocked",
           "script": "tools/run_f103_ram_fixture.py",
@@ -2287,7 +2299,7 @@
           "windowMs": 20,
           "rounds": 3
         },
-        "pass": "按对应 SRAM ELF 的实际入口及装载身份取证。环形 Fault 例核对 UDF、触发、20 ms 窗口和异常返回恢复。",
+        "pass": "按 fault_entry 触发 UDF，核对已进入 fault_handler、异常向量和触发记录。验证 20 ms 后触发窗严格解码，异常返回跳过 UDF，并逐项恢复 VTOR、栈、核心与 SRAM。",
         "execution": {
           "mode": "blocked",
           "script": "tools/run_f103_ram_fixture.py",

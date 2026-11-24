@@ -32,7 +32,7 @@ python -X utf8 toolbox.py project run fusion.evidence -- --actual <完整采集.
 
 | 脚本 | 当前覆盖 |
 |---|---|
-| [性能](../../tools/fusion_performance.py) | F103ZE、H743 的 8/16 位访问、32 位跨页 SRAM、RTT 序号与尾包、动态 J-Scope 和并发。HPM 的原生高速链路仍需相应执行器。 |
+| [性能](../../tools/fusion_performance.py) · [HPM SRAM](../../tools/fusion_hpm_sram.py) | F103ZE、H743 的 8/16 位访问、32 位跨页 SRAM、RTT、动态 J-Scope 和并发。HPM 有标准 DAP DMI/SBA 的 SRAM 及独立 RTT、J-Scope 执行入口，选 `--transport riscv-jtag` 并省略 ARM 的 tap、slot、idle。当前并发固件只支持 ARM MEM-AP，HPM 并发需要 RISC-V 数据面。 |
 | [启动和 RTT 终端](../../tools/fusion_boot.py) | 三板运行镜像、初始化标记和进度，以及 RTT 命令往返。烧录、冷复位和 GDB 单步、异常栈及观察点仍有待接入的步骤。 |
 | [UART](../../tools/fusion_uart.py) · [SWO](../../tools/fusion_swo.py) | 三板 UART COM 回显、F103ZE 真实 ITM、H743 TIM2/DMA 合成码源。UART 持续独立收、发、全双工，H743 真实 ITM，以及独立码源极限仍需对应脚本或现场设备。 |
 | [SPI、ETM 和 USB](../../tools/fusion_acceptance_run.py) | F103ZE SPI1 和 H743 SPI r3 主发持续测、H743 接收与全双工有限帧、两块 STM32 的 Golden 和重编 ETM，以及 USB 回环和私有 DDR。ETM SRAM/Fault、F103ZE 接收与全双工、SPI 接收和全双工长窗及流中断恢复按 JSON 的待补项处理。 |

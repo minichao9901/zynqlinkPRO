@@ -4,13 +4,13 @@ import json
 import struct
 
 from fusion_acceptance import TOOLBOX, run_capture
-from fusion_evidence import u32_sequence
+from fusion_evidence import Blocked, u32_sequence
 from fusion_fixture import read_bytes, target_io
 
 
 def matching_clock(actual, requested):
     if actual is None or abs(actual - requested) > 1:
-        raise RuntimeError(f'Clock readback {actual} differs from requested {requested} Hz')
+        raise Blocked(f'Clock readback {actual} differs from requested {requested} Hz')
 
 
 def check_scope(csv_path, channels):
@@ -153,9 +153,12 @@ def run_stream(case, image, serial, args, out):
 
     runner = case['runner']
     p = case['parameters']
-    transport = 'jtag' if args.transport == 'arm-jtag' else 'swd'
-    link = ['--transport', transport, '--clock', str(args.rate), '--tap', str(args.tap),
-            '--slot', str(args.slot), '--idle', str(args.idle)]
+    transport = 'swd' if args.transport == 'swd' else 'jtag'
+    link = ['--transport', transport, '--clock', str(args.rate)]
+    if args.transport == 'riscv-jtag':
+        link.append('--riscv')
+    else:
+        link.extend(('--tap', str(args.tap), '--slot', str(args.slot), '--idle', str(args.idle)))
     root = [*TOOLBOX, 'selectio', '--serial', serial]
     rtt = image.address('_SEGGER_RTT')
     scope = image.address('g_scope')
@@ -211,8 +214,10 @@ def run_stream(case, image, serial, args, out):
                 row['target_rtt'] = {'published': (after-before) & 0xffffffff, 'unread_after_stop': new_tail}
             if runner == 'rtt':
                 state = status['status']
-                if state[3] != count or state[5] or state[10] or state[11] >> 24 != args.rate // 1_000_000:
-                    raise RuntimeError(f'RTT STOP counters or MHz field differ: {state}')
+                if state[3] != count or state[5] or state[10]:
+                    raise RuntimeError(f'RTT STOP counters differ: {state}')
+                if state[11] >> 24 != args.rate // 1_000_000:
+                    raise Blocked(f'RTT integer-MHz clock {state[11] >> 24} differs from requested {args.rate} Hz')
             if runner == 'scope':
                 stats = export_scope(raw, waveform)
                 matching_clock(stats['definition']['link_hz'], args.rate)

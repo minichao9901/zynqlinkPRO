@@ -49,6 +49,18 @@ class FusionAcceptanceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, '--transport'):
             validate_point(case, plan['profiles'], point)
 
+    def test_hpm_points_require_the_single_tap_profile(self):
+        plan = load_plan()
+        case = find_case(plan, 'fusion-hpm6800evk-scope')
+        point = argparse.Namespace(transport='riscv-jtag', rate=25_000_000, tap=None, slot=None,
+                                   idle=None, channels=8, group_rate=1000)
+        validate_point(case, plan['profiles'], point)
+        point.tap = 16
+        with self.assertRaisesRegex(ValueError, 'single-TAP'):
+            validate_point(case, plan['profiles'], point)
+        combo = find_case(plan, 'fusion-hpm6800evk-combo')
+        self.assertEqual(combo['execution']['mode'], 'blocked')
+
     def test_load_receipt_requires_all_hashes_and_actual_serials(self):
         pair = (ROOT / load_plan()['probe']['candidate']).parent
         with tempfile.TemporaryDirectory() as directory:

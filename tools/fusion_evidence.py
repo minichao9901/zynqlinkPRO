@@ -6,6 +6,10 @@ from pathlib import Path
 import struct
 
 
+class Blocked(RuntimeError):
+    """A required hardware or timing configuration is unavailable."""
+
+
 def compare_stream(actual, expected):
     """Compare every byte and report the first differing offset."""
     offset=0

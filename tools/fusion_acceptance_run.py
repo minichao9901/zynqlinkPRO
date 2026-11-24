@@ -45,8 +45,12 @@ def run_case(case, plan, campaign, pair, args, target):
             return {'status': 'pending', **result}
 
     if runner == 'sram':
-        from fusion_performance import run_sram
-        result = run_sram(case, image, serial, args, out)
+        if case['board'] == 'hpm6800evk':
+            from fusion_hpm_sram import run_hpm_sram
+            result = run_hpm_sram(case, image, serial, args, out)
+        else:
+            from fusion_performance import run_sram
+            result = run_sram(case, image, serial, args, out)
     elif runner in ('rtt', 'scope', 'combo'):
         from fusion_performance import run_stream
         result = run_stream(case, image, serial, args, out)
