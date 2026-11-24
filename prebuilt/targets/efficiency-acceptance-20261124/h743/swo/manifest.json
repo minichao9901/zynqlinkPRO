@@ -1,0 +1,83 @@
+{
+  "source_revision": "8e2ae1c141a091587bb9c8c6a52578a11a07b595",
+  "source_dirty": false,
+  "board": "h743",
+  "image": "swo",
+  "cpu_mhz": 60,
+  "hclk_mhz": 60,
+  "load_kind": "Flash",
+  "entry": "0x08000061",
+  "load_segments": [
+    {
+      "vaddr": "0x08000000",
+      "paddr": "0x08000000",
+      "filesz": 1096,
+      "memsz": 1096
+    },
+    {
+      "vaddr": "0x24010000",
+      "paddr": "0x08000448",
+      "filesz": 0,
+      "memsz": 132
+    }
+  ],
+  "symbols": {
+    "g_clock_error": "0x24010008",
+    "g_cpu_hz": "0x2401000c",
+    "g_fault_detail": "0x24010000",
+    "g_fault_status": "0x24010004",
+    "g_fixture_ready": "0x24010010",
+    "g_hclk_hz": "0x24010014",
+    "g_itm_busy": "0x24010020",
+    "g_itm_port": "0x24010040",
+    "g_itm_request": "0x24010060",
+    "g_itm_sent": "0x24010080",
+    "main": "0x0800039c"
+  },
+  "compiler": "arm-none-eabi-gcc.EXE (GNU Arm Embedded Toolchain 10.3-2021.10) 10.3.1 20210824 (release)",
+  "build_command": [
+    "E:\\Share\\env-windows\\tools\\gnu_gcc\\arm_gcc\\mingw\\bin\\arm-none-eabi-gcc.EXE",
+    "-mcpu=cortex-m7",
+    "-mthumb",
+    "-mfpu=fpv5-d16",
+    "-mfloat-abi=hard",
+    "-DTARGET_H743",
+    "-O2",
+    "-g3",
+    "-gdwarf-4",
+    "-ffreestanding",
+    "-ffunction-sections",
+    "-fdata-sections",
+    "-fno-common",
+    "-Wall",
+    "-Wextra",
+    "-ffile-prefix-map=E:\\zynqlinkPRO-efficiency=.",
+    "-DFIXTURE_CPU_MHZ=60",
+    "-DFIXTURE_HCLK_MHZ=60",
+    "-DFIXTURE_BUILD_ID=\"h743-swo\"",
+    "-DFIXTURE_BUILD_MARKER=0x0",
+    "-Ifirmware\\target-support\\acceptance",
+    "-Ifirmware\\target\\h743\\etm\\cdc\\sdk\\Drivers\\CMSIS\\Include",
+    "-Ifirmware\\target\\h743\\etm\\cdc\\sdk\\Drivers\\CMSIS\\Device\\ST\\STM32H7xx\\Include",
+    "-nostartfiles",
+    "-specs=nano.specs",
+    "-specs=nosys.specs",
+    "-Wl,--gc-sections,--build-id=none",
+    "-Wl,-Map=E:\\zynqlinkPRO-efficiency\\build\\target-acceptance-e0ae985c\\h743\\swo\\fw.map",
+    "-Wl,--defsym=image_base=0x8000000,--defsym=image_size=0x200000",
+    "-Wl,--defsym=data_base=0x24010000,--defsym=data_size=0x30000",
+    "-T",
+    "firmware\\target-support\\acceptance\\arm.ld",
+    "firmware\\target-support\\acceptance\\arm_startup.c",
+    "firmware\\target-support\\acceptance\\arm_platform.c",
+    "firmware\\target-support\\acceptance\\swo.c",
+    "-o",
+    "E:\\zynqlinkPRO-efficiency\\build\\target-acceptance-e0ae985c\\h743\\swo\\fw.elf"
+  ],
+  "files": {
+    "fw.elf": "6fe4234af2dcf1a50198fc9c8af9531aa1d9fbbd99c3d5522f302231566dd803",
+    "fw.bin": "d9c8b7be5f96377b91b181f7fd72924a68eb608b40b3fe601272213b8dae55e5",
+    "fw.hex": "ae0ba21c677bed0d03b4b601d4c253cdfbb70ee9170369c74bd77f87a587303a"
+  },
+  "validation": "built and ELF layout inspected; hardware pending"
+}

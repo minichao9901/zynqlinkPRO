@@ -1,0 +1,82 @@
+{
+  "source_revision": "8e2ae1c141a091587bb9c8c6a52578a11a07b595",
+  "source_dirty": false,
+  "board": "h743",
+  "image": "spi",
+  "cpu_mhz": 480,
+  "hclk_mhz": 240,
+  "load_kind": "Flash",
+  "entry": "0x08007eed",
+  "load_segments": [
+    {
+      "vaddr": "0x08000000",
+      "paddr": "0x08000000",
+      "filesz": 39396,
+      "memsz": 39396
+    },
+    {
+      "vaddr": "0x24000000",
+      "paddr": "0x080099e4",
+      "filesz": 232,
+      "memsz": 232
+    },
+    {
+      "vaddr": "0x24000100",
+      "paddr": "0x08009acc",
+      "filesz": 0,
+      "memsz": 329176
+    },
+    {
+      "vaddr": "0x240506e0",
+      "paddr": "0x08009acc",
+      "filesz": 0,
+      "memsz": 5792
+    },
+    {
+      "vaddr": "0x20000000",
+      "paddr": "0x20000000",
+      "filesz": 0,
+      "memsz": 12328
+    }
+  ],
+  "symbols": {
+    "_SEGGER_RTT": "0x240005ec",
+    "g_boot_stage": "0x24000010",
+    "g_boot_stage_prev": "0x24000014",
+    "g_clock_err": "0x24000104",
+    "g_dwc2_udc": "0x24051b00",
+    "g_pfnVectors": "0x08000000",
+    "g_sysclk_hz": "0x24000108",
+    "g_trace": "0x20003000",
+    "g_usb_dwc2_busid": "0x240406ac",
+    "g_usb_dwc2_irq": "0x240406b0",
+    "g_usbd_core": "0x240516e0",
+    "g_usbdev_bus": "0x240406a4",
+    "main": "0x08000be4"
+  },
+  "compiler": "arm-none-eabi-gcc.EXE (GNU Arm Embedded Toolchain 10.3-2021.10) 10.3.1 20210824 (release)",
+  "build_command": [
+    "pwsh",
+    "-NoProfile",
+    "-File",
+    "firmware\\target\\h743\\etm\\cdc\\build.ps1",
+    "-CoreMHz",
+    "480",
+    "-TraceR",
+    "24",
+    "-SpiFixture",
+    "-BannerEveryMs",
+    "0",
+    "-Gcc",
+    "E:\\Share\\env-windows\\tools\\gnu_gcc\\arm_gcc\\mingw\\bin\\arm-none-eabi-gcc.EXE",
+    "-OutputDir",
+    "E:\\zynqlinkPRO-efficiency\\build\\target-acceptance-e0ae985c\\h743\\spi",
+    "-NoPublish"
+  ],
+  "files": {
+    "fw.elf": "ee23105e147678144b07e788a5fde0790304e8024e4febb44f64abe37a2daab5",
+    "fw.bin": "04c31bab5711bc0aee97b14a0f556325d6ed16214bb58eab3d7b5b722ffd561b",
+    "fw.hex": "70534d668e19f3cdfe98b7c6c62d8a10d3ed6207cd7f64ef9d4678acd080d761"
+  },
+  "validation": "built and ELF layout inspected; hardware pending"
+}

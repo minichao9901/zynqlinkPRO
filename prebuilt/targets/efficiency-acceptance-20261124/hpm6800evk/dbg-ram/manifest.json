@@ -1,0 +1,118 @@
+{
+  "source_revision": "8e2ae1c141a091587bb9c8c6a52578a11a07b595",
+  "source_dirty": false,
+  "board": "hpm6800evk",
+  "image": "dbg-ram",
+  "cpu_mhz": 600,
+  "hclk_mhz": null,
+  "load_kind": "Ram",
+  "entry": "0x00000000",
+  "load_segments": [
+    {
+      "vaddr": "0x00000000",
+      "paddr": "0x00000000",
+      "filesz": 46684,
+      "memsz": 46684
+    },
+    {
+      "vaddr": "0x01200000",
+      "paddr": "0x0000b660",
+      "filesz": 472,
+      "memsz": 472
+    },
+    {
+      "vaddr": "0x0000b65c",
+      "paddr": "0x0000b838",
+      "filesz": 0,
+      "memsz": 4
+    },
+    {
+      "vaddr": "0x012001d8",
+      "paddr": "0x0000b838",
+      "filesz": 0,
+      "memsz": 128
+    },
+    {
+      "vaddr": "0x00080000",
+      "paddr": "0x00080000",
+      "filesz": 0,
+      "memsz": 32768
+    },
+    {
+      "vaddr": "0x01240000",
+      "paddr": "0x01240000",
+      "filesz": 0,
+      "memsz": 18088
+    }
+  ],
+  "symbols": {
+    "_SEGGER_RTT": "0x01244660",
+    "g_boot_data_verified": "0x01240480",
+    "g_boot_id": "0x012404a0",
+    "g_bss_probe": "0x01240460",
+    "g_build_id": "0x0000a468",
+    "g_checksum": "0x012400c0",
+    "g_clock_error": "0x01240040",
+    "g_cpu_hz": "0x01240080",
+    "g_data_probe": "0x012001cc",
+    "g_fixture_ready": "0x01240020",
+    "g_frame_result": "0x01200238",
+    "g_hclk_hz": "0x01240060",
+    "g_last_result": "0x012400c4",
+    "g_loops": "0x012400cc",
+    "g_mchtmr_hz": "0x01240000",
+    "g_model": "0x01240260",
+    "g_model_bf_seed": "0x012400e0",
+    "g_model_const": "0x0000a308",
+    "g_model_epoch": "0x012400e4",
+    "g_model_plain": "0x012400e8",
+    "g_rtt_binary_echo": "0x012404c0",
+    "g_rtt_consumed": "0x01240520",
+    "g_rtt_pattern": "0x012404e0",
+    "g_rtt_published": "0x01240540",
+    "g_rtt_use_pattern": "0x01240500",
+    "g_seq_slot": "0x012400a0",
+    "g_stage": "0x012400c8",
+    "g_ticks": "0x012400d0",
+    "g_trap_cause": "0x01240098",
+    "g_trap_count": "0x0124009c",
+    "g_trap_epc": "0x01240094",
+    "g_trap_mtval": "0x01240090",
+    "g_watch_byte": "0x012403c0",
+    "g_watch_half": "0x012403e0",
+    "g_watch_read": "0x01240420",
+    "g_watch_request": "0x01240400",
+    "g_watch_word": "0x01240440",
+    "main": "0x00002bec"
+  },
+  "compiler": "riscv32-unknown-elf-gcc.exe (gc891d8dc23e) 13.2.0",
+  "build_command": [
+    [
+      "cmake",
+      "-G",
+      "Ninja",
+      "-DBOARD=hpm6800evk",
+      "-DCMAKE_BUILD_TYPE=debug",
+      "-DHPM_BUILD_TYPE=ram",
+      "-DFIXTURE_IMAGE=dbg-ram",
+      "-DFIXTURE_BUILD_MARKER=0x44424752",
+      "-S",
+      "firmware\\target\\hpm6800evk\\acceptance",
+      "-B",
+      "E:\\zynqlinkPRO-efficiency\\build\\target-acceptance-e0ae985c\\hpm6800evk\\dbg-ram\\sdk-build"
+    ],
+    [
+      "cmake",
+      "--build",
+      "E:\\zynqlinkPRO-efficiency\\build\\target-acceptance-e0ae985c\\hpm6800evk\\dbg-ram\\sdk-build",
+      "--parallel",
+      "3"
+    ]
+  ],
+  "files": {
+    "fw.elf": "646f93a2275eceb2d4627b5e0016828b4110d41b2d8833ff0dd4f3a976b00936",
+    "fw.bin": "417cb27937000e9aec9766a708c252ff370a2a8dd8a5954f3b5fee99bec5946c",
+    "fw.hex": "1b24db62e3e2964e376355378b5a6799fde742a9787a4c934eb4e153cc817865"
+  },
+  "validation": "built and ELF layout inspected; hardware pending"
+}

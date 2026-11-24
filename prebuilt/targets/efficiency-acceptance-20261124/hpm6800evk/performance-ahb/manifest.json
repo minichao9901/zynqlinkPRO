@@ -1,0 +1,112 @@
+{
+  "source_revision": "8e2ae1c141a091587bb9c8c6a52578a11a07b595",
+  "source_dirty": false,
+  "board": "hpm6800evk",
+  "image": "performance-ahb",
+  "cpu_mhz": 600,
+  "hclk_mhz": null,
+  "load_kind": "Flash",
+  "entry": "0x80003000",
+  "load_segments": [
+    {
+      "vaddr": "0x00080000",
+      "paddr": "0x00080000",
+      "filesz": 0,
+      "memsz": 32768
+    },
+    {
+      "vaddr": "0x01240000",
+      "paddr": "0x01240000",
+      "filesz": 0,
+      "memsz": 17256
+    },
+    {
+      "vaddr": "0x80000400",
+      "paddr": "0x80000400",
+      "filesz": 3216,
+      "memsz": 3216
+    },
+    {
+      "vaddr": "0x80003000",
+      "paddr": "0x80003000",
+      "filesz": 72,
+      "memsz": 72
+    },
+    {
+      "vaddr": "0x00000000",
+      "paddr": "0x80003048",
+      "filesz": 904,
+      "memsz": 904
+    },
+    {
+      "vaddr": "0x800033d0",
+      "paddr": "0x800033d0",
+      "filesz": 37992,
+      "memsz": 37992
+    },
+    {
+      "vaddr": "0x01200000",
+      "paddr": "0x8000c838",
+      "filesz": 472,
+      "memsz": 472
+    },
+    {
+      "vaddr": "0x012001d8",
+      "paddr": "0x8000ca10",
+      "filesz": 0,
+      "memsz": 128
+    }
+  ],
+  "symbols": {
+    "_SEGGER_RTT": "0x01244320",
+    "g_build_id": "0x8000bc44",
+    "g_clock_error": "0x01240040",
+    "g_cpu_hz": "0x01240080",
+    "g_fixture_ready": "0x01240020",
+    "g_hclk_hz": "0x01240060",
+    "g_mchtmr_hz": "0x01240000",
+    "g_mode": "0x01240140",
+    "g_perf_sram_address": "0x01240160",
+    "g_perf_sram_bytes": "0x012400c0",
+    "g_rtt_binary_echo": "0x01240180",
+    "g_rtt_consumed": "0x012401e0",
+    "g_rtt_pattern": "0x012401a0",
+    "g_rtt_published": "0x01240200",
+    "g_rtt_use_pattern": "0x012401c0",
+    "g_scope": "0x01240100",
+    "g_scope_mixed": "0x012400a0",
+    "g_scope_update_hz": "0x012400e0",
+    "g_scope_updates": "0x01240120",
+    "main": "0x80005508"
+  },
+  "compiler": "riscv32-unknown-elf-gcc.exe (gc891d8dc23e) 13.2.0",
+  "build_command": [
+    [
+      "cmake",
+      "-G",
+      "Ninja",
+      "-DBOARD=hpm6800evk",
+      "-DCMAKE_BUILD_TYPE=debug",
+      "-DHPM_BUILD_TYPE=flash_xip",
+      "-DFIXTURE_IMAGE=performance-ahb",
+      "-DFIXTURE_BUILD_MARKER=0x0",
+      "-S",
+      "firmware\\target\\hpm6800evk\\acceptance",
+      "-B",
+      "E:\\zynqlinkPRO-efficiency\\build\\target-acceptance-e0ae985c\\hpm6800evk\\performance-ahb\\sdk-build"
+    ],
+    [
+      "cmake",
+      "--build",
+      "E:\\zynqlinkPRO-efficiency\\build\\target-acceptance-e0ae985c\\hpm6800evk\\performance-ahb\\sdk-build",
+      "--parallel",
+      "3"
+    ]
+  ],
+  "files": {
+    "fw.elf": "0076b3799c24730d9eba544427fda6a14e0c23e39a041bcda14c7b5ac404974d",
+    "fw.bin": "86d0d9e0de9cb42163ad71222afe784c0b34b2c6807ad5d9f2edc5e596d6a032",
+    "fw.hex": "aefb8f133f846223db6b36244c5c32966c53daef23439fb09c078481b3b99ec3"
+  },
+  "validation": "built and ELF layout inspected; hardware pending"
+}

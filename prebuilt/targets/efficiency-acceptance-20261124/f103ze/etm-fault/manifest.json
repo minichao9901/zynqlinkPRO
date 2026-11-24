@@ -1,0 +1,41 @@
+{
+  "source_revision": "8e2ae1c141a091587bb9c8c6a52578a11a07b595",
+  "source_dirty": false,
+  "board": "f103ze",
+  "image": "etm-fault",
+  "cpu_mhz": null,
+  "hclk_mhz": null,
+  "load_kind": "Ram fixture",
+  "entry": "0x20002101",
+  "load_segments": [
+    {
+      "vaddr": "0x20000000",
+      "paddr": "0x20000000",
+      "filesz": 8536,
+      "memsz": 8536
+    }
+  ],
+  "symbols": {
+    "fault_entry": "0x20002100",
+    "fault_handler": "0x20002140"
+  },
+  "compiler": "arm-none-eabi-gcc.EXE (GNU Arm Embedded Toolchain 10.3-2021.10) 10.3.1 20210824 (release)",
+  "build_command": [
+    "E:\\Share\\env-windows\\tools\\gnu_gcc\\arm_gcc\\mingw\\bin\\arm-none-eabi-gcc.EXE",
+    "-mcpu=cortex-m3",
+    "-mthumb",
+    "-g3",
+    "-nostdlib",
+    "-Wl,--build-id=none",
+    "-Wl,-Ttext=0x20002100,-e,fault_entry",
+    "tools/fixtures/f103_fault_return.S",
+    "-o",
+    "E:\\zynqlinkPRO-efficiency\\build\\target-acceptance-e0ae985c\\f103ze\\etm-fault\\fw.elf"
+  ],
+  "files": {
+    "fw.elf": "e83467196f2975aae59bcfb06db6f0217d752b546292a3b7adc38db433f2728c",
+    "fw.bin": "324e076706d047675b6e9f50fd0659a69f5249513e495f76905564fcbf0d3109",
+    "fw.hex": "6ccedf5a781aeae1d6590e9c47bf8f2c0680f72c4adfeda131995963b09284c7"
+  },
+  "validation": "built and ELF layout inspected; hardware pending"
+}

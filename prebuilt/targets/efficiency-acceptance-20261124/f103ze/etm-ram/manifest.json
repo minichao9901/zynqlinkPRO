@@ -1,0 +1,73 @@
+{
+  "source_revision": "8e2ae1c141a091587bb9c8c6a52578a11a07b595",
+  "source_dirty": false,
+  "board": "f103ze",
+  "image": "etm-ram",
+  "cpu_mhz": 72,
+  "hclk_mhz": 72,
+  "load_kind": "Ram",
+  "entry": "0x20000249",
+  "load_segments": [
+    {
+      "vaddr": "0x20000000",
+      "paddr": "0x20000000",
+      "filesz": 20140,
+      "memsz": 20140
+    },
+    {
+      "vaddr": "0x20008000",
+      "paddr": "0x20004eac",
+      "filesz": 128,
+      "memsz": 7592
+    },
+    {
+      "vaddr": "0x20009da8",
+      "paddr": "0x20004f2c",
+      "filesz": 0,
+      "memsz": 1536
+    },
+    {
+      "vaddr": "0x2000b000",
+      "paddr": "0x2000b000",
+      "filesz": 0,
+      "memsz": 4148
+    }
+  ],
+  "symbols": {
+    "_SEGGER_RTT": "0x2000b000",
+    "g_clock_err": "0x200080a0",
+    "g_fsdev_instance": "0x20009d90",
+    "g_fsdev_udc": "0x20009c00",
+    "g_pfnVectors": "0x20000000",
+    "g_sysclk_hz": "0x200080a4",
+    "g_trace": "0x2000c000",
+    "g_trace_workload_digest": "0x200095e4",
+    "g_usbd_core": "0x200097fc",
+    "g_usbdev_bus": "0x20009bf8",
+    "main": "0x200007a8"
+  },
+  "compiler": "arm-none-eabi-gcc.EXE (GNU Arm Embedded Toolchain 10.3-2021.10) 10.3.1 20210824 (release)",
+  "build_command": [
+    "pwsh",
+    "-NoProfile",
+    "-File",
+    "firmware\\target\\f103ze\\etm\\cdc\\build.ps1",
+    "-Chip",
+    "ze",
+    "-CpuMHz",
+    "72",
+    "-Ram",
+    "-TraceWorkload",
+    "-Gcc",
+    "E:\\Share\\env-windows\\tools\\gnu_gcc\\arm_gcc\\mingw\\bin\\arm-none-eabi-gcc.EXE",
+    "-OutputDir",
+    "E:\\zynqlinkPRO-efficiency\\build\\target-acceptance-e0ae985c\\f103ze\\etm-ram",
+    "-NoPublish"
+  ],
+  "files": {
+    "fw.elf": "fdcac8ddf73c8ed31e52be5b9e6a10525b01ff78ce6f285540a249682e78e824",
+    "fw.bin": "f5f80984e2f5df2eb7283f2d296011c92168303426e31ccd9145cb2585053e38",
+    "fw.hex": "4f84e2a4c19ce19c1726ec9b924e1e879f7f602bcff4de63f81f4722bbc62c5a"
+  },
+  "validation": "built and ELF layout inspected; hardware pending"
+}

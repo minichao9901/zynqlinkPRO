@@ -1,0 +1,101 @@
+{
+  "source_revision": "8e2ae1c141a091587bb9c8c6a52578a11a07b595",
+  "source_dirty": false,
+  "board": "hpm6800evk",
+  "image": "uart",
+  "cpu_mhz": 600,
+  "hclk_mhz": null,
+  "load_kind": "Flash",
+  "entry": "0x80003000",
+  "load_segments": [
+    {
+      "vaddr": "0x00080000",
+      "paddr": "0x00080000",
+      "filesz": 0,
+      "memsz": 32768
+    },
+    {
+      "vaddr": "0x01240000",
+      "paddr": "0x01240000",
+      "filesz": 0,
+      "memsz": 424
+    },
+    {
+      "vaddr": "0x80000400",
+      "paddr": "0x80000400",
+      "filesz": 3216,
+      "memsz": 3216
+    },
+    {
+      "vaddr": "0x80003000",
+      "paddr": "0x80003000",
+      "filesz": 72,
+      "memsz": 72
+    },
+    {
+      "vaddr": "0x00000000",
+      "paddr": "0x80003048",
+      "filesz": 904,
+      "memsz": 904
+    },
+    {
+      "vaddr": "0x800033d0",
+      "paddr": "0x800033d0",
+      "filesz": 38856,
+      "memsz": 38856
+    },
+    {
+      "vaddr": "0x01200000",
+      "paddr": "0x8000cb98",
+      "filesz": 472,
+      "memsz": 496
+    }
+  ],
+  "symbols": {
+    "g_clock_error": "0x01240040",
+    "g_cpu_hz": "0x01240080",
+    "g_fixture_ready": "0x01240020",
+    "g_hclk_hz": "0x01240060",
+    "g_mchtmr_hz": "0x01240000",
+    "g_uart_baud": "0x01240180",
+    "g_uart_baud_request": "0x012401a0",
+    "g_uart_config_errors": "0x01240160",
+    "g_uart_mode": "0x01240140",
+    "g_uart_rx": "0x01240120",
+    "g_uart_rx_errors": "0x012400e0",
+    "g_uart_rx_hash": "0x012400c0",
+    "g_uart_tx": "0x01240100",
+    "g_uart_tx_sequence": "0x012400a0",
+    "main": "0x800058ca"
+  },
+  "compiler": "riscv32-unknown-elf-gcc.exe (gc891d8dc23e) 13.2.0",
+  "build_command": [
+    [
+      "cmake",
+      "-G",
+      "Ninja",
+      "-DBOARD=hpm6800evk",
+      "-DCMAKE_BUILD_TYPE=debug",
+      "-DHPM_BUILD_TYPE=flash_xip",
+      "-DFIXTURE_IMAGE=uart",
+      "-DFIXTURE_BUILD_MARKER=0x0",
+      "-S",
+      "firmware\\target\\hpm6800evk\\acceptance",
+      "-B",
+      "E:\\zynqlinkPRO-efficiency\\build\\target-acceptance-e0ae985c\\hpm6800evk\\uart\\sdk-build"
+    ],
+    [
+      "cmake",
+      "--build",
+      "E:\\zynqlinkPRO-efficiency\\build\\target-acceptance-e0ae985c\\hpm6800evk\\uart\\sdk-build",
+      "--parallel",
+      "3"
+    ]
+  ],
+  "files": {
+    "fw.elf": "d3f64c42b317de38b7d03b00f12f692b0d56b80422cfb65249212652b298abfd",
+    "fw.bin": "585c48f8ea4d88232b613126a0c597d0f5d9cb22715779bdecd92c8c90ef46e8",
+    "fw.hex": "7b1576584ca4da220963813d88ffb768fdc48633656f0e471735a4a09130cf1c"
+  },
+  "validation": "built and ELF layout inspected; hardware pending"
+}

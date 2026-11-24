@@ -14,8 +14,8 @@ docs/validation/h743-comprehensive-20261101/** -text -whitespace
 prebuilt/targets/stm32h743-cdc-trace-20261101/** -text -whitespace
 # Vendored model/BSP snapshots retain upstream byte identity on all checkouts.
 reference/** -text -whitespace
-firmware/target/stm32f103_rtt_seq72/** -text
-firmware/target/stm32f103_scope_rated/** -text
+firmware/target/f103ze/performance/rtt72/** -text
+firmware/target/f103ze/performance/scope72/** -text
 # Preserve byte identity for loaded initialization files and hashed build inputs.
 prebuilt/**/ps7_init.tcl -text
 # Exact loaded pairs and hashed acceptance evidence, including CRLF reports.
@@ -36,8 +36,10 @@ docs/validation/f103ze-web-flow-20261031/streams/**/*.csv -text
 
 # Keep imported target and hashed offline fixture bytes portable across checkouts.
 firmware/target/f103ze/etm/cdc/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
-firmware/target/stm32f103_hal_storage/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
-firmware/target/stm32f103_hal_storage/vendor/** -text -whitespace
+firmware/target/f103ze/etm/hal-storage/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+firmware/target/f103ze/etm/hal-storage/vendor/** -text -whitespace
+prebuilt/targets/efficiency-acceptance-20261124/**/fw.hex -text whitespace=cr-at-eol
+prebuilt/targets/efficiency-acceptance-20261124/**/fw.bin binary
 prebuilt/targets/f103ze-hal-storage-20261104/** -text whitespace=cr-at-eol
 docs/validation/main-web-hardware-20261103/raw/** -text -whitespace
 docs/validation/main-web-hardware-20261103/hal-storage-write-input/** -text -whitespace
