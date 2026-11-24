@@ -1,0 +1,328 @@
+{
+  "point": {
+    "id": "fusion-f103ze-sram",
+    "point": {
+      "image": "performance",
+      "transport": "swd",
+      "rate": 100000000
+    },
+    "exit": 0,
+    "status": "pending",
+    "reason": null,
+    "restored": true,
+    "seconds": 555.6140885353088,
+    "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-f103ze-sram\\20261124-raw4-grid-swd-100000000",
+    "guard": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\grid-sram-swd-100000000-guard"
+  },
+  "summary": {
+    "campaign": {
+      "plan": "fusion-full-acceptance-v2",
+      "serial": "12345678",
+      "probe": {
+        "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+        "files": {
+          "probe.bit": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+            "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+          },
+          "application.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+            "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+          },
+          "ps7_init.tcl": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+            "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+          }
+        }
+      }
+    },
+    "case": "fusion-f103ze-sram",
+    "receipt": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+      "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+    },
+    "point": {
+      "image": null,
+      "transport": "swd",
+      "rate": 100000000,
+      "tap": 8,
+      "slot": 25,
+      "idle": 2,
+      "channels": null,
+      "group_rate": null,
+      "encoding": null,
+      "spi_mode": null,
+      "frame_bytes": null
+    },
+    "target": {
+      "image": "performance",
+      "manifest": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\manifest.json",
+      "files": {
+        "fw.elf": {
+          "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.elf",
+          "sha256": "71971d460f5d0fb4302b022b3af23e2bab8e3ff753b4ed681e331779bb5204ea"
+        },
+        "fw.bin": {
+          "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.bin",
+          "sha256": "7491b1934190ede498a2cdb19fe9bc45caecc2bc27f3880d7fb74f4cc7341c90"
+        },
+        "fw.hex": {
+          "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.hex",
+          "sha256": "cbfdffff8f144f970f454e17d4a6a087cfce082d35b732e41d419e74550f46d1"
+        }
+      }
+    },
+    "status": "pending",
+    "windows": [
+      {
+        "round": 1,
+        "direction": "read",
+        "requests": 99312,
+        "payload_bytes": 400425984,
+        "seconds": 60.00725759999841,
+        "usb_seconds": 59.93789980004294,
+        "MBps": 6.672959238850646,
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x9965",
+          "tap": 8,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 1,
+        "direction": "write",
+        "requests": 98496,
+        "payload_bytes": 397135872,
+        "seconds": 60.001574800000526,
+        "usb_seconds": 58.719463700050255,
+        "MBps": 6.618757479678625,
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x9965",
+          "tap": 8,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 1,
+        "direction": "mixed",
+        "requests": 97920,
+        "payload_bytes": 394813440,
+        "seconds": 60.00251890000072,
+        "usb_seconds": 59.3131104998356,
+        "MBps": 6.579947762826257,
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x9965",
+          "tap": 8,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 2,
+        "direction": "read",
+        "requests": 99328,
+        "payload_bytes": 400490496,
+        "seconds": 60.00853320000169,
+        "usb_seconds": 59.94251830001667,
+        "MBps": 6.673892439017135,
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x9965",
+          "tap": 8,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 2,
+        "direction": "write",
+        "requests": 98560,
+        "payload_bytes": 397393920,
+        "seconds": 60.00582659999782,
+        "usb_seconds": 58.76846390017454,
+        "MBps": 6.622588880394066,
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x9965",
+          "tap": 8,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 2,
+        "direction": "mixed",
+        "requests": 97888,
+        "payload_bytes": 394684416,
+        "seconds": 60.00827710000158,
+        "usb_seconds": 59.30913149988919,
+        "MBps": 6.577166268951082,
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x9965",
+          "tap": 8,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 3,
+        "direction": "read",
+        "requests": 99328,
+        "payload_bytes": 400490496,
+        "seconds": 60.00615090000065,
+        "usb_seconds": 59.93940980001207,
+        "MBps": 6.674157398754194,
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x9965",
+          "tap": 8,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 3,
+        "direction": "write",
+        "requests": 98544,
+        "payload_bytes": 397329408,
+        "seconds": 60.00624819999939,
+        "usb_seconds": 58.76065579998976,
+        "MBps": 6.621467262470912,
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x9965",
+          "tap": 8,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 3,
+        "direction": "mixed",
+        "requests": 97872,
+        "payload_bytes": 394619904,
+        "seconds": 60.0006656000005,
+        "usb_seconds": 59.30832839982395,
+        "MBps": 6.5769254399737305,
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x9965",
+          "tap": 8,
+          "source": "PS clock tree and PL queue registers"
+        }
+      }
+    ],
+    "remaining": [
+      "Aggregate all link rates and compare verified SRAM throughput."
+    ]
+  },
+  "guard": {
+    "serial": "12345678",
+    "target_elf_sha256": "71971d460f5d0fb4302b022b3af23e2bab8e3ff753b4ed681e331779bb5204ea",
+    "restored": true,
+    "passed": true,
+    "golden": [
+      {
+        "address": 134217728,
+        "bytes": 20040,
+        "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1"
+      },
+      {
+        "address": 134237768,
+        "bytes": 128,
+        "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+      }
+    ],
+    "clocks": {
+      "CR": 50548355,
+      "CFGR": 5309450,
+      "APB1ENR": 276824064,
+      "FLASH_ACR": 49
+    },
+    "dhcsr": 16842753,
+    "demcr": 16777216,
+    "dcrdr": 1,
+    "vtor": 0,
+    "dwt": [
+      1073741825,
+      196142577
+    ],
+    "apb2": 16461,
+    "backup_bytes": 65536,
+    "sram_sha256": "f4a0c5c65951f87840c0f699d614205aaedd82d281bfdc3161579f7fdd7dbe72",
+    "fixture_clocks": {
+      "g_cpu_hz": 128000000,
+      "g_hclk_hz": 128000000,
+      "g_clock_error": 0,
+      "registers": {
+        "name": "STM32F103",
+        "cpuid": "0x411fc231",
+        "device": "0x10036414",
+        "registers": {
+          "0x40021000": "0x3034e83",
+          "0x40021004": "0x39e50a"
+        }
+      }
+    },
+    "measured_hclk_hz": 127718688.96997742,
+    "child_exit": 0,
+    "final_dhcsr": "0x1010001"
+  },
+  "sramRestored": {
+    "scratch_restored": true,
+    "surrounding_bytes_untouched": true
+  },
+  "medianMBps": {
+    "read": 6.673892439017135,
+    "write": 6.621467262470912,
+    "mixed": 6.577166268951082
+  },
+  "accessWidths": [
+    {
+      "address": "0x200087ff",
+      "width": 1,
+      "value": 197
+    },
+    {
+      "address": "0x20008800",
+      "width": 1,
+      "value": 61
+    },
+    {
+      "address": "0x20008801",
+      "width": 1,
+      "value": 222
+    },
+    {
+      "address": "0x200087fe",
+      "width": 2,
+      "value": 26268
+    },
+    {
+      "address": "0x20008800",
+      "width": 2,
+      "value": 32097
+    },
+    {
+      "address": "0x20008802",
+      "width": 2,
+      "value": 38059
+    }
+  ]
+}

@@ -4,6 +4,7 @@
 
 | 验收 | 证据 |
 |---|---|
+| F103ZE 新清单的同配对实板复验 | [RAW4 ABI 2 新批次](f103ze-raw4-v2-20261124/README.md) |
 | H743 历史 CDC Golden，ETM、SWD/JTAG、COM/SWO/SPI 功能与持续窗口 | [功能及持续验收](h743-cdc-golden-requal-20261123/README.md) |
 | 同板 MEM-AP WAIT、SRAM 区及 USB 端点拆分对照 | [吞吐分析](h743-throughput-audit-20261123/README.md) |
 | HCLK60/240 相同负载对照、JTAG SRAM 与独立 RTT 长窗 | [时钟及 JTAG 档位](h743-hclk-ab-20261123/README.md) |
