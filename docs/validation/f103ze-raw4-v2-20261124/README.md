@@ -57,3 +57,9 @@ SWD50 原 tap8／slot24／idle0 同档复跑第一轮就报告预填载荷不一
 ## JTAG SRAM 多档
 
 128 MHz 目标和 RAW4 同配对的 JTAG 50 MHz 与 72.727 MHz 各完成九窗，4,032 B 深度 4 的纯读／纯写／交替中位分别为 3.065／3.004／3.019 和 3.866／3.769／3.792 MB/s。验证跨页、载荷、保护字和两级恢复。100 MHz 首档 tap16／slot28／idle11 在第一笔原生传输报 status 1、detail 2，内外恢复均确认。首次失败保留，同频率的短窗校准和复跑另取证。 [逐档数据](sram-jtag-first.json)
+
+## SWD100 RTT 与 JTAG100 同频校准
+
+SWD100 RTT 三个 60 秒完整窗口逐轮以物理 MEM-AP0 核对活动时钟为 99,999,998 Hz，序号、目标发布、STOP 与环余量对账通过。主机有效中位 6.197 MB/s，目标 SRAM、时钟和运行态恢复。
+
+JTAG100 在相同 tap16／slot28、idle33 时通过短校准，60 秒读窗约 4.710 MB/s，写窗仍报原生 status 1、detail 4，导致整档失败。保留 idle11 首败、idle33 复跑及两层恢复，根因仍待定位。 [RTT 与复跑](rtt-swd100-and-jtag100-retry.json)
