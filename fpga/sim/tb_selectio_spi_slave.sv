@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module tb_selectio_spi_slave;
+module tb_selectio_spi_slave #(parameter FILTER=0);
     reg reference_clock = 0, reset_n = 0;
     wire serial_clk, quad_clk, octet_clk, wide_clk, phy_reset;
     always #10 reference_clock = ~reference_clock;
@@ -14,11 +14,13 @@ module tb_selectio_spi_slave;
     reg listener=0, master_sck=0, master_cs=1, master_data=0;
     reg [1:0] mode=0;
     tri sck, cs_n, mosi;
-    assign #0.21 sck = master_sck;
-    assign #0.32 cs_n = master_cs;
+    reg sck_glitch=0, nss_glitch=0;
+    assign #0.21 sck = master_sck ^ sck_glitch;
+    assign #0.32 cs_n = master_cs | nss_glitch;
     assign #0.98 mosi = master_data;
     wire [3:0] sck_samples, cs_samples, mosi_samples;
-    selectio_debug_phy pads(
+    wire [7:0] sck_wide, mosi_wide;
+    selectio_debug_phy #(.SPI_PAD_FILTER(FILTER)) pads(
         .serial_clk(serial_clk),.quad_clk(quad_clk),.octet_clk(octet_clk),
         .serial_rx_clk(wide_clk),.reset(phy_reset),.owner(3'd4),
         .legacy_clock(1'b0),.legacy_data(1'b1),.legacy_release(1'b1),
@@ -29,11 +31,30 @@ module tb_selectio_spi_slave;
         .tdi_pin(mosi),.tdo_pin(1'b1),.aux_spi(1'b1),.aux_spi_slave(1'b1),
         .aux_sck(4'h0),.aux_cs(4'hf),.aux_tx(4'h0),
         .uart_sideband(1'b0),.monitor_tdi(1'b0),
-        .slave_sck(sck_samples),.slave_cs_n(cs_samples),.slave_mosi(mosi_samples));
+        .slave_sck(sck_samples),.slave_cs_n(cs_samples),.slave_mosi(mosi_samples),
+        .slave_sck_wide(sck_wide),.slave_mosi_wide(mosi_wide));
     wire valid, error;
     wire [7:0] data;
-    selectio_spi_slave_rx receiver(quad_clk,phy_reset,listener,mode,
-        sck_samples,cs_samples,mosi_samples,valid,error,data);
+    generate if (FILTER) begin: filtered
+        wire [7:0] cs_wide={{2{cs_samples[3]}},{2{cs_samples[2]}},
+                            {2{cs_samples[1]}},{2{cs_samples[0]}}};
+        selectio_spi_slave_rx #(.WIDTH(8),.FILTER(1)) receiver(
+            quad_clk,phy_reset,listener,mode,sck_wide,cs_wide,mosi_wide,valid,error,data);
+    end else begin: original
+        selectio_spi_slave_rx receiver(quad_clk,phy_reset,listener,mode,
+            sck_samples,cs_samples,mosi_samples,valid,error,data);
+    end endgenerate
+
+    task automatic inject_glitches;
+        begin
+            // The ringing adds a repeated sampling-polarity edge and a
+            // separate short high pulse while NSS should remain selected.
+            sck_glitch <= #1.6 1;
+            sck_glitch <= #3.3 0;
+            nss_glitch <= #1.5 1;
+            nss_glitch <= #5.0 0;
+        end
+    endtask
 
     reg [7:0] expected[0:16383];
     integer sent=0, received=0, errors=0;
@@ -63,9 +84,11 @@ module tb_selectio_spi_slave;
                     if(!mode[0]) master_data=value[b];
                     #half_period;
                     master_sck=~mode[1];
+                    if(FILTER && !mode[0] && b==3) inject_glitches;
                     if(mode[0]) master_data=value[b];
                     #half_period;
                     master_sck=mode[1];
+                    if(FILTER && mode[0] && b==3) inject_glitches;
                 end
             end
             #half_period;
@@ -107,7 +130,7 @@ module tb_selectio_spi_slave;
             if(received!=sent) $fatal(1,"SPI did not recover for the next CS");
             errors=0;
         end
-        $display("SPI_SLAVE_PASS bytes=%0d modes=4 rates=50,72.727,100MHz phases=8 partial=4",received);
+        $display("SPI_SLAVE_PASS bytes=%0d modes=4 rates=50,72.727,100MHz phases=8 partial=4 glitches=%0d",received,FILTER);
         $finish;
     end
     initial #3000000 $fatal(1,"SPI slave timeout");

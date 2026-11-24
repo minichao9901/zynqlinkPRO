@@ -16,6 +16,11 @@ if {($variable_clock || $slice) && (!$selectio || $quad_dma)} {
     error "Variable-clock and cropped SelectIO builds require --selectio and FCLK0 DMA"
 }
 if {$slice && !$variable_clock} {error "Cropped SelectIO builds require --selectio-variable"}
+set spi_pad_filter [expr {[lsearch -exact $argv --spi-pad-filter]>=0}]
+if {$spi_pad_filter && (!$variable_clock || $slice)} {
+    error "--spi-pad-filter requires the fused --selectio --selectio-variable build"
+}
+set ::env(ZYNQLINK_SPI_PAD_FILTER) $spi_pad_filter
 set ::env(ZYNQLINK_SELECTIO_SLICE) $slice
 set ::env(ZYNQLINK_SELECTIO_VARIABLE) $variable_clock
 set ::env(ZYNQLINK_QUAD_DMA) $quad_dma

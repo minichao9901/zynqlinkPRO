@@ -7,10 +7,9 @@ from pathlib import Path
 import struct
 import time
 
-import serial
 from serial.tools.list_ports import comports
 
-from h743_spi_accept import Fixture, H743_USB, release, require, spi_config
+from h743_spi_accept import Fixture, H743_USB, open_fixture_port, release, require, spi_config
 from probe_flash import Session
 from selectio_native import native_connection
 from zynq_memory import PhysicalMemory
@@ -28,10 +27,17 @@ def run_lengths(samples):
             for level in (0, 1)]
 
 
-def summarize(words):
-    # AXI words are little-endian. Within each nibble bit 0 is earliest.
-    lanes = {name: [(word >> (offset + bit)) & 1 for word in words for bit in range(4)]
-             for name, offset in (("mosi", 0), ("sck", 4), ("nss", 8))}
+def summarize(words, wide=False):
+    # Bit 0 in each lane is earliest. NSS has four physical samples in both
+    # formats, so expand it only when comparing to the eight-slot SCK grid.
+    width = 8 if wide else 4
+    def lane(offset, slots):
+        return [(word >> (offset + bit)) & 1 for word in words for bit in range(slots)]
+
+    lanes = {"mosi": lane(0, width), "sck": lane(width, width),
+             "nss": lane(2 * width, 4)}
+    if wide:
+        lanes["nss"] = [sample for value in lanes["nss"] for sample in (value, value)]
     transitions = lambda values: sum(a != b for a, b in zip(values, values[1:]))
     return {"total_slots": len(lanes["sck"]),
             "transitions": {line: transitions(values) for line, values in lanes.items()},
@@ -52,10 +58,10 @@ def restore_tap(phy, address, tap):
     require(phy.read_words(address) == [tap], f"delay tap readback differs at {address:#x}")
 
 
-def capture(args, phy, report):
+def capture(args, phy, report, marker):
     ports = [p.device for p in comports() if (p.vid, p.pid, p.serial_number) == H743_USB]
     require(len(ports) == 1, f"expected the H743 SPI fixture, found {ports}")
-    with serial.Serial(ports[0], 115200, timeout=0.05, write_timeout=2) as port:
+    with open_fixture_port(ports[0]) as port:
         target = Fixture(port)
         fixture_info = target.identify()
         independent = "revision=4" in fixture_info
@@ -106,8 +112,8 @@ def capture(args, phy, report):
                 require(target.command(f"SPI FILL {fill}") == f"SPI fill={original_fill}", "fill restoration failed")
             else:
                 require(target.command(f"SPI DRIVE {original_drive}") == f"SPI drive={original_drive}", "drive restoration failed")
-    require(phy.read_words(AUX_MARKER) == [0x53504401], "diagnostic snapshot did not complete")
-    report["sample_summary"] = summarize(read_words(phy, args.out / "samples.bin"))
+    require(phy.read_words(AUX_MARKER) == [marker | 1], "diagnostic snapshot did not complete")
+    report["sample_summary"] = summarize(read_words(phy, args.out / "samples.bin"), wide=bool(marker & 2))
 
 
 def main():
@@ -129,15 +135,16 @@ def main():
     args.out.mkdir(parents=True, exist_ok=False)
     session = Session(args.out, args.sdk, "tcp:127.0.0.1:3121", cable_serial=args.cable_serial)
     phy = PhysicalMemory(session, cable_serial=args.cable_serial)
-    require(phy.read_words(AUX_MARKER)[0] & ~1 == 0x53504400, "J7 diagnostic bitstream is absent")
+    marker = phy.read_words(AUX_MARKER)[0] & ~1
+    require(marker in (0x53504400, 0x53504402), "J7 diagnostic bitstream is absent")
     saved_mosi = phy.read_words(MOSI_TAP)[0]
     saved_clock = phy.read_words(SCK_NSS_TAP)[0]
-    report = dict(mode=args.mode, drive=args.drive, edge=args.edge, fill=args.fill, mosi_tap=args.mosi_tap,
+    report = dict(snapshot_marker=hex(marker), mode=args.mode, drive=args.drive, edge=args.edge, fill=args.fill, mosi_tap=args.mosi_tap,
                   sck_nss_tap=saved_clock if args.sck_nss_tap is None else args.sck_nss_tap)
     try:
         if args.sck_nss_tap is not None:
             restore_tap(phy, SCK_NSS_TAP, args.sck_nss_tap)
-        capture(args, phy, report)
+        capture(args, phy, report, marker)
     finally:
         try:
             restore_tap(phy, MOSI_TAP, saved_mosi)

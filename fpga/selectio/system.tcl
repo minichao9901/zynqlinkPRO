@@ -37,6 +37,9 @@ set_property CONFIG.SELECTIO_SLICE $slice [get_bd_cells sio_aux]
 if {[info exists ::env(ZYNQLINK_SPI_PAD_DIAG)] && $::env(ZYNQLINK_SPI_PAD_DIAG)} {
     set_property CONFIG.SPI_PAD_DIAG 1 [get_bd_cells sio_aux]
 }
+if {[info exists ::env(ZYNQLINK_SPI_PAD_FILTER)] && $::env(ZYNQLINK_SPI_PAD_FILTER)} {
+    set_property CONFIG.SPI_PAD_FILTER 1 [get_bd_cells {sio_aux swd_controller_0}]
+}
 set_property CONFIG.VARIABLE_CLOCK $variable_clock [get_bd_cells {sio_clock sio_swd}]
 if {$variable_clock} {
     # 133.333/50/200 MHz together select the same IO PLL x48 used
@@ -92,6 +95,8 @@ foreach pins {
     {swd_controller_0/hs_slave_sck sio_aux/slave_sck}
     {swd_controller_0/hs_slave_cs_n sio_aux/slave_cs_n}
     {swd_controller_0/hs_slave_mosi sio_aux/slave_mosi}
+    {swd_controller_0/hs_slave_sck_wide sio_aux/slave_sck_wide}
+    {swd_controller_0/hs_slave_mosi_wide sio_aux/slave_mosi_wide}
     {sio_aux/clock_slots swd_controller_0/hs_aux_sck}
     {sio_aux/select_slots swd_controller_0/hs_aux_cs}
     {sio_aux/tx_slots swd_controller_0/hs_aux_tx}

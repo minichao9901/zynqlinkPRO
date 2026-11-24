@@ -40,6 +40,18 @@ def release(h743, probe=None):
         raise ReleaseError(f"SPI pin release could not be verified: {error}") from error
 
 
+def open_fixture_port(name):
+    # Windows usbser can abort SetCommState on the first open after idle.
+    # Retry only the setup, before any SPI command has been sent.
+    for attempt in range(3):
+        try:
+            return serial.Serial(name, 115200, timeout=0.05, write_timeout=2)
+        except serial.SerialException:
+            if attempt == 2:
+                raise
+            time.sleep(0.15)
+
+
 class Fixture:
     def __init__(self, port):
         self.port = port
@@ -89,9 +101,9 @@ def spi_config(codec, mode, hz, slot=0, drive=0, tap=0):
     return struct.pack("<BBBBIB", codec, drive, mode, slot, hz, tap)
 
 
-def receive_on_j7(probe, h743, mode, divider, row, seconds=0):
+def receive_on_j7(probe, h743, mode, divider, row, seconds=0, tap=0):
     hz = h743.kernel // divider
-    row.update(sck_hz=hz, sck_source="H743 PLL2 readback and SPI2 divider")
+    row.update(sck_hz=hz, sck_source="H743 PLL2 readback and SPI2 divider", mosi_tap=tap)
     seed = 0xB594D20F ^ (mode << 24) ^ divider
     block_size = 16384 if seconds else 4096
     expected = payload(seed, block_size)
@@ -109,7 +121,7 @@ def receive_on_j7(probe, h743, mode, divider, row, seconds=0):
                 first_bad = total + next(i for i, (a, b) in enumerate(zip(match, data)) if a != b)
         total += len(data)
 
-    probe.exchange(CHANNEL, 0, spi_config(3, mode, hz))
+    probe.exchange(CHANNEL, 0, spi_config(3, mode, hz, tap=tap))
     start = time.monotonic()
     try:
         if seconds:
@@ -232,6 +244,12 @@ def main():
     parser.add_argument("--out", type=Path, required=True, help="new JSON report file")
     parser.add_argument("--cdc-only", action="store_true")
     parser.add_argument("--modes", type=int, nargs="+", choices=range(4), default=list(range(4)))
+    parser.add_argument("--j7-slave-only", action="store_true")
+    parser.add_argument("--dividers", type=int, nargs="+", choices=DIVIDERS, default=DIVIDERS,
+                        help="H743 SPI2 kernel clock divisors for J7 receive tests")
+    parser.add_argument("--mosi-tap", type=int, choices=range(32), default=0, metavar="0..31")
+    parser.add_argument("--edge", type=int, choices=range(4), nargs=3,
+                        metavar=("SCK", "DATA", "NSS"), help="H743 revision 4 output slew settings")
     parser.add_argument("--seconds", type=int, choices=range(121), default=0, metavar="0..120")
     parser.add_argument("--repeats", type=int, choices=(1, 2, 3), default=3)
     args = parser.parse_args()
@@ -258,30 +276,50 @@ def main():
         return row["passed"]
 
     try:
-        with serial.Serial(ports[0], 115200, timeout=0.05, write_timeout=2) as port:
+        with open_fixture_port(ports[0]) as port:
             h743 = Fixture(port)
             report["fixture"] = h743.identify()
             report["initial_status"] = h743.state("SPI STOP")
             save()
             if args.cdc_only:
                 return 0
-            with native_connection(args.serial) as probe:
-                info = report["probe"] = probe.info()
-                require(info["dedicated_pipes"], "expected the ABI 2 J7 pair")
-                for mode in args.modes:
-                    passing = []
-                    for divider in DIVIDERS:
-                        if check("j7_slave", mode, receive_on_j7, probe, h743, mode, divider):
-                            passing.append(divider)
-                    for length in (1, 5, 4096):
-                        check("j7_native_master", mode, receive_on_h743, probe, h743, mode, length)
-                    check("j7_raw_duplex", mode, raw_duplex, probe, h743, mode, info["reference_hz"])
-                    if args.seconds:
-                        for divider in reversed(passing):
-                            trials = [check("j7_slave_sustained", mode, receive_on_j7, probe, h743, mode, divider,
-                                            seconds=args.seconds) for _ in range(args.repeats)]
-                            if all(trials):
-                                break
+            old_edge = None
+            try:
+                if args.edge is not None:
+                    require("revision=4" in report["fixture"], "--edge requires the revision 4 fixture")
+                    old_edge = h743.command("SPI EDGE").split("=", 1)[1]
+                    edge = ",".join(map(str, args.edge))
+                    require(h743.command("SPI EDGE " + edge.replace(",", " ")) == f"SPI edge={edge}",
+                            "H743 edge setup failed")
+                    report["edge"] = args.edge
+                with native_connection(args.serial) as probe:
+                    info = report["probe"] = probe.info()
+                    require(info["dedicated_pipes"], "expected the ABI 2 J7 pair")
+                    for mode in args.modes:
+                        passing = []
+                        for divider in sorted(set(args.dividers), reverse=True):
+                            if check("j7_slave", mode, receive_on_j7, probe, h743, mode, divider, tap=args.mosi_tap):
+                                passing.append(divider)
+                        if not args.j7_slave_only:
+                            for length in (1, 5, 4096):
+                                check("j7_native_master", mode, receive_on_h743, probe, h743, mode, length)
+                            check("j7_raw_duplex", mode, raw_duplex, probe, h743, mode, info["reference_hz"])
+                        if args.seconds:
+                            for divider in reversed(passing):
+                                trials = [
+                                    check("j7_slave_sustained", mode, receive_on_j7, probe, h743, mode, divider,
+                                          seconds=args.seconds, tap=args.mosi_tap)
+                                    for _ in range(args.repeats)
+                                ]
+                                if all(trials):
+                                    break
+            finally:
+                if old_edge is not None:
+                    h743.state("SPI STOP")
+                    report["edge_restored"] = (
+                        h743.command("SPI EDGE " + old_edge.replace(",", " ")) == f"SPI edge={old_edge}"
+                    )
+                    require(report["edge_restored"], "H743 edge restoration failed")
             report["final_status"] = h743.state("SPI STOP")
     except ReleaseError as error:
         report["error"] = str(error)

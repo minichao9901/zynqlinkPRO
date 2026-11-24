@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // GP1 peripheral for SPI, UART and SWO. TX uses synchronous dual-port RAM.
 // The producer owns each RX byte until software acknowledges its USB delivery.
-module selectio_aux_regs #(parameter SELECTIO_SLICE=0, SPI_PAD_DIAG=0)(
+module selectio_aux_regs #(parameter SELECTIO_SLICE=0, SPI_PAD_DIAG=0, SPI_PAD_FILTER=0)(
     (* X_INTERFACE_PARAMETER="ASSOCIATED_BUSIF S_AXI, ASSOCIATED_RESET axi_aresetn" *)
     input wire axi_aclk, axi_aresetn,
     input wire [16:0] s_axi_awaddr, input wire [2:0] s_axi_awprot,
@@ -17,6 +17,7 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0, SPI_PAD_DIAG=0)(
     input wire [7:0] wide_samples, input wire [3:0] pad_samples,output wire pad_request, uart_request, spi_selected, monitor_tdi,
     output wire [3:0] clock_slots, select_slots, tx_slots,
     input wire [3:0] slave_sck, slave_cs_n, slave_mosi,
+    input wire [7:0] slave_sck_wide, slave_mosi_wide,
     output wire spi_slave_selected
 );
     // flags[1:0] receive codec: 0 off, 1 UART 8N1, 2 Manchester SWO.
@@ -136,26 +137,44 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0, SPI_PAD_DIAG=0)(
     reg [1:0] slave_mode;
     always @(posedge quad_clk)
         if(!spi_slave_selected) slave_mode<=spi_config[1:0];
-    selectio_spi_slave_rx slave_rx(
-        .clk(quad_clk),.reset(phy_reset),.enable(spi_slave_selected && pad_granted),
-        .mode(slave_mode),.sck(slave_sck),.cs_n(slave_cs_n),.mosi(slave_mosi),
-        .valid(slave_valid),.error(slave_error),.data(slave_byte));
-    // Capture raw four-slot input words in a debug-only snapshot. The existing
+    generate if (SPI_PAD_FILTER) begin: filtered_spi
+        // NSS continues to use the SWD receiver. Expand its four slots to
+        // the same time grid as the eight-slot SCK and MOSI receivers.
+        wire [7:0] cs_n={{2{slave_cs_n[3]}},{2{slave_cs_n[2]}},
+                         {2{slave_cs_n[1]}},{2{slave_cs_n[0]}}};
+        selectio_spi_slave_rx #(.WIDTH(8),.FILTER(1)) slave_rx(
+            .clk(quad_clk),.reset(phy_reset),.enable(spi_slave_selected && pad_granted),
+            .mode(slave_mode),.sck(slave_sck_wide),.cs_n(cs_n),.mosi(slave_mosi_wide),
+            .valid(slave_valid),.error(slave_error),.data(slave_byte));
+    end else begin: unfiltered_spi
+        selectio_spi_slave_rx slave_rx(
+            .clk(quad_clk),.reset(phy_reset),.enable(spi_slave_selected && pad_granted),
+            .mode(slave_mode),.sck(slave_sck),.cs_n(slave_cs_n),.mosi(slave_mosi),
+            .valid(slave_valid),.error(slave_error),.data(slave_byte));
+    end endgenerate
+    // Capture raw input words in a debug-only snapshot. The existing
     // AUX clear handshake rearms the snapshot before the next transaction.
     wire diag_read = SPI_PAD_DIAG && s_axi_arvalid && s_axi_arready &&
                      s_axi_araddr[16:12]==5'h04 && s_axi_araddr[1:0]==0;
-    wire [11:0] diag_data;
+    wire [19:0] diag_data;
     wire diag_done;
     generate if (SPI_PAD_DIAG) begin: spi_capture_snapshot
-        (* ram_style="block" *) reg [11:0] samples[0:1023];
+        localparam DIAG_WIDTH=SPI_PAD_FILTER ? 20 : 12;
+        (* ram_style="block" *) reg [DIAG_WIDTH-1:0] samples[0:1023];
         reg [10:0] count;
-        reg [11:0] data_out;
+        reg [DIAG_WIDTH-1:0] data_out;
+        wire [DIAG_WIDTH-1:0] raw_word;
+        if (SPI_PAD_FILTER) begin: wide_snapshot
+            assign raw_word={slave_cs_n,slave_sck_wide,slave_mosi_wide};
+        end else begin: quad_snapshot
+            assign raw_word={slave_cs_n,slave_sck,slave_mosi};
+        end
         (* ASYNC_REG="TRUE" *) reg [1:0] done_sync;
         always @(posedge quad_clk) begin
             if (phy_reset || (apply_reader && clear_io)) count<=0;
             else if (spi_slave_selected && pad_granted && !count[10] &&
                      ((|count) || (!(&slave_cs_n) && slave_sck!={4{slave_mode[1]}}))) begin
-                samples[count[9:0]]<={slave_cs_n,slave_sck,slave_mosi};
+                samples[count[9:0]]<=raw_word;
                 count<=count+1'b1;
             end
         end
@@ -264,7 +283,7 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0, SPI_PAD_DIAG=0)(
             end
             if(s_axi_rready) s_axi_rvalid<=0;
             if(ram_pending) begin ram_pending<=0;s_axi_rdata<=ram_q;s_axi_rresp<=0;s_axi_rvalid<=1;end
-            if(diag_pending) begin diag_pending<=0;s_axi_rdata<={20'b0,diag_data};s_axi_rresp<=0;s_axi_rvalid<=1;end
+            if(diag_pending) begin diag_pending<=0;s_axi_rdata<={12'b0,diag_data};s_axi_rresp<=0;s_axi_rvalid<=1;end
             if(s_axi_arvalid && s_axi_arready) begin
                 if(diag_read) diag_pending<=1;
                 else if(ram_read) ram_pending<=1;
@@ -280,7 +299,7 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0, SPI_PAD_DIAG=0)(
                         'h28:s_axi_rdata<=snapshot[31:0];
                         'h2c:s_axi_rdata<=snapshot[63:32];
                         'h34:s_axi_rdata<=SELECTIO_SLICE==0 ? 32'h53504952 : 0; // SPIR
-                        'h38:s_axi_rdata<=SPI_PAD_DIAG ? {31'h29a82200,diag_done} : 0; // SPI pad snapshot
+                        'h38:s_axi_rdata<=SPI_PAD_DIAG ? {30'h14d41100,(SPI_PAD_FILTER != 0),diag_done} : 0; // SPI pad snapshot
                         default: begin s_axi_rdata<=0;s_axi_rresp<=2;end
                     endcase
                 end

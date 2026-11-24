@@ -104,13 +104,17 @@ def main():
         return result.stdout
 
     run("xvlog", ["--sv", *sources], "xvlog.txt")
-    for suffix, marker in (("", "SPI_SLAVE_PASS"), ("_offset", "SPI_SLAVE_OFFSET_PASS")):
+    cases = (("", "", "SPI_SLAVE_PASS", []),
+             ("_offset", "_offset", "SPI_SLAVE_OFFSET_PASS", []),
+             ("_filter", "", "SPI_SLAVE_PASS", ["-generic_top", "FILTER=1"]))
+    for suffix, top_suffix, marker, generics in cases:
         entry = "spi_slave" + suffix
-        run("xelab", ["-L", "unisims_ver", "-L", "secureip", "-s", entry, "tb_selectio_" + entry, "glbl"],
+        run("xelab", ["-L", "unisims_ver", "-L", "secureip", *generics,
+                      "-s", entry, "tb_selectio_spi_slave" + top_suffix, "glbl"],
             f"xelab{suffix}.txt")
         output = run("xsim", [entry, "-runall"], f"xsim{suffix}.txt")
         match = next((line for line in output.splitlines() if line.startswith(marker)), None)
-        if match is None or "Fatal:" in output:
+        if match is None or "Fatal:" in output or (generics and "glitches=1" not in match):
             raise SystemExit(output[-4000:])
         print(match, flush=True)
 

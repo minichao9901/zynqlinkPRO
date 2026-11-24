@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // One physical quartet per 100 MHz parallel clock. The 50 MHz JTAG
 // producer launches eight slots on the same MMCM; neither clock is gated.
-module selectio_debug_phy (
+module selectio_debug_phy #(parameter SPI_PAD_FILTER=0) (
     input wire serial_clk, quad_clk, octet_clk, reset,
     input wire [2:0] owner, // 0 park, 1 compatibility, 2 JTAG, 3 SWD
     input wire legacy_clock, legacy_data, legacy_release, legacy_tdi, legacy_tdi_release,
@@ -17,7 +17,8 @@ module selectio_debug_phy (
     output wire [3:0] aux_rx, input wire uart_sideband, monitor_tdi,
     input wire serial_rx_clk, output wire [7:0] aux_wide_rx,
     input wire aux_spi_slave,
-    output wire [3:0] slave_sck, slave_cs_n, slave_mosi
+    output wire [3:0] slave_sck, slave_cs_n, slave_mosi,
+    output wire [7:0] slave_sck_wide, slave_mosi_wide
 );
     // Aligned rising edges: observe the toggle on the intervening quartet
     // edge. At the next shared edge the serializer consumes the upper half.
@@ -72,12 +73,21 @@ module selectio_debug_phy (
     IBUF tdo_pad(.I(tdo_pin),.O(tdo_input));
     wire [3:0] captured_swd;
     assign slave_cs_n = captured_swd;
+    assign slave_mosi_wide = tdi_wide;
     assign slave_mosi = {tdi_wide[6],tdi_wide[4],tdi_wide[2],tdi_wide[0]};
     // Register the ILOGIC return before evaluating ACK and preparing the
     // next OSERDES word. Sample offsets include this additional quartet.
     always @(posedge quad_clk) swd_samples<=captured_swd;
     selectio_rx data_rx(serial_clk, quad_clk, reset, swdio_input, tap_clk, swdio_load, swdio_tap, captured_swd, data_level);
-    selectio_rx clock_rx(serial_clk, quad_clk, reset, clock_input, tap_clk, swdio_load, swdio_tap, slave_sck, clock_level);
+    generate if (SPI_PAD_FILTER) begin: spi_clock_wide
+        selectio_rx #(.WIDTH(8)) clock_rx(serial_rx_clk, quad_clk, reset, clock_input,
+                                        tap_clk, swdio_load, swdio_tap, slave_sck_wide, clock_level);
+        assign slave_sck={slave_sck_wide[6],slave_sck_wide[4],slave_sck_wide[2],slave_sck_wide[0]};
+    end else begin: spi_clock_quad
+        selectio_rx clock_rx(serial_clk, quad_clk, reset, clock_input, tap_clk,
+                             swdio_load, swdio_tap, slave_sck, clock_level);
+        assign slave_sck_wide=0;
+    end endgenerate
     selectio_rx #(.WIDTH(8)) tdi_rx(serial_rx_clk,quad_clk,reset,tdi_input,tap_clk,tdo_load,tdo_tap,tdi_wide,tdi_level);
     selectio_rx #(.WIDTH(8)) tdo_rx(serial_rx_clk, quad_clk, reset, tdo_input, tap_clk, tdo_load, tdo_tap, tdo_wide, tdo_level);
 endmodule

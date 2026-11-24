@@ -2,47 +2,84 @@
 // The SPI master supplies SCK. All three input words share an oversampling
 // clock, with sample 0 earliest. A small frequency offset can place two
 // edges of the selected polarity in one word, even at nominal 100 MHz.
-module selectio_spi_slave_rx (
+module selectio_spi_slave_rx #(parameter WIDTH=4, FILTER=0) (
     input wire clk, reset, enable,
     input wire [1:0] mode,
-    input wire [3:0] sck, cs_n, mosi,
+    input wire [WIDTH-1:0] sck, cs_n, mosi,
     output reg valid, error,
     output reg [7:0] data
 );
     reg previous_sck, armed;
     wire rising_sample = !(mode[1] ^ mode[0]);
-    wire [3:0] edges = (sck ^ {sck[2:0],previous_sck}) &
-                       (rising_sample ? sck : ~sck) & ~cs_n;
-    wire [3:0] first_edge = {edges[3] && !edges[2:0],
-                             edges[2] && !edges[1:0],
-                             edges[1] && !edges[0], edges[0]};
-    wire [3:0] second_edge = edges & ~first_edge;
-    wire [3:0] last_edge = second_edge ? second_edge : first_edge;
+    wire [WIDTH-1:0] chip_select, raw_edges, eligible, after_first;
+    wire [WIDTH-1:0] first_edge, second_edge, last_edge;
+    reg [3:0] clock_hold;
+    // At 800 MS/s an accepted 100 MHz bit edge is normally eight slots
+    // from its predecessor. Ignore repeat edges closer than five slots.
+    localparam SPACING = FILTER ? 5 : 1;
+    generate if (FILTER) begin: nss_filter
+        reg [3:0] history;
+        reg inactive;
+        wire [WIDTH+3:0] window = {cs_n,history};
+        wire [WIDTH:0] inactive_chain;
+        assign inactive_chain[0] = inactive;
+        for (genvar i=0; i<WIDTH; i=i+1) begin: slot
+            // Preserve the first sampling edge on assertion. A high pulse
+            // must occupy at least five slots before it can end a frame.
+            assign inactive_chain[i+1] = cs_n[i] && (inactive_chain[i] || (&window[i +: 5]));
+            assign chip_select[i] = inactive_chain[i+1];
+        end
+        always @(posedge clk) begin
+            if (reset || !enable) begin history<=4'hf; inactive<=1; end
+            else begin history<=cs_n[WIDTH-1 -: 4]; inactive<=inactive_chain[WIDTH]; end
+        end
+    end else begin
+        assign chip_select=cs_n;
+    end endgenerate
+    assign raw_edges = (sck ^ {sck[WIDTH-2:0],previous_sck}) &
+                       (rising_sample ? sck : ~sck) & ~chip_select;
+    wire [WIDTH-1:0] cs_before, cs_after, cs_between;
+    wire [3:0] next_hold [0:WIDTH-1];
+    for (genvar i=0; i<WIDTH; i=i+1) begin: edges_per_slot
+        localparam [WIDTH-1:0] EARLIER = (1<<i)-1;
+        localparam [WIDTH-1:0] LATER = ~((2<<i)-1);
+        localparam [WIDTH-1:0] SPACED = i>=SPACING ? (1<<(i-SPACING+1))-1 : 0;
+        assign eligible[i]=raw_edges[i] && (!FILTER || i>=clock_hold);
+        assign first_edge[i]=eligible[i] && !(|(eligible & EARLIER));
+        assign after_first[i]=eligible[i] && (|(first_edge & SPACED));
+        assign second_edge[i]=after_first[i] && !(|(after_first & EARLIER));
+        assign cs_before[i]=first_edge[i] && (|(chip_select & EARLIER));
+        assign cs_after[i]=last_edge[i] && (|(chip_select & LATER));
+        assign cs_between[i]=chip_select[i] && (|(first_edge & EARLIER)) && (|(second_edge & LATER));
+        assign next_hold[i]=(FILTER && i+SPACING>WIDTH && last_edge[i]) ? i+SPACING-WIDTH : 0;
+    end
+    assign last_edge = second_edge ? second_edge : first_edge;
+    reg [3:0] hold_from_edge;
+    always @* begin
+        hold_from_edge=0;
+        for (integer i=0; i<WIDTH; i=i+1)
+            hold_from_edge=hold_from_edge | next_hold[i];
+    end
     reg first_valid, second_valid, first_value, second_value;
     reg end_before, end_between, end_after;
     // Register the ordered edges and CS boundaries before assembling bytes.
     always @(posedge clk) begin
         if (reset || !enable) begin
-            previous_sck <= 0;
+            previous_sck <= FILTER ? mode[1] : 1'b0;
+            clock_hold <= 0;
             first_valid <= 0; second_valid <= 0;
             first_value <= 0; second_value <= 0;
             end_before <= 0; end_between <= 0; end_after <= 0;
         end else begin
-            previous_sck <= sck[3];
+            previous_sck <= sck[WIDTH-1];
+            clock_hold <= hold_from_edge;
             first_valid <= |first_edge;
             second_valid <= |second_edge;
             first_value <= |(first_edge & mosi);
             second_value <= |(second_edge & mosi);
-            end_before <= (first_edge[1] && cs_n[0]) ||
-                          (first_edge[2] && |cs_n[1:0]) ||
-                          (first_edge[3] && |cs_n[2:0]);
-            end_between <= (edges[0] && edges[2] && cs_n[1]) ||
-                           (edges[0] && edges[3] && |cs_n[2:1]) ||
-                           (edges[1] && edges[3] && cs_n[2]);
-            end_after <= (!edges && |cs_n) ||
-                         (last_edge[0] && |cs_n[3:1]) ||
-                         (last_edge[1] && |cs_n[3:2]) ||
-                         (last_edge[2] && cs_n[3]);
+            end_before <= |cs_before;
+            end_between <= |cs_between;
+            end_after <= (!last_edge && |chip_select) || (|cs_after);
         end
     end
 

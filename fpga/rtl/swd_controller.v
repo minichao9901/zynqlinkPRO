@@ -14,7 +14,8 @@ module swd_controller #(
     parameter integer SWDIO_IN_DELAY_NS = 0,
     parameter integer SELECTIO = 0,
     parameter integer QUAD_AXI = 0,
-    parameter integer SELECTIO_SLICE = 0
+    parameter integer SELECTIO_SLICE = 0,
+    parameter integer SPI_PAD_FILTER = 0
 )(
     input  wire                                    clk,
     input  wire                                    rst_n,
@@ -89,6 +90,7 @@ module swd_controller #(
     input wire [2:0] hs_owner,
     input wire hs_monitor_tdi,hs_uart_request,output wire hs_uart_grant, input wire hs_aux_spi,input wire [3:0] hs_aux_sck,hs_aux_cs,hs_aux_tx,output wire [3:0] hs_aux_rx, output wire [7:0] hs_aux_wide_rx,
     input wire hs_aux_spi_slave, output wire [3:0] hs_slave_sck, hs_slave_cs_n, hs_slave_mosi,
+    output wire [7:0] hs_slave_sck_wide, hs_slave_mosi_wide,
     input wire [23:0] hs_jtag_lanes, output wire [7:0] hs_jtag_samples,
     input wire [3:0] hs_swd_ckslots, hs_swd_data, hs_swd_release,
     output wire [3:0] hs_swd_samples,
@@ -189,7 +191,7 @@ module swd_controller #(
         always @(posedge hs_quad_phase) live_swd_sync<={live_swd_sync[0],hs_live_swd};
     end
     if (SELECTIO) begin:g_selectio
-        selectio_debug_phy phy(
+        selectio_debug_phy #(.SPI_PAD_FILTER(SPI_PAD_FILTER)) phy(
             .serial_rx_clk(hs_serial_rx_phase),.aux_wide_rx(hs_aux_wide_rx),
             .serial_clk(hs_serial_phase), .quad_clk(hs_quad_phase), .octet_clk(hs_octet_phase),
             .reset(hs_reset), .owner(hs_owner), .legacy_clock(clock_drive),
@@ -205,9 +207,12 @@ module swd_controller #(
             .clock_pin(swclk), .data_pin(swdio), .tdi_pin(gpio_aux[0]), .tdo_pin(gpio_aux[1]),
             .monitor_tdi(hs_monitor_tdi),.uart_sideband(hs_uart_grant),.aux_spi(hs_aux_spi), .aux_sck(hs_aux_sck),.aux_cs(hs_aux_cs),.aux_tx(hs_aux_tx),.aux_rx(hs_aux_rx),
             .aux_spi_slave(hs_aux_spi_slave),.slave_sck(hs_slave_sck),.slave_cs_n(hs_slave_cs_n),.slave_mosi(hs_slave_mosi),
+            .slave_sck_wide(hs_slave_sck_wide),.slave_mosi_wide(hs_slave_mosi_wide),
             .clock_level(clock_feedback), .data_level(swdio_i_raw), .tdi_level(gpio_in[0]), .tdo_level(gpio_in[1])
         );
     end else begin:g_legacy_pads
+        assign hs_slave_sck_wide=0;
+        assign hs_slave_mosi_wide=0;
         IOBUF u_swdio_iobuf(.IO(swdio), .I(legacy_data), .O(swdio_i_raw), .T(legacy_release));
         IOBUF u_clock_iobuf(.IO(swclk), .I(clock_drive), .T(1'b0), .O(clock_feedback));
         assign hs_jtag_samples=0;
