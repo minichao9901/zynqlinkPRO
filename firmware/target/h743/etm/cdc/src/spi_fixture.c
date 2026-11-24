@@ -18,6 +18,9 @@ static uint8_t tx[MAX_BYTES] __attribute__((aligned(32)));
 static uint8_t rx[MAX_BYTES] __attribute__((aligned(32)));
 static uint32_t kernel_hz;
 static uint32_t drive_speed = GPIO_SPEED_FREQ_VERY_HIGH;
+static uint32_t data_speed = GPIO_SPEED_FREQ_VERY_HIGH;
+static uint32_t nss_speed = GPIO_SPEED_FREQ_VERY_HIGH;
+static int fill_byte = -1;
 
 typedef struct {
     bool active, master, send, receive, stream;
@@ -36,13 +39,23 @@ static uint8_t pattern(uint32_t i, uint32_t seed)
     return (uint8_t)(x ^ (x >> 13) ^ (x >> 23));
 }
 
-static void pins(unsigned mask, uint32_t mode, uint32_t pull)
+static void pins_at_speed(unsigned mask, uint32_t mode, uint32_t pull, uint32_t speed)
 {
     GPIO_InitTypeDef cfg = {
         .Pin = mask, .Mode = mode, .Pull = pull,
-        .Speed = drive_speed, .Alternate = 5,
+        .Speed = speed, .Alternate = 5,
     };
     HAL_GPIO_Init(GPIOI, &cfg);
+}
+
+static void pins(unsigned mask, uint32_t mode, uint32_t pull)
+{
+    if (mask & SCK)
+        pins_at_speed(SCK, mode, pull, drive_speed);
+    if (mask & (MOSI | MISO))
+        pins_at_speed(mask & (MOSI | MISO), mode, pull, data_speed);
+    if (mask & NSS)
+        pins_at_speed(NSS, mode, pull, nss_speed);
 }
 
 static void release_pins(void)
@@ -317,7 +330,7 @@ void spi_fixture_command(char *line, char *reply, size_t capacity)
         snprintf(reply, capacity, "PONG H743SPI/1\r\n");
     } else if (!strcmp(line, "SPI INFO")) {
         snprintf(reply, capacity, "H743SPI/1 kernel_hz=%" PRIu32
-                 " div=2,4,8,16,32,64,128,256 max_bytes=%u max_ms=%u revision=3 drive=%" PRIu32 "\r\n",
+                 " div=2,4,8,16,32,64,128,256 max_bytes=%u max_ms=%u revision=4 drive=%" PRIu32 "\r\n",
                  kernel_hz, MAX_BYTES, MAX_MS, drive_speed);
     } else if (!strcmp(line, "SPI STATUS")) {
         status(reply, capacity);
@@ -332,9 +345,41 @@ void spi_fixture_command(char *line, char *reply, size_t capacity)
         if (!number(line + 10, &speed) || speed > GPIO_SPEED_FREQ_VERY_HIGH) {
             snprintf(reply, capacity, "ERR invalid_drive\r\n");
         } else {
-            drive_speed = speed;
+            drive_speed = data_speed = nss_speed = speed;
             snprintf(reply, capacity, "SPI drive=%" PRIu32 "\r\n", drive_speed);
         }
+    } else if (!strcmp(line, "SPI EDGE") || !strncmp(line, "SPI EDGE ", 9)) {
+        bool valid = true;
+        if (line[8] == ' ') {
+            char *next;
+            uint32_t sck, data, nss;
+            char *first = strtok_r(line + 9, " ", &next);
+            char *second = strtok_r(NULL, " ", &next);
+            char *third = strtok_r(NULL, " ", &next);
+            valid = number(first, &sck) && number(second, &data) && number(third, &nss) &&
+                    !strtok_r(NULL, " ", &next) && sck <= 3 && data <= 3 && nss <= 3;
+            if (valid) {
+                drive_speed = sck;
+                data_speed = data;
+                nss_speed = nss;
+            }
+        }
+        if (valid)
+            snprintf(reply, capacity, "SPI edge=%lu,%lu,%lu\r\n",
+                     (unsigned long)drive_speed, (unsigned long)data_speed, (unsigned long)nss_speed);
+        else
+            snprintf(reply, capacity, "ERR invalid_edge\r\n");
+    } else if (!strcmp(line, "SPI FILL") || !strncmp(line, "SPI FILL ", 9)) {
+        uint32_t value;
+        if (!strcmp(line, "SPI FILL PATTERN"))
+            fill_byte = -1;
+        else if (line[8] == ' ' && number(line + 9, &value) && value <= UINT8_MAX)
+            fill_byte = (int)value;
+        else if (line[8] == ' ') {
+            snprintf(reply, capacity, "ERR invalid_fill\r\n");
+            return;
+        }
+        snprintf(reply, capacity, "SPI fill=%d\r\n", fill_byte);
     } else if (!strcmp(line, "SPI READ")) {
         read_prefix(reply, capacity);
     } else if (!strcmp(line, "SPI PINS")) {
@@ -347,7 +392,7 @@ void spi_fixture_command(char *line, char *reply, size_t capacity)
         }
         if (job.send)
             for (uint32_t i = 0; i < job.size; ++i)
-                tx[i] = pattern(i, job.seed);
+                tx[i] = job.master && fill_byte >= 0 ? (uint8_t)fill_byte : pattern(i, job.seed);
         state = job;
         if (state.master) {
             GPIOI->BSRR = NSS;

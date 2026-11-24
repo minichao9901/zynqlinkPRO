@@ -58,11 +58,21 @@ def capture(args, phy, report):
     with serial.Serial(ports[0], 115200, timeout=0.05, write_timeout=2) as port:
         target = Fixture(port)
         fixture_info = target.identify()
-        require("revision=3" in fixture_info, "expected the revision 3 H743 SPI fixture")
+        independent = "revision=4" in fixture_info
+        require(independent or "revision=3" in fixture_info, "expected the revision 3 or 4 H743 SPI fixture")
+        require(independent or (args.edge is None and args.fill is None), "EDGE/FILL requires revision 4")
         original_drive = int(fixture_info.split("drive=")[1])
         target.state("SPI STOP")
+        original_edge = target.command("SPI EDGE").split("=")[1] if independent else None
+        original_fill = target.command("SPI FILL").split("=")[1] if independent else None
         try:
-            require(target.command(f"SPI DRIVE {args.drive}") == f"SPI drive={args.drive}", "drive setup failed")
+            if args.edge:
+                edge = ",".join(map(str, args.edge))
+                require(target.command("SPI EDGE " + edge.replace(",", " ")) == f"SPI edge={edge}", "edge setup failed")
+            else:
+                require(target.command(f"SPI DRIVE {args.drive}") == f"SPI drive={args.drive}", "drive setup failed")
+            if args.fill is not None:
+                require(target.command(f"SPI FILL {args.fill}") == f"SPI fill={args.fill}", "fill setup failed")
             with native_connection(args.serial) as probe:
                 info = probe.info()
                 require(info["dedicated_pipes"], "expected the ABI 2 J7 SPI path")
@@ -89,7 +99,13 @@ def capture(args, phy, report):
                 finally:
                     release(target, probe)
         finally:
-            require(target.command(f"SPI DRIVE {original_drive}") == f"SPI drive={original_drive}", "drive restoration failed")
+            if independent:
+                require(target.command("SPI EDGE " + original_edge.replace(",", " ")) ==
+                        f"SPI edge={original_edge}", "edge restoration failed")
+                fill = "PATTERN" if original_fill == "-1" else original_fill
+                require(target.command(f"SPI FILL {fill}") == f"SPI fill={original_fill}", "fill restoration failed")
+            else:
+                require(target.command(f"SPI DRIVE {original_drive}") == f"SPI drive={original_drive}", "drive restoration failed")
     require(phy.read_words(AUX_MARKER) == [0x53504401], "diagnostic snapshot did not complete")
     report["sample_summary"] = summarize(read_words(phy, args.out / "samples.bin"))
 
@@ -102,6 +118,8 @@ def main():
     parser.add_argument("--sdk", default=Path("E:/Xilinx/SDK/2018.3"), type=Path)
     parser.add_argument("--mode", type=int, choices=range(4), default=0)
     parser.add_argument("--drive", type=int, choices=range(4), default=3)
+    parser.add_argument("--edge", type=int, choices=range(4), nargs=3, metavar=("SCK", "DATA", "NSS"))
+    parser.add_argument("--fill", type=lambda value: int(value, 0), choices=range(256), metavar="BYTE")
     parser.add_argument("--divider", type=int, choices=(2, 4, 8, 16, 32, 64, 128, 256), default=2)
     parser.add_argument("--mosi-tap", type=int, choices=range(32), default=0)
     parser.add_argument("--sck-nss-tap", type=int, choices=range(32))
@@ -114,7 +132,7 @@ def main():
     require(phy.read_words(AUX_MARKER)[0] & ~1 == 0x53504400, "J7 diagnostic bitstream is absent")
     saved_mosi = phy.read_words(MOSI_TAP)[0]
     saved_clock = phy.read_words(SCK_NSS_TAP)[0]
-    report = dict(mode=args.mode, drive=args.drive, mosi_tap=args.mosi_tap,
+    report = dict(mode=args.mode, drive=args.drive, edge=args.edge, fill=args.fill, mosi_tap=args.mosi_tap,
                   sck_nss_tap=saved_clock if args.sck_nss_tap is None else args.sck_nss_tap)
     try:
         if args.sck_nss_tap is not None:

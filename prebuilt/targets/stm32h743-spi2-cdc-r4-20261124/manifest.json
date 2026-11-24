@@ -1,0 +1,32 @@
+{
+  "board": "ALIENTEK Apollo STM32H743",
+  "source_base": "4241e40e7b0286e8724e6c06b585d18254d4f9b2",
+  "source_sha256": {
+    "firmware/target/h743/etm/cdc/build.ps1": "61c8562e1b305dd6e488d78a640549d3d98684c99dbaff7b038c8801794263fd",
+    "firmware/target/h743/etm/cdc/src/main.c": "dc5be0b902bb7894f83681796d644717b85e7fe12e307b995b7f80af94a0575e",
+    "firmware/target/h743/etm/cdc/src/spi_fixture.c": "b97a3171a13be337f6699192aca92ef9b041906a94216b79f199b78ac97a7546",
+    "firmware/target/h743/etm/cdc/src/spi_fixture.h": "ae364e6b4e474b783347763ab30f2dfa5997948a18956c4f759c6000d4ec6b50"
+  },
+  "build_flags": [
+    "-SpiFixture",
+    "-CoreMHz",
+    "480",
+    "-TraceR",
+    "24",
+    "-BannerEveryMs",
+    "0",
+    "-NoPublish"
+  ],
+  "files_sha256": {
+    "fw.bin": "57704acfd1a146f0caef873ef8739b5ce3ff2696114e56b97b4e7b58e7e62d07",
+    "fw.elf": "c1f8d0a21e2727f4368508baf907f9dc5f3a390c25e96a3ccdae95b11dd9ecc1"
+  },
+  "usb": {
+    "vid": "0xf055",
+    "pid": "0x7432",
+    "serial": "H743SPI0001"
+  },
+  "flash_start": "0x08000000",
+  "validation": "../../../docs/validation/h743-spi2-100mhz-20261124/README.md",
+  "revision": 4
+}
