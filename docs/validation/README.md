@@ -21,6 +21,8 @@
 
 ## 融合方案历次实测
 
+- [F103ZE 用例清单实板验收](f103ze-cases-20261124/README.md)，含 ABI 1 功能及旧正式 RAM 对照。
+
 - [首轮双协议集成](selectio-integration/README.md)与[F103ZE 整体回归](selectio-fusion-20261121/README.md)
 - [融合队列与吞吐](efficiency-20261122/README.md)、[变频实现](selectio-variable-20261122/README.md)与[变频实板](selectio-variable-board-20261122/README.md)
 - [SWD50 标准路径](swd50-standard-20261122/README.md)与[四时钟 DMA 对照](swd50-quad-dma-20261122/README.md)

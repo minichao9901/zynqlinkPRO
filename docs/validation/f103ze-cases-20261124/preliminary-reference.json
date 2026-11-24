@@ -1,0 +1,345 @@
+{
+  "caseCatalogEvidence": false,
+  "reason": "Executed the general Web procedure with the historical JTAG/RAM pair before switching to the worktree case catalog.",
+  "revision": "208316672583d8b2ae2986032db996cda592b184",
+  "files": {
+    "bit": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\release-20261106\\probe.bit",
+      "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+    },
+    "zynqElf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\release-20261106\\application.elf",
+      "sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802"
+    },
+    "targetElf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\golden\\f103ze-cdc48.elf",
+      "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f"
+    },
+    "etmElf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\golden\\f103ze-cdc48.elf",
+      "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f"
+    }
+  },
+  "counts": {
+    "pass": 7,
+    "fail": 3,
+    "pending": 3,
+    "not-applicable": 0,
+    "blocked": 0
+  },
+  "status": "fail",
+  "scope": {
+    "swd-jscope-1": {
+      "periodTicks": 24,
+      "timebaseHz": 24000000,
+      "seconds": 60,
+      "nominalGroupsPerSecond": 1000000.0,
+      "transport": "swd",
+      "requestedHz": 60000000,
+      "channels": 1,
+      "address": "0x20004100",
+      "target": {
+        "halted": true,
+        "clock": {
+          "name": "STM32F103",
+          "cpuid": "0x411fc231",
+          "device": "0x10036414",
+          "registers": {
+            "0x40021000": "0x3034e83",
+            "0x40021004": "0x51040a"
+          }
+        },
+        "dhcsr": 196611,
+        "ccr": "0x0"
+      },
+      "clock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0xa11",
+        "jtagSamplingMode": 0,
+        "jtagRoute": 2,
+        "actual_link_Hz": 59999999.0,
+        "basis": "physical MEM-AP0 readback of PLL/divider registers"
+      },
+      "definitionVerified": true,
+      "usbBytes": 249435136,
+      "formattedBytes": 249435136,
+      "usbFrames": 487178,
+      "completedUsbFrames": 487178,
+      "receivedGroups": 60405268,
+      "finalProduced": 60405268,
+      "finalSkipped": 2567,
+      "tailCountDelta": 0,
+      "transferByteDelta": 0,
+      "dataFrames": 487176,
+      "allFramesVerified": true,
+      "droppedUsbFrames": 0,
+      "finalReadErrors": 0,
+      "finalDapYields": 0,
+      "decodedTimelineSkips": 2567,
+      "finalMetrics": [
+        827544392,
+        1268181180,
+        24000000,
+        60405268,
+        2567,
+        0,
+        0,
+        0,
+        487178,
+        249435136,
+        24,
+        0
+      ],
+      "readerError": null,
+      "status": "fail",
+      "error": "Native HSS fixed window was not acquired"
+    },
+    "swd-jscope-8": {
+      "periodTicks": 416,
+      "timebaseHz": 24000000,
+      "seconds": 60,
+      "nominalGroupsPerSecond": 57692.307692307695,
+      "transport": "swd",
+      "requestedHz": 60000000,
+      "channels": 8,
+      "address": "0x20004100",
+      "target": {
+        "halted": true,
+        "clock": {
+          "name": "STM32F103",
+          "cpuid": "0x411fc231",
+          "device": "0x10036414",
+          "registers": {
+            "0x40021000": "0x3034e83",
+            "0x40021004": "0x51040a"
+          }
+        },
+        "dhcsr": 196611,
+        "ccr": "0x0"
+      },
+      "clock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0xa11",
+        "jtagSamplingMode": 0,
+        "jtagRoute": 2,
+        "actual_link_Hz": 59999999.0,
+        "basis": "physical MEM-AP0 readback of PLL/divider registers"
+      },
+      "definitionVerified": true,
+      "usbBytes": 118981632,
+      "formattedBytes": 118981632,
+      "usbFrames": 232386,
+      "completedUsbFrames": 232386,
+      "receivedGroups": 3485759,
+      "finalProduced": 3485759,
+      "finalSkipped": 0,
+      "tailCountDelta": 0,
+      "transferByteDelta": 0,
+      "dataFrames": 232384,
+      "allFramesVerified": true,
+      "droppedUsbFrames": 0,
+      "finalReadErrors": 0,
+      "finalDapYields": 0,
+      "decodedTimelineSkips": 0,
+      "finalMetrics": [
+        827544392,
+        763186467,
+        24000000,
+        3485759,
+        0,
+        0,
+        0,
+        0,
+        232386,
+        118981632,
+        416,
+        0
+      ],
+      "readerError": null,
+      "status": "fail",
+      "error": "Native HSS fixed window was not acquired"
+    }
+  },
+  "etmVerification": {
+    "protocol": "trace-cli/1",
+    "runId": "20261124-160934-095a1164",
+    "command": "verify",
+    "ok": false,
+    "error": {
+      "type": "CliError",
+      "message": "验证未通过",
+      "details": {
+        "recordDir": "E:\\zynqlinkPRO-efficiency\\etm-service\\records\\capture-eb7477c7b2224c89a81a688065f10ba8",
+        "extent": {
+          "known": false,
+          "complete": null,
+          "reason": "该原始格式没有KVDAT采样头；不从请求参数猜测实际时长"
+        },
+        "raw": {
+          "bytes": 3889547,
+          "sha256": "14fdbc9be47ec296a79585d40545bcad5638870a155216bd7efc789e86375734"
+        },
+        "elf": {
+          "bytes": 1216624,
+          "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f"
+        },
+        "inputManifestVerified": false,
+        "passed": false,
+        "storeInputVerification": {
+          "verified": true,
+          "skipped": false,
+          "reason": "",
+          "declared": 7,
+          "present": 5,
+          "blockingHashed": 5,
+          "hashed": 6,
+          "hashedBytes": 5127270,
+          "hashSeconds": 0.007996,
+          "unverified": [],
+          "unbound": [],
+          "excluded": [],
+          "metadata": [
+            {
+              "name": "session.json",
+              "bytes": 8696,
+              "expectedSha256": "5bd1df4b024bf8191da84cc1b1037fd39eb179dc675ca531382d131b80466ae0",
+              "sha256": null,
+              "seconds": 0.0,
+              "status": "size-mismatch"
+            },
+            {
+              "name": "sources.json",
+              "bytes": 677,
+              "expectedSha256": "8a25ffbf3a517b70f9683f154a890be6fef8d3305496af499790abfcc022176e",
+              "sha256": "8a25ffbf3a517b70f9683f154a890be6fef8d3305496af499790abfcc022176e",
+              "seconds": 0.000381,
+              "status": "ok"
+            }
+          ],
+          "metadataChanged": [],
+          "inputs": [
+            {
+              "name": "etm.bin",
+              "bytes": 3889547,
+              "expectedSha256": "14fdbc9be47ec296a79585d40545bcad5638870a155216bd7efc789e86375734",
+              "sha256": "14fdbc9be47ec296a79585d40545bcad5638870a155216bd7efc789e86375734",
+              "seconds": 0.004656,
+              "status": "ok"
+            },
+            {
+              "name": "native-config.txt",
+              "bytes": 254,
+              "expectedSha256": "cc5742ca3bfe9368e5f6d59f2b2548910bfd11558a820602af4a1ab103e68ac5",
+              "sha256": "cc5742ca3bfe9368e5f6d59f2b2548910bfd11558a820602af4a1ab103e68ac5",
+              "seconds": 0.00049,
+              "status": "ok"
+            },
+            {
+              "name": "firmware.elf",
+              "bytes": 1216624,
+              "expectedSha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+              "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+              "seconds": 0.00156,
+              "status": "ok"
+            },
+            {
+              "name": "image-0.bin",
+              "bytes": 20040,
+              "expectedSha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1",
+              "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1",
+              "seconds": 0.000433,
+              "status": "ok"
+            },
+            {
+              "name": "image-1.bin",
+              "bytes": 128,
+              "expectedSha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341",
+              "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341",
+              "seconds": 0.000476,
+              "status": "ok"
+            }
+          ],
+          "problems": [],
+          "elapsedSeconds": 0.009378,
+          "generation": "g-20261124T160927-c55c65f3",
+          "storeCheckSeconds": 0.403141,
+          "openSeconds": 0.413207
+        },
+        "quality": {
+          "passed": false,
+          "failures": {
+            "gaps": 2
+          },
+          "terminalBoundaryPackets": [],
+          "note": "尾部INCOMPLETE_EOT单列保留；初始化未同步/条件未知不视作已证实执行；字节核算不等于无损证明"
+        },
+        "summary": {
+          "packets": 3845592,
+          "ranges": 19147451,
+          "instructions": 19147451,
+          "executed": 17233768,
+          "sourceMapped": 19147451,
+          "exceptions": 998,
+          "gaps": 2,
+          "packetIssues": 0,
+          "unknownExecution": 1,
+          "functions": {
+            "cdc_poll": 8612200,
+            "main": 8611561,
+            "HAL_IncTick": 6986,
+            "SysTick_Handler": 2994,
+            "trace_hook_mark": 23,
+            "HAL_GPIO_WritePin": 4
+          }
+        }
+      },
+      "notes": []
+    },
+    "exitCode": 5,
+    "elapsedSeconds": 0.4503549999990355
+  },
+  "targetFinal": {
+    "target": {
+      "halted": false,
+      "clock": {
+        "name": "STM32F103",
+        "cpuid": "0x411fc231",
+        "device": "0x10036414",
+        "registers": {
+          "0x40021000": "0x3034e83",
+          "0x40021004": "0x51040a"
+        }
+      },
+      "dhcsr": 16842753,
+      "ccr": "0x0"
+    },
+    "probe": {
+      "serial": "12345678",
+      "usb": "CMSIS-DAP",
+      "hid": "ZynqLink probe control"
+    },
+    "clock": {
+      "FCLK_Hz": 119999998,
+      "cfg": "0xcaa11",
+      "actual_link_Hz": 9999999.833333334,
+      "frequencyBasis": "probe PLL/divider register report",
+      "dpidr": "0x1ba01477"
+    },
+    "streams": {
+      "rtt": 65536,
+      "hss": 16777492
+    },
+    "engines": {
+      "PS_IDCODE": "0x23727093",
+      "LEVEL_SHIFTERS": "0xf",
+      "FPGA_RESET": "0x0",
+      "BOOT_MODE": "0x0",
+      "CAPTURE": "0xa",
+      "SWD": "0x0",
+      "PACKET": "0x0",
+      "DDR": "0x2",
+      "CDMA_BASE": "0x40020000",
+      "CDMA": "0x1002"
+    }
+  }
+}
