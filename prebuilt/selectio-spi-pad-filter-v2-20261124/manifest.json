@@ -80,8 +80,8 @@
     "application.elf": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49",
     "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
   },
-  "board_verified": false,
-  "scope": "SPI receive v2. Four-mode 50 MHz finite transfer verified. 100 MHz remains unqualified.",
+  "board_verified": true,
+  "scope": "H743 to J7 SPI receive on the existing jumper wiring. 50 MHz four-mode sustained verified. 100 MHz varying data remains unqualified.",
   "validation": "../../docs/validation/h743-spi2-100mhz-20261124/README.md",
   "board_tested": true,
   "board_load": {
@@ -98,5 +98,33 @@
       3
     ],
     "bytes_per_trial": 16384
+  },
+  "sustained_spi_receive": {
+    "hz": 50000000,
+    "modes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "repeats_per_mode": 3,
+    "seconds_per_repeat": 60,
+    "source_edge_sck_mosi_nss": [
+      1,
+      1,
+      1
+    ],
+    "mosi_tap": 0,
+    "sck_nss_tap": 0,
+    "received_bytes": 4499965791,
+    "pc_MBps_range": [
+      6.2489394322326435,
+      6.249089025761722
+    ],
+    "max_usb_wait_ms": 19.884600000295904,
+    "max_source_dma_tail_bytes": 15,
+    "mismatches": 0,
+    "frame_errors": 0,
+    "dropped_bytes": 0
   }
 }

@@ -1,0 +1,41 @@
+{
+  "operation": "check",
+  "stage": "complete",
+  "passed": true,
+  "before": {
+    "PS_IDCODE": "0x23727093",
+    "LEVEL_SHIFTERS": "0xf",
+    "FPGA_RESET": "0x0",
+    "BOOT_MODE": "0x0",
+    "CAPTURE": "0x8",
+    "SWD": "0x0",
+    "JQUEUE": "0x14",
+    "SQUEUE": "0x38",
+    "AUX": "0x0",
+    "AUXFLAGS": "0x0",
+    "PACKET": "0x0",
+    "DDR": "0x0",
+    "CDMA_BASE": "0x40020000",
+    "CDMA": "0x1002"
+  },
+  "fixture_status": {
+    "state": "done",
+    "role": "slave",
+    "mode": 3,
+    "sck_hz": 0,
+    "frames": 1,
+    "tx_dma": 24,
+    "rx": 24,
+    "bad": 0,
+    "first_bad": 4294967295,
+    "spi": 0,
+    "dma": 0,
+    "ms": 2
+  },
+  "fixture_edge": "SPI edge=3,3,3",
+  "fixture_fill": "SPI fill=-1",
+  "mosi_tap": 0,
+  "sck_nss_tap": 0,
+  "fixture_edge_restored": true,
+  "vivado_or_xsim_processes_at_long_retest_start": []
+}

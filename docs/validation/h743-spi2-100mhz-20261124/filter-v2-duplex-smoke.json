@@ -1,0 +1,173 @@
+{
+  "rows": [
+    {
+      "mode": 0,
+      "passed": true,
+      "sck_hz": 24999999,
+      "sck_source": "J7 raw sample reference and waveform period",
+      "size": 24,
+      "target": {
+        "state": "done",
+        "role": "slave",
+        "mode": 0,
+        "sck_hz": 0,
+        "frames": 1,
+        "tx_dma": 24,
+        "rx": 24,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 4
+      },
+      "matching_sample_offsets": [
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "mode": 1,
+      "passed": true,
+      "sck_hz": 24999999,
+      "sck_source": "J7 raw sample reference and waveform period",
+      "size": 24,
+      "target": {
+        "state": "done",
+        "role": "slave",
+        "mode": 1,
+        "sck_hz": 0,
+        "frames": 1,
+        "tx_dma": 24,
+        "rx": 24,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 2
+      },
+      "matching_sample_offsets": [
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "mode": 2,
+      "passed": true,
+      "sck_hz": 24999999,
+      "sck_source": "J7 raw sample reference and waveform period",
+      "size": 24,
+      "target": {
+        "state": "done",
+        "role": "slave",
+        "mode": 2,
+        "sck_hz": 0,
+        "frames": 1,
+        "tx_dma": 24,
+        "rx": 24,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 2
+      },
+      "matching_sample_offsets": [
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "mode": 3,
+      "passed": true,
+      "sck_hz": 24999999,
+      "sck_source": "J7 raw sample reference and waveform period",
+      "size": 24,
+      "target": {
+        "state": "done",
+        "role": "slave",
+        "mode": 3,
+        "sck_hz": 0,
+        "frames": 1,
+        "tx_dma": 24,
+        "rx": 24,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 2
+      },
+      "matching_sample_offsets": [
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+      ]
+    }
+  ],
+  "fixture": "H743SPI/1 kernel_hz=200000000 div=2,4,8,16,32,64,128,256 max_bytes=32768 max_ms=120000 revision=4 drive=3",
+  "initial_edge": "SPI edge=3,3,3",
+  "initial_fill": "SPI fill=-1",
+  "probe": {
+    "protocol": "ZLK1",
+    "reference_hz": 199999996,
+    "link_hz": 99999998.0,
+    "features": "0x4450ffff",
+    "integrated_pl": true,
+    "max_frame": 16384,
+    "firmware_abi": 2,
+    "bulk_header_bytes": 16,
+    "serial_buffer_bytes": 2162688,
+    "fclk0_hz": 133333332,
+    "negotiated_frame": 16384,
+    "max_queue_depth": 4,
+    "dedicated_pipes": true
+  },
+  "final_status": {
+    "state": "done",
+    "role": "slave",
+    "mode": 3,
+    "sck_hz": 0,
+    "frames": 1,
+    "tx_dma": 24,
+    "rx": 24,
+    "bad": 0,
+    "first_bad": 4294967295,
+    "spi": 0,
+    "dma": 0,
+    "ms": 2
+  },
+  "final_edge": "SPI edge=3,3,3",
+  "final_fill": "SPI fill=-1",
+  "marker": "0x53504402",
+  "mosi_tap": 0,
+  "sck_nss_tap": 0
+}

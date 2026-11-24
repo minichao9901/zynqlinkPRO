@@ -7,3 +7,10 @@ FPGA 按 800 MS/s 接收 SCK 和 MOSI，抑制重复同极性 SCK 边沿。NSS �
 ```powershell
 python -X utf8 toolbox.py probe-load --pair prebuilt/selectio-spi-pad-filter-v2-20261124 --dry-run
 ```
+
+现有杜邦线、H743 SPI2 夹具修订 4 和三线速度 1 已通过 50 MHz 四模式各三轮 60 秒，共 4,499,965,791 B。100 MHz 的跳变数据仍未过逐字节短测。
+
+```powershell
+python -X utf8 toolbox.py probe-load --pair prebuilt/selectio-spi-pad-filter-v2-20261124
+python -X utf8 tools/h743_spi_accept.py --j7-slave-only --dividers 4 --edge 1 1 1 --seconds 60 --repeats 3 --out build/spi-filter-v2-50mhz
+```
