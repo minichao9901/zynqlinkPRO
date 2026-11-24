@@ -1,0 +1,106 @@
+{
+  "pattern": "00",
+  "mode": 1,
+  "edge": [
+    3,
+    3,
+    3
+  ],
+  "rows": [
+    {
+      "seconds": 0,
+      "passed": true,
+      "sck_hz": 100000000,
+      "sck_source": "H743 PLL2 readback and SPI2 divider",
+      "mosi_tap": 0,
+      "bytes": 16384,
+      "first_bad": null,
+      "duration_seconds": 0.009450200000173936,
+      "pc_MBps": 1.7337199212395975,
+      "probe": {
+        "pending": 0,
+        "dropped": 0,
+        "errors": 0,
+        "flags": 0,
+        "cursor": 16384
+      },
+      "target": {
+        "state": "done",
+        "role": "master",
+        "mode": 1,
+        "sck_hz": 100000000,
+        "frames": 4,
+        "tx_dma": 16384,
+        "rx": 0,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 2
+      }
+    },
+    {
+      "seconds": 3,
+      "passed": true,
+      "sck_hz": 100000000,
+      "sck_source": "H743 PLL2 readback and SPI2 divider",
+      "mosi_tap": 0,
+      "bytes": 37493484,
+      "first_bad": null,
+      "duration_seconds": 3.010073299999931,
+      "pc_MBps": 12.456003646157342,
+      "probe": {
+        "pending": 0,
+        "dropped": 0,
+        "errors": 0,
+        "flags": 0,
+        "cursor": 6892
+      },
+      "target": {
+        "state": "done",
+        "role": "master",
+        "mode": 1,
+        "sck_hz": 100000000,
+        "frames": 0,
+        "tx_dma": 37493500,
+        "rx": 0,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 3000
+      }
+    }
+  ],
+  "fixture": "H743SPI/1 kernel_hz=200000000 div=2,4,8,16,32,64,128,256 max_bytes=32768 max_ms=120000 revision=4 drive=3",
+  "probe": {
+    "protocol": "ZLK1",
+    "reference_hz": 199999996,
+    "link_hz": 99999998.0,
+    "features": "0x4450ffff",
+    "integrated_pl": true,
+    "max_frame": 16384,
+    "firmware_abi": 2,
+    "bulk_header_bytes": 16,
+    "serial_buffer_bytes": 2162688,
+    "fclk0_hz": 133333332,
+    "negotiated_frame": 16384,
+    "max_queue_depth": 4,
+    "dedicated_pipes": true
+  },
+  "final_status": {
+    "state": "done",
+    "role": "master",
+    "mode": 1,
+    "sck_hz": 100000000,
+    "frames": 0,
+    "tx_dma": 37493500,
+    "rx": 0,
+    "bad": 0,
+    "first_bad": 4294967295,
+    "spi": 0,
+    "dma": 0,
+    "ms": 3000
+  },
+  "restored": true
+}

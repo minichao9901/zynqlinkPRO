@@ -1,0 +1,62 @@
+{
+  "snapshot_marker": "0x53504400",
+  "mode": 2,
+  "drive": 3,
+  "edge": [
+    1,
+    0,
+    3
+  ],
+  "fill": null,
+  "mosi_tap": 0,
+  "sck_nss_tap": 0,
+  "reference_hz_before_arm": 199999996,
+  "source_hz": 100000000,
+  "target": {
+    "state": "done",
+    "role": "master",
+    "mode": 2,
+    "sck_hz": 100000000,
+    "frames": 1,
+    "tx_dma": 4096,
+    "rx": 0,
+    "bad": 0,
+    "first_bad": 4294967295,
+    "spi": 0,
+    "dma": 0,
+    "ms": 0
+  },
+  "decoded": {
+    "bytes": 4093,
+    "pending": 0,
+    "dropped": 0,
+    "errors": 1
+  },
+  "sample_summary": {
+    "total_slots": 4096,
+    "transitions": {
+      "mosi": 313,
+      "sck": 2048,
+      "nss": 0
+    },
+    "nss_high_slots": 0,
+    "sck_low_high_run_lengths": [
+      {
+        "2": 513,
+        "1": 511
+      },
+      {
+        "1": 7,
+        "2": 502,
+        "3": 516
+      }
+    ],
+    "nss_low_high_run_lengths": [
+      {
+        "4096": 1
+      },
+      {}
+    ]
+  },
+  "delay_restored": true
+}
