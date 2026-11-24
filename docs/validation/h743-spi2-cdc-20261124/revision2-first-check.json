@@ -1,0 +1,505 @@
+{
+  "cdc": {
+    "h743_com": "COM52",
+    "j7_serial": "12345678",
+    "rows": [],
+    "fixture": "H743SPI/1 kernel_hz=200000000 div=2,4,8,16,32,64,128,256 max_bytes=32768 max_ms=120000 revision=2",
+    "initial_status": {
+      "state": "idle",
+      "role": "slave",
+      "mode": 0,
+      "sck_hz": 0,
+      "frames": 0,
+      "tx_dma": 0,
+      "rx": 0,
+      "bad": 0,
+      "first_bad": 4294967295,
+      "spi": 0,
+      "dma": 0,
+      "ms": 0
+    }
+  },
+  "pins": [
+    {
+      "signal": "SCK",
+      "requested": 0,
+      "j7": 0,
+      "pi": 0,
+      "gpio_i": 8
+    },
+    {
+      "signal": "SCK",
+      "requested": 1,
+      "j7": 1,
+      "pi": 1,
+      "gpio_i": 10
+    },
+    {
+      "signal": "SCK",
+      "requested": 0,
+      "j7": 0,
+      "pi": 0,
+      "gpio_i": 8
+    },
+    {
+      "signal": "SCK",
+      "requested": 1,
+      "j7": 1,
+      "pi": 1,
+      "gpio_i": 10
+    },
+    {
+      "signal": "NSS",
+      "requested": 0,
+      "j7": 0,
+      "pi": 0,
+      "gpio_i": 10
+    },
+    {
+      "signal": "NSS",
+      "requested": 1,
+      "j7": 1,
+      "pi": 1,
+      "gpio_i": 11
+    },
+    {
+      "signal": "NSS",
+      "requested": 0,
+      "j7": 0,
+      "pi": 0,
+      "gpio_i": 10
+    },
+    {
+      "signal": "NSS",
+      "requested": 1,
+      "j7": 1,
+      "pi": 1,
+      "gpio_i": 11
+    },
+    {
+      "signal": "MOSI",
+      "requested": 0,
+      "j7": 0,
+      "pi": 1,
+      "gpio_i": 11
+    },
+    {
+      "signal": "MOSI",
+      "requested": 1,
+      "j7": 1,
+      "pi": 1,
+      "gpio_i": 15
+    },
+    {
+      "signal": "MOSI",
+      "requested": 0,
+      "j7": 0,
+      "pi": 1,
+      "gpio_i": 11
+    },
+    {
+      "signal": "MOSI",
+      "requested": 1,
+      "j7": 1,
+      "pi": 1,
+      "gpio_i": 15
+    }
+  ],
+  "rows": [
+    {
+      "case": "j7_slave",
+      "mode": 0,
+      "passed": false,
+      "sck_hz": 781250,
+      "sck_source": "H743 PLL2 readback and SPI2 divider",
+      "bytes": 9471,
+      "first_bad": 0,
+      "duration_seconds": 0.18313009999110363,
+      "pc_MBps": 0.05171733101472721,
+      "probe": {
+        "pending": 0,
+        "dropped": 0,
+        "errors": 15016,
+        "flags": 4,
+        "cursor": 9471
+      },
+      "target": {
+        "state": "done",
+        "role": "master",
+        "mode": 0,
+        "sck_hz": 781250,
+        "frames": 4,
+        "tx_dma": 16384,
+        "rx": 0,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 168
+      },
+      "error": "J7 receive mismatch or loss"
+    },
+    {
+      "case": "j7_slave",
+      "mode": 0,
+      "passed": false,
+      "sck_hz": 1562500,
+      "sck_source": "H743 PLL2 readback and SPI2 divider",
+      "bytes": 9934,
+      "first_bad": 0,
+      "duration_seconds": 0.09621729998616502,
+      "pc_MBps": 0.1032454662667566,
+      "probe": {
+        "pending": 0,
+        "dropped": 0,
+        "errors": 13970,
+        "flags": 4,
+        "cursor": 9934
+      },
+      "target": {
+        "state": "done",
+        "role": "master",
+        "mode": 0,
+        "sck_hz": 1562500,
+        "frames": 4,
+        "tx_dma": 16384,
+        "rx": 0,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 84
+      },
+      "error": "J7 receive mismatch or loss"
+    },
+    {
+      "case": "j7_slave",
+      "mode": 0,
+      "passed": false,
+      "sck_hz": 3125000,
+      "sck_source": "H743 PLL2 readback and SPI2 divider",
+      "bytes": 13844,
+      "first_bad": 0,
+      "duration_seconds": 0.050468800007365644,
+      "pc_MBps": 0.2743080873327589,
+      "probe": {
+        "pending": 0,
+        "dropped": 0,
+        "errors": 5264,
+        "flags": 4,
+        "cursor": 13844
+      },
+      "target": {
+        "state": "done",
+        "role": "master",
+        "mode": 0,
+        "sck_hz": 3125000,
+        "frames": 4,
+        "tx_dma": 16384,
+        "rx": 0,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 42
+      },
+      "error": "J7 receive mismatch or loss"
+    },
+    {
+      "case": "j7_slave",
+      "mode": 0,
+      "passed": false,
+      "sck_hz": 6250000,
+      "sck_source": "H743 PLL2 readback and SPI2 divider",
+      "bytes": 2066,
+      "first_bad": 0,
+      "duration_seconds": 0.028083200013497844,
+      "pc_MBps": 0.07356711482334644,
+      "probe": {
+        "pending": 0,
+        "dropped": 0,
+        "errors": 31335,
+        "flags": 4,
+        "cursor": 2066
+      },
+      "target": {
+        "state": "done",
+        "role": "master",
+        "mode": 0,
+        "sck_hz": 6250000,
+        "frames": 4,
+        "tx_dma": 16384,
+        "rx": 0,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 21
+      },
+      "error": "J7 receive mismatch or loss"
+    },
+    {
+      "case": "j7_slave",
+      "mode": 0,
+      "passed": false,
+      "sck_hz": 12500000,
+      "sck_source": "H743 PLL2 readback and SPI2 divider",
+      "bytes": 9071,
+      "first_bad": 0,
+      "duration_seconds": 0.0280631999776233,
+      "pc_MBps": 0.3232346990803945,
+      "probe": {
+        "pending": 0,
+        "dropped": 0,
+        "errors": 15761,
+        "flags": 4,
+        "cursor": 9071
+      },
+      "target": {
+        "state": "done",
+        "role": "master",
+        "mode": 0,
+        "sck_hz": 12500000,
+        "frames": 4,
+        "tx_dma": 16384,
+        "rx": 0,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 10
+      },
+      "error": "J7 receive mismatch or loss"
+    },
+    {
+      "case": "j7_slave",
+      "mode": 0,
+      "passed": false,
+      "sck_hz": 25000000,
+      "sck_source": "H743 PLL2 readback and SPI2 divider",
+      "bytes": 9824,
+      "first_bad": 0,
+      "duration_seconds": 0.02826920000370592,
+      "pc_MBps": 0.34751602446168034,
+      "probe": {
+        "pending": 0,
+        "dropped": 0,
+        "errors": 14406,
+        "flags": 4,
+        "cursor": 9824
+      },
+      "target": {
+        "state": "done",
+        "role": "master",
+        "mode": 0,
+        "sck_hz": 25000000,
+        "frames": 4,
+        "tx_dma": 16384,
+        "rx": 0,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 5
+      },
+      "error": "J7 receive mismatch or loss"
+    },
+    {
+      "case": "j7_slave",
+      "mode": 0,
+      "passed": false,
+      "sck_hz": 50000000,
+      "sck_source": "H743 PLL2 readback and SPI2 divider",
+      "bytes": 1006,
+      "first_bad": 0,
+      "duration_seconds": 0.028988399979425594,
+      "pc_MBps": 0.03470353661167932,
+      "probe": {
+        "pending": 0,
+        "dropped": 0,
+        "errors": 44634,
+        "flags": 4,
+        "cursor": 1006
+      },
+      "target": {
+        "state": "done",
+        "role": "master",
+        "mode": 0,
+        "sck_hz": 50000000,
+        "frames": 4,
+        "tx_dma": 16384,
+        "rx": 0,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 3
+      },
+      "error": "J7 receive mismatch or loss"
+    },
+    {
+      "case": "j7_slave",
+      "mode": 0,
+      "passed": false,
+      "sck_hz": 100000000,
+      "sck_source": "H743 PLL2 readback and SPI2 divider",
+      "bytes": 10038,
+      "first_bad": 0,
+      "duration_seconds": 0.005459000007249415,
+      "pc_MBps": 1.8387983122677758,
+      "probe": {
+        "pending": 0,
+        "dropped": 0,
+        "errors": 7913,
+        "flags": 4,
+        "cursor": 10038
+      },
+      "target": {
+        "state": "done",
+        "role": "master",
+        "mode": 0,
+        "sck_hz": 100000000,
+        "frames": 4,
+        "tx_dma": 16384,
+        "rx": 0,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 1
+      },
+      "error": "J7 receive mismatch or loss"
+    },
+    {
+      "case": "j7_native_master",
+      "mode": 0,
+      "passed": false,
+      "sck_hz": 100000000,
+      "sck_source": "J7 native SPI configured clock",
+      "size": 1,
+      "target": {
+        "state": "mismatch",
+        "role": "slave",
+        "mode": 0,
+        "sck_hz": 0,
+        "frames": 1,
+        "tx_dma": 0,
+        "rx": 1,
+        "bad": 1,
+        "first_bad": 0,
+        "spi": 0,
+        "dma": 0,
+        "ms": 2
+      },
+      "probe_stats": [
+        0,
+        0,
+        0,
+        4,
+        1
+      ],
+      "miso_sample_bytes": 1,
+      "error": "H743 transfer failed: {'state': 'mismatch', 'role': 'slave', 'mode': 0, 'sck_hz': 0, 'frames': 1, 'tx_dma': 0, 'rx': 1, 'bad': 1, 'first_bad': 0, 'spi': 0, 'dma': 0, 'ms': 2}"
+    },
+    {
+      "case": "j7_native_master",
+      "mode": 0,
+      "passed": false,
+      "sck_hz": 100000000,
+      "sck_source": "J7 native SPI configured clock",
+      "size": 5,
+      "target": {
+        "state": "mismatch",
+        "role": "slave",
+        "mode": 0,
+        "sck_hz": 0,
+        "frames": 1,
+        "tx_dma": 0,
+        "rx": 5,
+        "bad": 5,
+        "first_bad": 0,
+        "spi": 0,
+        "dma": 0,
+        "ms": 5
+      },
+      "probe_stats": [
+        0,
+        0,
+        0,
+        4,
+        5
+      ],
+      "miso_sample_bytes": 5,
+      "error": "H743 transfer failed: {'state': 'mismatch', 'role': 'slave', 'mode': 0, 'sck_hz': 0, 'frames': 1, 'tx_dma': 0, 'rx': 5, 'bad': 5, 'first_bad': 0, 'spi': 0, 'dma': 0, 'ms': 5}"
+    },
+    {
+      "case": "j7_native_master",
+      "mode": 0,
+      "passed": false,
+      "sck_hz": 100000000,
+      "sck_source": "J7 native SPI configured clock",
+      "size": 4096,
+      "target": {
+        "state": "mismatch",
+        "role": "slave",
+        "mode": 0,
+        "sck_hz": 0,
+        "frames": 1,
+        "tx_dma": 0,
+        "rx": 4096,
+        "bad": 4080,
+        "first_bad": 0,
+        "spi": 0,
+        "dma": 0,
+        "ms": 5
+      },
+      "probe_stats": [
+        0,
+        0,
+        0,
+        4,
+        4096
+      ],
+      "miso_sample_bytes": 4096,
+      "error": "H743 transfer failed: {'state': 'mismatch', 'role': 'slave', 'mode': 0, 'sck_hz': 0, 'frames': 1, 'tx_dma': 0, 'rx': 4096, 'bad': 4080, 'first_bad': 0, 'spi': 0, 'dma': 0, 'ms': 5}"
+    },
+    {
+      "case": "j7_raw_duplex",
+      "mode": 0,
+      "passed": false,
+      "sck_hz": 24999999,
+      "sck_source": "J7 raw sample reference and waveform period",
+      "size": 24,
+      "target": {
+        "state": "hardware_error",
+        "role": "slave",
+        "mode": 0,
+        "sck_hz": 0,
+        "frames": 0,
+        "tx_dma": 24,
+        "rx": 24,
+        "bad": 24,
+        "first_bad": 0,
+        "spi": 32,
+        "dma": 0,
+        "ms": 3
+      },
+      "matching_sample_offsets": [],
+      "error": "H743 transfer failed: {'state': 'hardware_error', 'role': 'slave', 'mode': 0, 'sck_hz': 0, 'frames': 0, 'tx_dma': 24, 'rx': 24, 'bad': 24, 'first_bad': 0, 'spi': 32, 'dma': 0, 'ms': 3}"
+    }
+  ],
+  "final_status": {
+    "state": "hardware_error",
+    "role": "slave",
+    "mode": 0,
+    "sck_hz": 0,
+    "frames": 0,
+    "tx_dma": 24,
+    "rx": 24,
+    "bad": 24,
+    "first_bad": 0,
+    "spi": 32,
+    "dma": 0,
+    "ms": 3
+  }
+}

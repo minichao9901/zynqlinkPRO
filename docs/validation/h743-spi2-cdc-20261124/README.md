@@ -43,3 +43,7 @@
 保留 SPI 接线，通过 H743 原生 USB 烧录。板载 CH340 控制线尝试未引起 CDC 断开，用户手动设置 BOOT0 并复位。Windows 枚举 ROM DFU `0483:df11`、序列号 `200364500000`，DFU alt 0 为 `0x08000000` 内部 Flash。烧前读取前 1,024 B 核对旧夹具身份。dfu-util 0.11 写入修订 2，共 39,392 B，全量独立读回一致。Option Bytes 未写入。
 
 自动退出 DFU 时 dfu-util 返回 74，ROM DFU 仍枚举。待 BOOT0 回到 0 并复位后确认修订号、CDC 与 SPI 实测。 [烧录证据](revision2-usb-dfu.json) · [ST AN2606](https://www.st.com/resource/en/application_note/an2606-stm32-microcontroller-system-memory-boot-mode-stmicroelectronics.pdf)
+
+用户恢复 BOOT0=0 并复位后，COM52 确认 `revision=2`、SPI2 内核 200 MHz。原接线 Mode 0 八档 H743 主机都完成 16,384 B DMA 提交，无 SPI/DMA 错误，旧 `MODF` 未再出现。J7 接收仍有成帧及对拍错误。从机全双工的 TX DMA FEIF 未再出现，出现 SPI UDR，待正确接线下复测。
+
+逐线静态对照中，J7 SCK／NSS 分别由 H743 PI1／PI0 正确回读。J7 MOSI 每次拉高拉低，H743 **PI2** 同步变化，预期的 **PI3** 始终高。已请求按 J7-25 → P3-25／PI3、J7-27 → P3-34／PI2 核对两根数据线。 [启动及逐线证据](revision2-first-check.json)
