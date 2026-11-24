@@ -63,6 +63,10 @@ firmware/target-support/hpm5301_perf/build/
 !prebuilt/**/*.bit
 !prebuilt/**/*.elf
 
+# Built target acceptance images are versioned next to their board README.
+!firmware/target/*/images/*/fw.elf
+!firmware/target/*/images/*/fw.bin
+
 # FPGA bitstreams and Zynq firmware ELFs must be eligible for Git tracking,
 # including artifacts kept under build/ and releases/. Keep intermediate
 # files ignored; select the validated artifact pair explicitly when committing.

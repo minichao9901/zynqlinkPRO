@@ -38,8 +38,8 @@ docs/validation/f103ze-web-flow-20261031/streams/**/*.csv -text
 firmware/target/f103ze/etm/cdc/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 firmware/target/f103ze/etm/hal-storage/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 firmware/target/f103ze/etm/hal-storage/vendor/** -text -whitespace
-prebuilt/targets/efficiency-acceptance-20261124/**/fw.hex -text whitespace=cr-at-eol
-prebuilt/targets/efficiency-acceptance-20261124/**/fw.bin binary
+firmware/target/*/images/**/fw.hex -text whitespace=cr-at-eol
+firmware/target/*/images/**/fw.bin binary
 prebuilt/targets/f103ze-hal-storage-20261104/** -text whitespace=cr-at-eol
 docs/validation/main-web-hardware-20261103/raw/** -text -whitespace
 docs/validation/main-web-hardware-20261103/hal-storage-write-input/** -text -whitespace

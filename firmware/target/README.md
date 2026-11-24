@@ -1,11 +1,10 @@
 # J7 efficiency 三板目标固件
 
 用于 [RAW4 ABI 2 融合探针](../../prebuilt/selectio-usb-split-raw4-20261123/README.md)。
-这里收录 MCU 目标源码。J7 bit/PS ELF、目标 MCU ELF 和上位机版本各有独立身份。
-[新版构建产物](../../prebuilt/targets/efficiency-acceptance-20261124/manifest.json) 标明装载地址、工具链、哈希和验证范围。
+这里收录 MCU 目标源码和各板编译产物。J7 bit/PS ELF、目标 MCU ELF 和上位机版本各有独立身份。
+各板已编译的固件在自己的 `images/` 目录。每个用途子目录包含 ELF、BIN、HEX 和 SHA-256 清单，清单同时记录装载地址、工具链和验证范围。
 
-按板卡打开固件索引可直接找到 ELF、BIN 和 HEX。
-[HPM6800EVK](hpm6800evk/README.md) · [F103ZE](f103ze/README.md) · [H743](h743/README.md)。
+[HPM6800EVK 固件索引](hpm6800evk/README.md) · [F103ZE 固件索引](f103ze/README.md) · [H743 固件索引](h743/README.md)。
 
 ## 固件清单
 
