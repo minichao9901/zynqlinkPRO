@@ -4,6 +4,14 @@
 
 HS3 下载线 `210299008529`，J7 USB `12345678`、COM33，目标 CDC `F103CDC0001`、COM34。目标 CPUID `0x411fc231`、DBGMCU ID `0x10036414`。板上 Flash 的 20,168 B 装载段与 CDC48 ELF 一致，目标 RCC_CFGR 为 `0x0051040a`。临时下载探针对应位流和 PS ELF 后，以物理 MEM-AP0 核对其 OCM 执行段。各项的原始窗口与恢复备份保存在本机 `build/runs/<用例 ID>/20261124-case`。
 
+## 本报告的验证范围
+
+这六项是 **J7 探针回归**，使用板上的 CDC48 Golden 和各任务的临时 SRAM 夹具。新交付镜像的实板签收按各自 ELF 与板上装载段单独取证。 [F103ZE 镜像索引](../../../firmware/target/f103ze/README.md)
+
+- 115200 UART 使用 GPIO 回显。100 Mbaud 是 J7 CDC 经 F103 双 TAP BYPASS 的物理回环。ITM 使用临时 SRAM 产数程序。SPI→CDC 的负载由 GPIO 产生，DWT 折算平均 SCK 约 1.35–1.64 MHz。USART 和 SPI1 新镜像的速率另测。
+- 独立 J-Scope 在停核时采预置固定值，并发窗口使用 SRAM RTT 生产者和预置采样字。HCLK128 对照使用专用时钟夹具。新 `performance` 镜像的持续产数和动态波形待单独验收。
+- 调试和烧录复用了 CDC48。源码步入记录为回退到指令级，源码步入及 GDBStress 的 A/B 映像和 RTT 命令终端待单独验收。ETM 实测绑定本报告记录的 CDC48 Golden ELF。
+
 ## 融合功能
 
 以下三项按清单使用 `selectio-spi-cdc-rx-guard-20261123`。实际枚举为 ABI 1，`bcdDevice=0x0201`，原生协议 `ZLK1`。配对哈希、完整 USB 描述符、逐模式数据和恢复结果见[结构化功能证据](functional.json)。

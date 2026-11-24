@@ -8,6 +8,8 @@ E:\zynqlinkPRO-efficiency\firmware\target\f103ze\images
 
 [镜像总清单](images/manifest.json)列出本板所有用途。每个子目录有 `fw.elf`、`fw.bin`、`fw.hex` 和 SHA-256 清单。调试和 Trace 使用与已加载映像匹配的 ELF。标为 **RAM 启动**或 **RAM 夹具**的项目按 [三板总表](../README.md) 的 RAM 加载方法使用。
 
+本目录的交付镜像已核对离线构建，实板按实际加载的 ELF 单独签收。现有 F103ZE 实板报告使用 CDC48 Golden 和临时 SRAM 夹具，适用范围为 J7 探针回归。 [实板报告的验证范围](../../../docs/validation/f103ze-cases-20261124/README.md#本报告的验证范围)
+
 | 目录 | 用途 | 文件 |
 |---|---|---|
 | `performance` | 128/128 MHz，SRAM 性能测试，RAM 启动 | [ELF](images/performance/fw.elf) · [BIN](images/performance/fw.bin) · [HEX](images/performance/fw.hex) · [清单](images/performance/manifest.json) |

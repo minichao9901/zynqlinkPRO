@@ -4,6 +4,8 @@
 
 先核对当前 Git worktree 和分支。用根目录 [acceptance-cases.json](../acceptance-cases.json) 的 Case ID 找入口、参数、配对、目标 ELF 和证据。用例库涵盖优先复用的工作路径、常用诊断和明确保留的历史对照，更细的测试组合见对应验收报告。
 
+`validationScope: "probe-regression"` 标出这六个 F103ZE 探针回归用例。三板新目标镜像的实板签收应明确融合 bit/PS ELF，按 [板卡镜像索引](../firmware/target/README.md) 选目标 ELF，核对装载段，再测镜像本身的功能与速率。QSPI 正式配对用于旧工作台对照。 [F103ZE 回归范围](validation/f103ze-cases-20261124/README.md#本报告的验证范围)
+
 | 任务 | 从这里开始 | 配对与证据 |
 |---|---|---|
 | SRAM、RTT、J-Scope | F103ZE CDC48 功能回归用 `f103ze-sram-rtt-scope`，HCLK128 的 50 MHz SWD 性能用 `f103ze-hclk128-swd50`。另有 `h743-sram-rtt-scope`、`hpm6800evk-rtt`、`hpm6800evk-scope`。 | [融合板测索引](validation/README.md)。F103ZE 功能与性能、H743 RAW4 ABI 2、HPM QSPI 历史对照各有独立条件。 |

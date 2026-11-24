@@ -66,7 +66,8 @@
       "evidence": [
         "docs/validation/spi-cdc-20261123/README.md"
       ],
-      "note": "CDC48 和已验证的 ABI 1 配对。临时 SRAM 夹具由脚本准备。RAW4 ABI 2 结果另计。"
+      "note": "J7 探针回归。CDC48 现场下使用临时 SRAM RTT 生产者。独立 HSS 在停核时采样预置固定值，并发窗口的样值也由夹具预置。HCLK128 的 performance 镜像持续产数和动态波形单独验收。",
+      "validationScope": "probe-regression"
     },
     {
       "id": "f103ze-hclk128-swd50",
@@ -106,10 +107,11 @@
       "issues": [
         "ZL-297"
       ],
-      "note": "预置现场为 CDC48。目标 ELF 为脚本加载到 SRAM 的时钟夹具。正式计时前用 RCC 和 DWT 核对 HCLK128，收尾恢复现场。historical 是脚本中标准 CMSIS-DAP 和 RTT→CDC 对照的选项名。",
+      "note": "J7 探针对照。预置现场为 CDC48，目标 ELF 是临时 SRAM 时钟夹具，使用独立 RTT 生产者。用 RCC 和 DWT 确认 HCLK128。historical 是标准 CMSIS-DAP 与 RTT→CDC 对照的选项名。performance 镜像单独验收。",
       "prerequisites": [
         "确认临时 SRAM 夹具、切换 HCLK128 和现有 CDC48 现场均在本轮授权内。"
-      ]
+      ],
+      "validationScope": "probe-regression"
     },
     {
       "id": "h743-sram-rtt-scope",
@@ -246,11 +248,12 @@
       "evidence": [
         "docs/板卡精简验收与交付.md"
       ],
-      "note": "使用标准 Web 验收入口及对应工作台。Flash 擦写权限和目标身份按当前任务另核对。",
+      "note": "标准工作台的 CDC48 原映像调试和复位回归，使用正式 QSPI 包的配对。已归档的实测中这套配对经 HS3 临时加载，源码步入回退到指令级。新 GDBStress 的 Flash A/B、RAM 和 RTT 终端单独验收。",
       "prerequisites": [
         "按配对启动本机工作台，并准备与板上镜像匹配的目标 ELF。",
         "执行 Flash 项前按任务授权确认 --allow-flash。"
-      ]
+      ],
+      "validationScope": "probe-regression"
     },
     {
       "id": "h743-debug-flash",
@@ -358,7 +361,8 @@
         "docs/validation/spi-cdc-20261123/README.md",
         "docs/validation/selectio-integration/README.md"
       ],
-      "note": "物理 UART 与标准 SWO 分别接线。ITM 源由临时 SRAM 夹具生成。"
+      "note": "J7 探针回归。115200 使用 GPIO 回显。100 Mbaud 窗口使用双 TAP BYPASS 物理回环。ITM 由临时 SRAM 程序写入。新 USART 和 ITM 镜像各自取证。",
+      "validationScope": "probe-regression"
     },
     {
       "id": "h743-uart-swo",
@@ -404,7 +408,8 @@
       "evidence": [
         "docs/validation/spi-cdc-20261123/README.md"
       ],
-      "note": "ABI 1 四模式实体 GPIO 源和恢复回归。100 MHz 实体线速用独立源核对。"
+      "note": "ABI 1 探针回归。四模式通过时，发送端使用 F103 GPIO 夹具，DWT 折算平均 SCK 约 1.35–1.64 MHz。128 MHz SPI1 按专用镜像单独验收。",
+      "validationScope": "probe-regression"
     },
     {
       "id": "h743-spi-j7-rx",
@@ -607,7 +612,8 @@
         "docs/validation/selectio-fusion-20261121/README.md",
         "docs/validation/spi-cdc-20261123/README.md"
       ],
-      "note": "SWD 10 MHz、CPU/HCLK48、TRACECLK24、1 秒。历史 ABI 1 与 RAW4 ABI 2 结果分别记录。"
+      "note": "CDC48 Golden 的 ETMv3 基线。SWD 请求 10 MHz、CPU/HCLK48、TRACECLK24、1 秒。重建的 images/etm 和 SRAM / Fault 变体按其各自装载段另行取证。",
+      "validationScope": "probe-regression"
     },
     {
       "id": "h743-etm",
