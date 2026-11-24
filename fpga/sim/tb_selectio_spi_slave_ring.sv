@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module tb_selectio_spi_slave_ring;
+module tb_selectio_spi_slave_ring #(parameter PAD_DIAG=0);
     localparam integer CAPACITY = 65536;
     localparam integer BLOCK = 4096;
     localparam integer LENGTH = CAPACITY + 2*BLOCK - 1;
@@ -17,7 +17,7 @@ module tb_selectio_spi_slave_ring;
 
     reg [3:0] sck = 0, cs_n = 15, mosi = 0;
     wire pad_request, listening;
-    selectio_aux_regs dut (
+    selectio_aux_regs #(.SPI_PAD_DIAG(PAD_DIAG)) dut (
         .axi_aclk(axi_clk), .axi_aresetn(!reset),
         .s_axi_awaddr(awaddr), .s_axi_awprot(3'b0), .s_axi_awvalid(awvalid),
         .s_axi_awready(awready), .s_axi_wdata(wdata), .s_axi_wstrb(4'hf),
@@ -161,9 +161,21 @@ module tb_selectio_spi_slave_ring;
         read_reg(17'h24, available);
         if (available !== 0) $fatal(1, "tail not fully drained: %d", available);
         counters(0, 0);
+        if (PAD_DIAG) begin
+            read_reg(17'h38, available);
+            if (available !== 32'h53504401) $fatal(1, "capture ready marker %h", available);
+            read_reg(17'h4000, available);
+            if (available !== 32'h060) $fatal(1, "first capture word %h", available);
+            read_reg(17'h403c, available);
+            if (available !== 32'h06f) $fatal(1, "capture MOSI/SCK packing %h", available);
+        end
 
         write_reg(17'h08, 0);
         arm();
+        if (PAD_DIAG) begin
+            read_reg(17'h38, available);
+            if (available !== 32'h53504400) $fatal(1, "capture did not rearm %h", available);
+        end
         send(CAPACITY + 7, 3);
         repeat (12) @(posedge quad_clk);
         read_reg(17'h24, available);

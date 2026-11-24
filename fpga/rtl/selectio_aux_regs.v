@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // GP1 peripheral for SPI, UART and SWO. TX uses synchronous dual-port RAM.
 // The producer owns each RX byte until software acknowledges its USB delivery.
-module selectio_aux_regs #(parameter SELECTIO_SLICE=0)(
+module selectio_aux_regs #(parameter SELECTIO_SLICE=0, SPI_PAD_DIAG=0)(
     (* X_INTERFACE_PARAMETER="ASSOCIATED_BUSIF S_AXI, ASSOCIATED_RESET axi_aresetn" *)
     input wire axi_aclk, axi_aresetn,
     input wire [16:0] s_axi_awaddr, input wire [2:0] s_axi_awprot,
@@ -140,6 +140,37 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0)(
         .clk(quad_clk),.reset(phy_reset),.enable(spi_slave_selected && pad_granted),
         .mode(slave_mode),.sck(slave_sck),.cs_n(slave_cs_n),.mosi(slave_mosi),
         .valid(slave_valid),.error(slave_error),.data(slave_byte));
+    // Capture raw four-slot input words in a debug-only snapshot. The existing
+    // AUX clear handshake rearms the snapshot before the next transaction.
+    wire diag_read = SPI_PAD_DIAG && s_axi_arvalid && s_axi_arready &&
+                     s_axi_araddr[16:12]==5'h04 && s_axi_araddr[1:0]==0;
+    wire [11:0] diag_data;
+    wire diag_done;
+    generate if (SPI_PAD_DIAG) begin: spi_capture_snapshot
+        (* ram_style="block" *) reg [11:0] samples[0:1023];
+        reg [10:0] count;
+        reg [11:0] data_out;
+        (* ASYNC_REG="TRUE" *) reg [1:0] done_sync;
+        always @(posedge quad_clk) begin
+            if (phy_reset || (apply_reader && clear_io)) count<=0;
+            else if (spi_slave_selected && pad_granted && !count[10] &&
+                     ((|count) || (!(&slave_cs_n) && slave_sck!={4{slave_mode[1]}}))) begin
+                samples[count[9:0]]<={slave_cs_n,slave_sck,slave_mosi};
+                count<=count+1'b1;
+            end
+        end
+        always @(posedge axi_aclk) begin
+            if (!axi_aresetn) done_sync<=0;
+            else done_sync<={done_sync[0],count[10]};
+            if (diag_read) data_out<=samples[s_axi_araddr[11:2]];
+        end
+        assign diag_data=data_out;
+        assign diag_done=done_sync[1];
+    end else begin
+        assign diag_data=0;
+        assign diag_done=0;
+    end endgenerate
+    reg diag_pending;
     reg produced;
     reg [7:0] produced_byte;
     always @(posedge quad_clk) begin
@@ -189,7 +220,7 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0)(
         .io_start(snapshot_io),.io_request(),.io_done(snapshot_io),.io_response({errors,drops}));
     assign s_axi_awready=!have_aw && !s_axi_bvalid;
     assign s_axi_wready=!have_w && !s_axi_bvalid;
-    assign s_axi_arready=!s_axi_rvalid && !ram_pending;
+    assign s_axi_arready=!s_axi_rvalid && !ram_pending && !diag_pending;
     always @(posedge axi_aclk) begin
         wr_meta<=writer_gray;wr_gray_sync<=wr_meta;writer_view<=from_gray(wr_gray_sync);
         grant_sync<={grant_sync[0],granted};
@@ -197,7 +228,7 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0)(
         if(!axi_aresetn) begin
             flags<=0;period_q8<=888889;spi_config<=0;test_config<=0;
             min_short<=1;short_limit<=3;long_limit<=5;
-            have_aw<=0;have_w<=0;s_axi_bvalid<=0;s_axi_rvalid<=0;ram_pending<=0;
+            have_aw<=0;have_w<=0;s_axi_bvalid<=0;s_axi_rvalid<=0;ram_pending<=0;diag_pending<=0;
             reader_view<=0;completed<=0;grant_sync<=0;
         end else begin
             if(tx_done) completed<=1;
@@ -233,8 +264,10 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0)(
             end
             if(s_axi_rready) s_axi_rvalid<=0;
             if(ram_pending) begin ram_pending<=0;s_axi_rdata<=ram_q;s_axi_rresp<=0;s_axi_rvalid<=1;end
+            if(diag_pending) begin diag_pending<=0;s_axi_rdata<={20'b0,diag_data};s_axi_rresp<=0;s_axi_rvalid<=1;end
             if(s_axi_arvalid && s_axi_arready) begin
-                if(ram_read) ram_pending<=1;
+                if(diag_read) diag_pending<=1;
+                else if(ram_read) ram_pending<=1;
                 else begin
                     s_axi_rvalid<=1;s_axi_rresp<=0;
                     case(s_axi_araddr)
@@ -247,6 +280,7 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0)(
                         'h28:s_axi_rdata<=snapshot[31:0];
                         'h2c:s_axi_rdata<=snapshot[63:32];
                         'h34:s_axi_rdata<=SELECTIO_SLICE==0 ? 32'h53504952 : 0; // SPIR
+                        'h38:s_axi_rdata<=SPI_PAD_DIAG ? {31'h29a82200,diag_done} : 0; // SPI pad snapshot
                         default: begin s_axi_rdata<=0;s_axi_rresp<=2;end
                     endcase
                 end

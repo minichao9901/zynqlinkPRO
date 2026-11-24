@@ -9,3 +9,9 @@ GPIO 速度 3、2、1 的四模式和速度 0 的 Mode 0、1，分别扫 MOSI ta
 ## 连接状态
 
 扫描途中 J7 WinUSB 报 `Pipe error`，随后 Windows 未枚举到 J7 和 HS3，速度 0 的 Mode 2、3 未扫。H743 COM52 仍响应，停止命令成功、GPIO 速度恢复到 3。HS3 的 Microsoft 签名 FTDI `oem6.inf` 仍在，重新应用并扫描后没有设备可绑定，XSCT 无目标。USB 断开原因待确认，后续板测及四模式 100 MHz 长窗待恢复连接。
+
+## 三线采样候选
+
+诊断 bitstream 增加一次性旁路采样，首次片选且检测到时钟活动后记录 1,024 组。每组 12 位按 `{NSS[3:0], SCK[3:0], MOSI[3:0]}` 打包，最低槽最早。报告统计 NSS 高电平槽和 SCK 半周期采样长度，用于区分片选假边沿与时钟假边沿。测试验证了 100 MHz 的正常输入、重触发和 AXI 读回，再由主机解析合成样本。
+
+完整 Vivado 2018.3 构建通过，133.333 MHz 约束下 setup／hold 裕量 **+0.051／+0.053 ns**。此配对为诊断候选，等待 HS3 枚举后上板。四模式稳定性须通过逐字节短测和长窗确认。 [离线证据](offline-diagnostic.txt) · [配对](../../../prebuilt/selectio-spi-pad-diag-20261124/README.md)

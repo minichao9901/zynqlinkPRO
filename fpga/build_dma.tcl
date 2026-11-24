@@ -23,6 +23,7 @@ if {$selectio} {
     if {![info exists ::env(ZYNQLINK_FPGA_OUT)]} {set out [file join $root build selectio]}
     set ::env(ZYNQLINK_FPGA_OUT) $out
     set ::env(ZYNQLINK_SELECTIO) 1
+    set ::env(ZYNQLINK_SPI_PAD_DIAG) [expr {[lsearch -exact $argv --spi-pad-diagnostic]>=0}]
     set ::env(ZYNQLINK_ETM_DOUBLE_SAMPLE) [expr {[lsearch -exact $argv --etm400]>=0}]
     set ::env(ZYNQLINK_RAW_TRACE) 4
     set ::env(ZYNQLINK_ETM_DDR) 1

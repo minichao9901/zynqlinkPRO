@@ -34,6 +34,9 @@ set_property CONFIG.SELECTIO_SLICE $slice [get_bd_cells swd_controller_0]
 set_property CONFIG.ENABLE_ENGINE [expr {$slice!=2}] [get_bd_cells sio_jtag]
 set_property CONFIG.ENABLE_BATCH [expr {$slice!=1}] [get_bd_cells sio_swd]
 set_property CONFIG.SELECTIO_SLICE $slice [get_bd_cells sio_aux]
+if {[info exists ::env(ZYNQLINK_SPI_PAD_DIAG)] && $::env(ZYNQLINK_SPI_PAD_DIAG)} {
+    set_property CONFIG.SPI_PAD_DIAG 1 [get_bd_cells sio_aux]
+}
 set_property CONFIG.VARIABLE_CLOCK $variable_clock [get_bd_cells {sio_clock sio_swd}]
 if {$variable_clock} {
     # 133.333/50/200 MHz together select the same IO PLL x48 used
