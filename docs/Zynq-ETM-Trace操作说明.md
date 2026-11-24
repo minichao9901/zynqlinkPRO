@@ -30,7 +30,7 @@ F103ZE样例HSE为8MHz，48MHz固件默认HCLK48MHz、物理TRACECLK24MHz。
 H743阿波罗Golden例程HSE为25MHz、CPU/HCLK60MHz、TRACECLK20MHz；30MHz在本次Zynq接线下未通过。
 H743 Trace时钟和CPU可独立，必须以实际RCC及板级HSE计算，不能套用F103的CPU/2。
 如果需要降低TRACECLK，应由target固件构建档位完成，并重新载入新固件的匹配ELF。
-H743本轮已验收范围是原生CLI连续DDR USB窗口，详见 [综合报告](validation/h743-comprehensive-20261101/README.md)，不能扩展成Web全部入口已验收。
+H743本轮已验收范围是原生CLI连续DDR USB窗口，详见 [综合报告](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/h743-comprehensive-20261101/README.md)，不能扩展成Web全部入口已验收。
 
 ## 3 采集：全程点击Web
 
@@ -104,4 +104,4 @@ python toolbox.py bridge-build --zip
 包内manifest记录源码提交、依赖版本、文件SHA-256。Golden bit/PS ELF不因打包改变，不包含SDK或Node。
 AI离线预检：`zynq-etm-bridge.exe --check --data-dir CHECK_DIR`，不连接目标。
 AI界面验收：加`--offline --no-browser`，硬件API明确拒绝，只允许导入、解码和浏览。
-实际构建与离线验收结论统一见[F103ZE记录](F103ZE-Web-CLI-ETM统一验收-20261031.md)。
+实际构建与离线验收结论统一见[F103ZE记录](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/F103ZE-Web-CLI-ETM%E7%BB%9F%E4%B8%80%E9%AA%8C%E6%94%B6-20261031.md)。

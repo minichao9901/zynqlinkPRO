@@ -58,7 +58,8 @@ python -X utf8 tools/verify_dependencies.py
 
 ```powershell
 # 硬件采集示例：仅在已核对/加载配对、确认板卡空闲且任务允许操作硬件后执行。
-python -X utf8 toolbox.py trace capture --elf prebuilt/golden/f103ze-cdc48.elf --bit prebuilt/release-20261106/probe.bit --zynq-elf prebuilt/release-20261106/application.elf --out build/etm-capture-new --seconds 1 --swd-khz 10000
+$pair = 'prebuilt/selectio-usb-split-raw4-20261123'
+python -X utf8 toolbox.py trace capture --elf prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf --bit "$pair/probe.bit" --zynq-elf "$pair/application.elf" --out build/etm-capture-new --seconds 1 --swd-khz 10000
 # 已保存记录的离线查询示例，不采集、不烧录。
 python -X utf8 toolbox.py trace query --record <记录目录> --view summary
 ```
@@ -90,12 +91,12 @@ ETM配置默认SWD为 **10MHz**，前端、本地采集服务接管和恢复连�
 - 核对探针型号和 USB 序列号，串口按序列号匹配当前 COM。J7 与 SuperLinkPRO 并接时，按本轮指定身份选取探针，记录实际配对与启动方式。
 - 单板操作不能并行抢占；先查占用、采集/DDR/DMA状态，再动时钟或加载。只停止本任务进程，不结束共享 `hw_server` 或其他会话服务。
 - 默认保持目标PLL、AHB/APB、Flash和QSPI；需要改变时按任务授权执行，不能用重刷、复位或降频掩盖失败。临时SRAM/核心寄存器/AFIO/Trace夹具必须备份并核对恢复，记录最终运行/暂停状态。
-- DAP Golden 在 `prebuilt/golden/`，历史 QSPI 恢复包在 `prebuilt/recovery/`。分别记录 JTAG/RAM 加载和 QSPI 冷启动的实板证据。ETM 24 MHz 研究基线见[主线与基线说明](docs/ETM主线合并与最佳基线-20261101.md)。
+- DAP Golden 在 `prebuilt/golden/`，历史 QSPI 恢复包在 `prebuilt/recovery/`。分别记录 JTAG/RAM 加载和 QSPI 冷启动的实板证据。ETM 24 MHz 研究基线见[主线与基线说明](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/ETM%E4%B8%BB%E7%BA%BF%E5%90%88%E5%B9%B6%E4%B8%8E%E6%9C%80%E4%BD%B3%E5%9F%BA%E7%BA%BF-20261101.md)。
 - 固定133MHz实验 `prebuilt/fclk133-swd-fixed-test-20261101/` 已归档在tag `archive/main-before-formal-release-20261106`，是SWD-only，不能代替正式release；其中60MHz请求实际可落到33.333MHz。测试必须记录实际FCLK/SWCLK/TCK和来源，不只写请求频率；寄存器计算频率不冒充外部频率计实测。
 - 当前ETM业务只要求低频SWD配置；高频ETM输出+RTT并发不是产品必验组合。150MHz FCLK/36MHz TRACECLK等已暂停研究不可因新会话而自动重启。
 - DDR/OCM身份核对使用物理MEM-AP0，CPU上下文 `mrd -force` 不能保证绕过缓存。包错误为0、FIFO无丢帧或IDELAYCTRL RDY不能单独证明完整窗口、完整执行流或完成逐线校准。
 - 性能对比固定配对、目标固件/时钟、事务规模、队列深度、窗口和重复次数；分别报告控制、硬件窗口、下载、解码/索引与首屏。离线时间、估算和旧JSON路径不得冒充当前E2E。
-- H743 Golden 源码和自包含 SDK 在 `firmware/target/stm32h743_cdc_trace/`，配套目标 ELF 在 `prebuilt/targets/stm32h743-cdc-trace-20261101/`。ETM 用 CPU/HCLK 60 MHz、TRACECLK 20 MHz，吞吐用 CPU480/HCLK240，分别取证。原生 ETM 使用连续 DDR USB 窗口，F103 专用 entry/reset 选项仅用于 F103。内存控制与备份兼容 1 KiB TAR 回绕，RTT RAM 夹具用 AXI SRAM 并核对缓存和恢复。JTAG 1/10 MHz 可用于 SRAM/RTT，当前 HSS 在这些档位因 FCLK 低于 24 MHz 无法启动。[H743 综合报告](docs/validation/h743-comprehensive-20261101/README.md)
+- H743 Golden 源码和自包含 SDK 在 `firmware/target/stm32h743_cdc_trace/`，配套目标 ELF 在 `prebuilt/targets/stm32h743-cdc-trace-20261101/`。ETM 用 CPU/HCLK 60 MHz、TRACECLK 20 MHz，吞吐用 CPU480/HCLK240，分别取证。原生 ETM 使用连续 DDR USB 窗口，F103 专用 entry/reset 选项仅用于 F103。内存控制与备份兼容 1 KiB TAR 回绕，RTT RAM 夹具用 AXI SRAM 并核对缓存和恢复。JTAG 1/10 MHz 可用于 SRAM/RTT，当前 HSS 在这些档位因 FCLK 低于 24 MHz 无法启动。[H743 RAW4 验收](docs/validation/h743-cdc-golden-requal-20261123/README.md) · [运行态 HCLK 对照](docs/validation/h743-hclk-ab-20261123/README.md)
 
 ## FPGA bitstream 与 Zynq ELF 必须纳入 Git
 

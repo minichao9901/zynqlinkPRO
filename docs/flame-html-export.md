@@ -39,6 +39,6 @@ python toolbox.py --runtime <运行目录> page etm download <下载ID> flame.ht
 
 使用当前已选记录与区间；`captureOnly=true`只交给CLI下载捕获，普通点击仍触发浏览器下载，并保留“再次下载 HTML”链接。
 
-本轮使用已有H743初始化及单次echo记录，未访问板卡。样例、截图与源码/冻结程序验收见 [交互HTML验收](validation/flame-html-20261102/README.md)。
+本轮使用已有H743初始化及单次echo记录，未访问板卡。样例、截图与源码/冻结程序验收见 [交互HTML验收](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/flame-html-20261102/README.md)。
 
-双标签与框选放大的更新验证见 [双标签HTML交付](validation/flame-tabs-20261102/README.md)。
+双标签与框选放大的更新验证见 [双标签HTML交付](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/flame-tabs-20261102/README.md)。

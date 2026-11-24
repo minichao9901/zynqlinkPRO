@@ -4,7 +4,7 @@
 
 ## 历史基线与优化过程
 
-2026-10-31 的项目最佳为标准 CMSIS-DAP SRAM **4.047 / 3.983 MB/s**，RTT→CDC **3.995 MB/s**。目标 HCLK96，探针 FCLK0 约 100 MHz，实际 SWCLK 49,999,999.5 Hz，配置 0xa11 为约 10 ns 高电平、1 拍 idle。标准 SRAM 使用 512 字、2 KiB、USB 深度 32，每方向 256 块、三轮取中位。RTT 使用 SRAM 生产者、8 KiB 环和 2 KiB 块，两个 3 秒窗，探针计数约 4.007 MB/s。原始记录位于归档 archive/main-before-cleanup-20261105 的 docs/validation/combined-20261031/sota_peak_rtt/peak_swd_50000.json 和 rtt_swd_50000000.json。历史 RTL 为 954de8fd。[历史报告](../combined-20261031/README.md#最终真机验收)
+2026-10-31 的项目最佳为标准 CMSIS-DAP SRAM **4.047 / 3.983 MB/s**，RTT→CDC **3.995 MB/s**。目标 HCLK96，探针 FCLK0 约 100 MHz，实际 SWCLK 49,999,999.5 Hz，配置 0xa11 为约 10 ns 高电平、1 拍 idle。标准 SRAM 使用 512 字、2 KiB、USB 深度 32，每方向 256 块、三轮取中位。RTT 使用 SRAM 生产者、8 KiB 环和 2 KiB 块，两个 3 秒窗，探针计数约 4.007 MB/s。原始记录位于归档 archive/main-before-cleanup-20261105 的 docs/validation/combined-20261031/sota_peak_rtt/peak_swd_50000.json 和 rtt_swd_50000000.json。历史 RTL 为 954de8fd。[历史报告](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/combined-20261031/README.md#最终真机验收)
 
 | 阶段 | 目标 HCLK | 主机接口 | SRAM 读 / 写 | RTT |
 |---|---:|---|---:|---:|

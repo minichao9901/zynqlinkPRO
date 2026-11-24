@@ -98,7 +98,7 @@ SRAM 每方向和 RTT 各一轮 60 秒，调试线实速 99,999,998 Hz，目标 
 | SWO NRZ | 1 Mbaud，73,728 B | 1.5 Mbaud 载荷不完整；2 Mbaud 时 H743 源平均仅约 1.75 Msymbol/s。 |
 | SWO Manchester | 750 kbit/s，协商 750,002 bit/s，73,728 B | 1 Mbit/s 要求 2 Msymbol/s，本夹具实测约 1.75 Msymbol/s。 |
 | SPI 四模式 | Probe 100 MHz 配置下，15/30 MHz PWM 各通过；四模式 100 MHz 全双工模型通过 | 全速双向实板对拍待独立高速从机；SPI 从机到 CDC 的 100 MHz 物理验收也需独立高速主机。 |
-| ETM | 20 MHz TRACECLK，12 窗严格通过 | 同配对最高频率待独立匹配工况。历史不同目标配置曾连续通过 25 MHz。[历史灰排线证据](../h743-etm-ribbon-20261111/README.md) |
+| ETM | 20 MHz TRACECLK，12 窗严格通过 | 同配对最高频率待独立匹配工况。历史不同目标配置曾连续通过 25 MHz。[历史灰排线证据](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/h743-etm-ribbon-20261111/README.md) |
 
 以上为本次 H743 工况。原定 HCLK96/128、标准 CMSIS-DAP 和旧 RTT→CDC 的历史成绩按各自负载与入口留档。 [持续吞吐、接口及最终现场证据](raw4-sustained-evidence.json) · [历史参考和用例](../../selectio/fusion-performance-cases.md#已确认结果)
 

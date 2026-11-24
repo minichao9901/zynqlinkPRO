@@ -23,4 +23,4 @@ J7 的 CLI 与本机 Web 手册共用[正式 QSPI 固定目录](../prebuilt/qspi
 
 ## 验收
 
-开发检查运行 `python -X utf8 toolbox.py project run web.check` 和 `python -X utf8 toolbox.py project run test.web`。实板覆盖及边界见 [H743 Web／JTAG 与 ETM](../docs/validation/h743-workbench-acceptance-20261109/README.md)、[HPM6800EVK 端到端验收](../docs/validation/hpm6800-e2e-20261114/README.md)和 [RTT Viewer 与转发复测](../docs/validation/hpm6800-rtt-viewer-20261114/README.md)。待验项以[问题索引](../docs/项目问题跟踪列表.md)为准。
+开发检查运行 `python -X utf8 toolbox.py project run web.check` 和 `python -X utf8 toolbox.py project run test.web`。当前融合版使用 [USB ABI 2](../docs/selectio-native.md)，以 [融合验收记录](../docs/validation/README.md) 和[问题表](../docs/项目问题跟踪列表.md)核对实板与 Web 对接范围。

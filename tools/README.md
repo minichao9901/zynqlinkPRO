@@ -12,6 +12,6 @@
 | 板卡加载与身份 | `probe.load`、`probe.ocm-verify`；`probe.flash`会写QSPI |
 | QSPI启动包 | `boot.bsp`、`boot.build`、`boot.package`；[构建与固化](../firmware/boot/README.md) |
 
-保留构建/运行依赖、测试、可复用诊断和当前验收工具；Python Golden参考不属于冗余代码。2026-11-05退出活跃树的8个一次性旧测速、改频和打包脚本，以及历史报告内的驱动副本，见[归档清单](../docs/validation/cleanup-20261105/archived-files.json)。其原始字节保存在tag `archive/main-before-cleanup-20261105`。
+当前融合版的验收入口和配对见 [SelectIO CLI](../docs/selectio/README.md)。融合前的专用脚本及报告从 [历史提交](../docs/validation/README.md#融合前档案) 取回。
 
 后续验收优先复用现有入口；一次性脚本随报告归档，不继续堆入活跃工具目录。详细边界见[CLI工作台](../docs/toolbox-cli-ai.md)。

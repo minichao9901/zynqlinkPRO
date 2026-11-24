@@ -1,25 +1,29 @@
-# 验收与历史证据
+# SelectIO 融合验收
 
-当前状态见[问题索引](../项目问题跟踪列表.md)，文档导航见[文档入口](../README.md)。目录内各报告保留当时结论，失败、暂停和能力边界继续有效。
+## 当前 RAW4 + ABI 2
 
-2026-11-18 调试器 RTT 交互终端、自动刷新及 v1.3.16 分发见[工作台验收](workbench-v1316-debugger-rtt-20261118/README.md)。
+| 验收 | 证据 |
+|---|---|
+| H743 历史 CDC Golden，ETM、SWD/JTAG、COM/SWO/SPI 功能与持续窗口 | [功能及持续验收](h743-cdc-golden-requal-20261123/README.md) |
+| 同板 MEM-AP WAIT、SRAM 区及 USB 端点拆分对照 | [吞吐分析](h743-throughput-audit-20261123/README.md) |
+| HCLK60/240 相同负载对照、JTAG SRAM 与独立 RTT 长窗 | [时钟及 JTAG 档位](h743-hclk-ab-20261123/README.md) |
+| USB ABI 2 拆分、并发与读尾部 | [USB 拆分验证](usb-split-20261123/README.md) |
+| ETM400 的成帧故障与 RAW4 复验 | [同板诊断](h743-etm-source-audit-20261123/README.md) |
 
-2026-11-06当前J7 bit/ELF、WebUSB、工程下载与GitHub发布见[正式交付](release-20261106/README.md)。23套旧prebuilt归档到 `archive/main-before-formal-release-20261106`，失败及暂停结论不变。
+## 融合方案历次实测
 
-2026-11-05整理后，当前树保留各阶段报告与顶层摘要、最终会话/飞行记录、固件查看器和探针安全的完整公开证据；另保留原生差分依赖的 F103 大输入、H743 1s 与 H743 2s 固定原始输入。业务库仅有[5份精选记录](../retained-records.json)。自动测试夹具独立保留。
+- [首轮双协议集成](selectio-integration/README.md)与[F103ZE 整体回归](selectio-fusion-20261121/README.md)
+- [融合队列与吞吐](efficiency-20261122/README.md)、[变频实现](selectio-variable-20261122/README.md)与[变频实板](selectio-variable-board-20261122/README.md)
+- [SWD50 标准路径](swd50-standard-20261122/README.md)与[四时钟 DMA 对照](swd50-quad-dma-20261122/README.md)
+- [SPI CDC 原配对与分档](spi-cdc-20261123/README.md)及 [H743 目标高速工况](h743-perf-20261123/README.md)
 
-历史逐轮输出、截图和一次性驱动固定在 annotated tag `archive/main-before-cleanup-20261105`，对应清理前提交 `6765937`。逐文件路径、尺寸和SHA见[归档清单](cleanup-20261105/archived-files.json)。该归档tag已于2026-11-06随正式发布推送；原Git历史仍在。
+## 融合前档案
 
-查看单个历史文件：
+`bf53619c` 是共享 SelectIO 融合的起点。融合前的验收报告和过时文档可以从冻结的 `main` 提交 `03b6a1da` 或清理前融合分支提交 `9b5faece` 读取。例如：
 
 ```powershell
-git show archive/main-before-cleanup-20261105:docs/validation/etm-e2e-clock-20261101/README.md
+git show 9b5faece:docs/validation/README.md
+git show 03b6a1da:docs/validation/h743-comprehensive-20261101/README.md
 ```
 
-需要整目录或二进制证据时，用Git原生归档保留字节，再解压到项目外独立目录：
-
-```powershell
-git archive --format=zip --output=E:/zynqlinkPRO-history-20261105.zip archive/main-before-cleanup-20261105 docs/validation tools
-```
-
-历史脚本可能操作硬件或写Flash；恢复文件本身不授权执行。不要把历史板上状态当作当前现场，也不要因清理而关闭问题或重启暂停研究。
+离线示例、测试依赖及配对身份清单随当前工程提供。历史条件和问题状态可在原提交追溯。

@@ -31,7 +31,7 @@ flowchart LR
 | 27 | L14 | TDO | MISO | 探针 RX，接目标 UART TX / CoreSight SWO |
 | 41、39、37、35、33 | J16、K16、M18、M17、L17 | TRACECLK、TRACED[0..3] | — | ETM |
 
-J7 信号使用 LVCMOS33，探针与目标共地。nSRST 在 J7-23，nTRST 在 J7-19。SWD 的时钟和数据只需 L15、L16，可与使用 L14 的被动监听共存。[J7 转接板引脚](../validation/j7-adapter-20261106/README.md)
+J7 信号使用 LVCMOS33，探针与目标共地。nSRST 在 J7-23，nTRST 在 J7-19。SWD 的时钟和数据只需 L15、L16，可与使用 L14 的被动监听共存。[J7 转接板引脚](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/j7-adapter-20261106/README.md)
 
 JTAG 占用 TDI/TDO，SPI 切换时取得四根线的独占权。F103 的 PB3 可切换 JTDO 与 TRACESWO，PA15 用作 JTDI 或测试目标的串口接收。目标串口、ITM 和四位 ETM 各自需要正确的目标引脚配置。
 

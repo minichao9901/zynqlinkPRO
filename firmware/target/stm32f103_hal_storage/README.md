@@ -47,4 +47,4 @@ arm有意暂停核心，供Trace设置起点再继续。verify要求事务已完
 
 Web载入同一ELF及本目录源码，起点选择 `storage_exercise`，SWD10MHz、1秒；用同一主机备份/arm步骤后再采集，完成后运行verify。新旧算法比较必须对同一份raw记录进行，不能拿不同采集窗口的指令数做差分。
 
-本轮实物证据、差分结果、交付ELF及最终恢复状态见 [主线真机验收报告](../../../docs/validation/main-web-hardware-20261103/README.md)。初次构建/启动失败与不通过的Web HSS均保留，不能从本说明推定全部功能已通过。
+本轮实物证据、差分结果、交付ELF及最终恢复状态见 [主线真机验收报告](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/main-web-hardware-20261103/README.md)。初次构建/启动失败与不通过的Web HSS均保留，不能从本说明推定全部功能已通过。

@@ -8,7 +8,7 @@
 | probe.bit | `dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6` |
 | application.elf | `5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802` |
 
-BOOT 4281040 B，实际擦写范围 `[0, 4284416)`。整片32MiB备份、受限辅助器写入、逐扇区/逐页校验、独立整片回读与范围外逐字节比较通过。无暂停复位启动及用户实际断电重上电均通过，冷启动后不下载bit/ELF，物理MEM-AP0的85844 B主应用执行段匹配。WebUSB、SWD10、JTAG1/10与24MHz ETM 100ms回归通过。[验收报告](../../docs/validation/qspi-release-20261106/README.md) · [验收身份](acceptance.json) · [全部文件哈希](flash_manifest.json)。
+BOOT 4281040 B，实际擦写范围 `[0, 4284416)`。整片32MiB备份、受限辅助器写入、逐扇区/逐页校验、独立整片回读与范围外逐字节比较通过。无暂停复位启动及用户实际断电重上电均通过，冷启动后不下载bit/ELF，物理MEM-AP0的85844 B主应用执行段匹配。WebUSB、SWD10、JTAG1/10与24MHz ETM 100ms回归通过。[验收报告](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/qspi-release-20261106/README.md) · [验收身份](acceptance.json) · [全部文件哈希](flash_manifest.json)。
 
 QSPI引导空闲FCLK约100MHz；请求10MHz调试档后读回FCLK约120MHz。133.333333MHz仍为该bit的实现约束，不能把约束当作运行时钟。ELD1默认五路零tap。目标MCU保持CDC48/TRACECLK24MHz及运行，未烧录目标Flash。
 

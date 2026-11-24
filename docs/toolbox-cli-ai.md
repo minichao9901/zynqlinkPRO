@@ -293,7 +293,7 @@ JTAG 临时加载的默认配对在 `prebuilt/release-20261106/`，断电后丢�
     python -X utf8 toolbox.py --runtime build/workbench-j7-new probe cancel --owner OWNER_ID
     ```
 
-22. 查看原生探针服务的请求格式。调用 USB/HID/串口动作时按协议传递 owner 和 resourceEpoch。[服务协议与验收](validation/session-flight-recorder-20261105/README.md)
+22. 查看原生探针服务的请求格式。调用 USB/HID/串口动作时按协议传递 owner 和 resourceEpoch。[服务协议与验收](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/session-flight-recorder-20261105/README.md)
 
     ```powershell
     python -X utf8 toolbox.py probe call --help
@@ -381,7 +381,7 @@ JTAG 临时加载的默认配对在 `prebuilt/release-20261106/`，断电后丢�
 
 ## OpenOCD Wasm 目标配置
 
-调试器、烧录器和 RTT Viewer 共用 OpenOCD Wasm。内置烧录列表提供与 Wasm 源码版本配对的 OpenOCD 原版 target CFG，以及 HPM SDK v1.11.0 原版 board、SoC 和入口 CFG。内置与手动导入共用解析入口。HPM 内置项通过 SDK 的 `BOARD` 和 `PROBE=cmsis_dap` 选择板卡及探针，包括 HPM6P00EVK。[H743 对照与 HPM 发布](validation/hpm-sdk-cfg-release-20261112/README.md)
+调试器、烧录器和 RTT Viewer 共用 OpenOCD Wasm。内置烧录列表提供与 Wasm 源码版本配对的 OpenOCD 原版 target CFG，以及 HPM SDK v1.11.0 原版 board、SoC 和入口 CFG。内置与手动导入共用解析入口。HPM 内置项通过 SDK 的 `BOARD` 和 `PROBE=cmsis_dap` 选择板卡及探针，包括 HPM6P00EVK。[H743 对照与 HPM 发布](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/hpm-sdk-cfg-release-20261112/README.md)
 
 在调试器断开时导入匹配且可信的 CFG。单文件直接上传。有 `source [find …]` 依赖时，上传脚本根目录再选入口。导入时在断开 USB 的 Worker 解析，目标事件在实际连接时执行。
 
@@ -427,7 +427,7 @@ JTAG 临时加载的默认配对在 `prebuilt/release-20261106/`，断电后丢�
    python -X utf8 toolbox.py --runtime build/workbench-j7-new page rtt click '#r-use-session-target'
    ```
 
-内置烧录默认 SWD 1 MHz、HPM JTAG 10 MHz。调试器、烧录器和 RTT Viewer 的内置 HPM 档最高 25 MHz，其他 ARM/RISC-V 最高 60 MHz。RTT Viewer 默认 10 MHz。导入项使用 CFG 自带频率，实际时钟以板上读回为准。J-Scope 自动模式在采样周期达到 10 ms 时使用 Wasm 轮询，短周期使用探针硬件采样。RTT 转发和硬件采样通过探针私有 HID 控制，数据走 CDC 和 HSS Bulk。[Wasm 迁移与验收范围](validation/openocd-wasm-20261108/README.md)
+内置烧录默认 SWD 1 MHz、HPM JTAG 10 MHz。调试器、烧录器和 RTT Viewer 的内置 HPM 档最高 25 MHz，其他 ARM/RISC-V 最高 60 MHz。RTT Viewer 默认 10 MHz。导入项使用 CFG 自带频率，实际时钟以板上读回为准。J-Scope 自动模式在采样周期达到 10 ms 时使用 Wasm 轮询，短周期使用探针硬件采样。RTT 转发和硬件采样通过探针私有 HID 控制，数据走 CDC 和 HSS Bulk。[Wasm 迁移与验收范围](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/openocd-wasm-20261108/README.md)
 
 使用 zynqlinkPRO 的 Cortex-M SWD 时，Viewer 先用 OpenOCD Wasm 校验 ELF 指定的 RTT 控制块。通过 DP 和 ADIv5 MEM-AP 核对后，上行使用 `DAP_TransferBlock`，沿用该 AP 的访问属性并按 1 KiB TAR 切块。快路径要求控制块和活动环位于 Cortex-M SRAM 区，且对调试 AP 可见。连接摘要的 `SWD MEM-AP` 表示已接管。ADIv6、非小端或接管校验失败时沿用 Wasm。重新载入 ELF 会重新确认控制块和通道布局。
 
@@ -462,7 +462,7 @@ $ocd = 'prebuilt/golden/host/openocd'
 & "$ocd/openocd.exe" -s "$ocd/scripts" -c 'adapter driver cmsis-dap; cmsis-dap backend usb_bulk; adapter usb vid_pid 0x0d28 0x0204; adapter serial 12345678; transport select jtag' -f target/stm32h7x.cfg -c 'adapter speed 50000; reset_config none; init; scan_chain; shutdown'
 ```
 
-F103ZE 的原生档为 60 MHz，使用 `target/stm32f1x.cfg`。运行固件若关闭了目标 JTAG，需按固件源码确认 SWJ_CFG，使用 `tools/run_f103_jtag_fixture.py` 临时切换并恢复。SRAM、RTT 转发和探针采样使用 `bench.sram -- --transport jtag`、`bench.rtt -- --transport jtag`、`bench.hss -- --transports jtag` 等原生入口，搭配相应板卡的夹具和参数。先用 `toolbox.py project run <入口> -- --help` 核对范围。[历史原生实测](validation/h743-workbench-acceptance-20261109/README.md)
+F103ZE 的原生档为 60 MHz，使用 `target/stm32f1x.cfg`。运行固件若关闭了目标 JTAG，需按固件源码确认 SWJ_CFG，使用 `tools/run_f103_jtag_fixture.py` 临时切换并恢复。SRAM、RTT 转发和探针采样使用 `bench.sram -- --transport jtag`、`bench.rtt -- --transport jtag`、`bench.hss -- --transports jtag` 等原生入口，搭配相应板卡的夹具和参数。先用 `toolbox.py project run <入口> -- --help` 核对范围。[历史原生实测](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/h743-workbench-acceptance-20261109/README.md)
 
 ### RAM ELF 调试
 
@@ -600,7 +600,7 @@ Windows 日常入口为 `dist/zynq-etm-bridge/zynq-etm-bridge.exe`，默认打�
 
 HPM 高频对照和 DDR 压力测试示例需要从 `archive/main-before-formal-release-20261106` 取回各自的实验配对。目录名和取回方法见 [正式产物索引](../prebuilt/README.md)。
 
-1. 预览 HPM6800EVK 的原生 TCK、idle 和采样窗口对照。历史 66.667 MHz 结果限定于该配对、idle22 和 mode17。[HPM6800EVK 历史报告](validation/hpm6800-speed-completion-20261102/README.md)
+1. 预览 HPM6800EVK 的原生 TCK、idle 和采样窗口对照。历史 66.667 MHz 结果限定于该配对、idle22 和 mode17。[HPM6800EVK 历史报告](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/hpm6800-speed-completion-20261102/README.md)
 
    ```powershell
    python -X utf8 toolbox.py project run tools/validate_hpm6800_performance.py --dry-run -- --bit prebuilt/hpm6800-jtag66-133-20261102/probe.bit --elf prebuilt/hpm6800-jtag66-133-20261102/application.elf --out build/hpm-cli-high-new --speeds 66666667 --idle 22 --modes 17 --windows axi --loops 128 --repeats 3
@@ -630,4 +630,4 @@ HPM 高频对照和 DDR 压力测试示例需要从 `archive/main-before-formal-
    python -X utf8 toolbox.py project run etm.framed -- captured.frm1 --out build/framed-check-new --tail-bytes 1 --trace-id 2
    ```
 
-H743 ETMv4 连续采集见 [H743 综合报告](validation/h743-comprehensive-20261101/README.md)。PLL、AHB/APB 分频由目标固件管理。
+H743 ETMv4 连续采集见 [H743 综合报告](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/h743-comprehensive-20261101/README.md)。PLL、AHB/APB 分频由目标固件管理。

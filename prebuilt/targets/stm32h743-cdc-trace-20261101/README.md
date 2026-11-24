@@ -1,6 +1,6 @@
 # H743目标Golden与独立性能配置
 
-目标程序，不是Zynq PS ELF。源代码、SDK、许可证和构建/烧录说明见 [例程](../../../firmware/target/stm32h743_cdc_trace/README.md)，逐文件身份、编译参数和验收范围见 [manifest](manifest.json)，实测数据见 [综合报告](../../../docs/validation/h743-comprehensive-20261101/README.md)。
+目标程序，不是Zynq PS ELF。源代码、SDK、许可证和构建/烧录说明见 [例程](../../../firmware/target/stm32h743_cdc_trace/README.md)，逐文件身份、编译参数和验收范围见 [manifest](manifest.json)，实测数据见 [综合报告](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/h743-comprehensive-20261101/README.md)。
 
 | 目录 | CPU/HCLK/TRACECLK MHz | 使用范围 |
 |---|---|---|

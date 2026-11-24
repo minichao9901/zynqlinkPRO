@@ -14,7 +14,7 @@
 | PLL1R，20 MHz | 1、2、3 | 9 | 131 | 未通过 |
 | PLL1R，24.615 MHz | 3 | 3 | 344 | 未通过 |
 
-均收到实际 formatter 数据，错误出现在探针成帧阶段。FIFO 丢帧、DDR 写入错误、IDELAY ready 丢失均为零。原 HSI、GPIO 3、零 tap 的两次分别为 6 和 8 个 parser 错误。试过的 CLK/D0–D3 tap 对照没有得到零错误窗口，未晋级 3×1 秒。当前配对和目标程序尚未取得严格通过档。历史正式配对的 H743 25 MHz 记录与 F103ZE 融合配对的 36 MHz 各自有效。 [本轮逐点数据](evidence.json) · [历史 H743 25 MHz](../../h743-etm-ribbon-20261111/README.md) · [F103ZE 36 MHz](../rx-guard-etm36-long.json)
+均收到实际 formatter 数据，错误出现在探针成帧阶段。FIFO 丢帧、DDR 写入错误、IDELAY ready 丢失均为零。原 HSI、GPIO 3、零 tap 的两次分别为 6 和 8 个 parser 错误。试过的 CLK/D0–D3 tap 对照没有得到零错误窗口，未晋级 3×1 秒。当前配对和目标程序尚未取得严格通过档。历史正式配对的 H743 25 MHz 记录与 F103ZE 融合配对的 36 MHz 各自有效。 [本轮逐点数据](evidence.json) · [历史 H743 25 MHz](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/h743-etm-ribbon-20261111/README.md) · [F103ZE 36 MHz](../rx-guard-etm36-long.json)
 
 ## 高速源用例
 

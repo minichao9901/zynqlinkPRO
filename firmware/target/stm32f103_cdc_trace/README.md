@@ -1,5 +1,5 @@
 > 仓库内归档：本目录现包含CB/ZE目标所需CMSIS/HAL、CherryUSB、RTT、链接脚本、构建封装及host测试，无需原build/worktree。
-> 主要验收入口与固件身份见[统一文档](../../../docs/F103ZE-Web-CLI-ETM统一验收-20261031.md)。
+> 主要验收入口与固件身份见[统一文档](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/F103ZE-Web-CLI-ETM%E7%BB%9F%E4%B8%80%E9%AA%8C%E6%94%B6-20261031.md)。
 > 离线构建：`pwsh -NoProfile -File firmware/target/stm32f103_cdc_trace/build.ps1 -Chip ze -CpuMHz 48`，72MHz显式指定`-CpuMHz 72`。
 > 主机回归：`pwsh -NoProfile -File firmware/target/stm32f103_cdc_trace/tests/run_tests.ps1`（本机gcc）。
 > 本目录编译不连接板卡。硬件烧录优先使用统一toolbox CLI，遵守双方设备独占交接。
@@ -25,7 +25,7 @@ USB 时钟仍为 48 MHz（PLL 直接供 USB，Flash 1 等待周期）。CB 默�
 相同 CDC 初始化起点、500 MSa/s、10 ms 实测：原 72/36 MHz + 广播开为 63 次 overflow；
 48/24 MHz + 广播开为 16 次；48/24 MHz + 广播关连续三轮均为 0。
 仅降频不足以保证无 overflow，业务负载和 Trace 选项同样影响输出量。
-详见 [F103ZE-CDC-48MHz与ETM选项验收](../../docs/F103ZE-CDC-48MHz与ETM选项验收.md)。
+详见 [F103ZE-CDC-48MHz与ETM选项验收](../../../docs/validation/selectio-variable-board-20261122/README.md)。
 
 **基底**：你提供的参考工程 `cherry_drag_n_drop_bootloader_fat16`（MSC 拖拽 IAP，已在同一块板验证可枚举）。
 本工程**只做三处改动**，USB 底层一行没动：

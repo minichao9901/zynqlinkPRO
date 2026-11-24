@@ -2,7 +2,7 @@
 
 F103ZE/J7 限定交付，包含五路 ELD1、原始 SWD `0x1D` 修复、L14/TDO 输入隔离及 WebUSB 网页入口。WebUSB 返回 `https://minichao9901.github.io/zynqlinkPRO/#download`，通知是否显示由浏览器决定。
 
-bit 沿用本日已经验收的相同字节，本轮仅重编 PS ELF，未重新综合 PL。133.333333 MHz 约束下 setup/hold 余量 0.067/0.044 ns，ELD1 默认五路零 tap。构建选项、实际源码输入、文件 SHA-256 和继承验证范围见 [manifest](manifest.json)、[源码绑定](source-binding.json)与[交付报告](../../docs/validation/release-20261106/README.md)。
+bit 沿用本日已经验收的相同字节，本轮仅重编 PS ELF，未重新综合 PL。133.333333 MHz 约束下 setup/hold 余量 0.067/0.044 ns，ELD1 默认五路零 tap。构建选项、实际源码输入、文件 SHA-256 和继承验证范围见 [manifest](manifest.json)、[源码绑定](source-binding.json)与[交付报告](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/release-20261106/README.md)。
 
 本轮实板通过 BOS/WinUSB/GET_URL（含短读与非法请求 STALL/恢复）、物理 MEM-AP0 执行段对拍、16 次原始 SWD DPID/奇偶校验、SWD10/JTAG1/10 IDCODE/内存读取，以及24 MHz TRACECLK的100 ms DDR+USB/解码。相同 bit 的 SWD/JTAG60 和 TRACECLK32 MHz 来源于此前限定验证，本轮未重新测速或改目标 PLL。
 

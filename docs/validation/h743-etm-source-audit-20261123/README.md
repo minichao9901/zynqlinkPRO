@@ -19,7 +19,7 @@
 
 ## 历史通过记录与归因
 
-同一 `main` 正式 RAM bit/ELF 在历史 H743 **CPU/HCLK200、TRACECLK25 MHz、GPIO 2、临时分支负载**下，曾三轮各 1 秒通过。历史 **CPU/HCLK60、TRACECLK20 MHz** 的 H743 CDC 目标也有通过记录。本次用当前解码器从这份 1 秒归档的 2,176,688 B 原始数据重建解码与索引，严格校验通过，解析 18,373,686 条指令、0 个 ETM packet issue。 [25 MHz 实板](../h743-etm-ribbon-20261111/README.md) · [20 MHz 原始记录](../h743-comprehensive-20261101/raw/etm20-4ms-matrix/1000ms-1/session.json) · [本次离线复验](summary.json)
+同一 `main` 正式 RAM bit/ELF 在历史 H743 **CPU/HCLK200、TRACECLK25 MHz、GPIO 2、临时分支负载**下，曾三轮各 1 秒通过。历史 **CPU/HCLK60、TRACECLK20 MHz** 的 H743 CDC 目标也有通过记录。本次用当前解码器从这份 1 秒归档的 2,176,688 B 原始数据重建解码与索引，严格校验通过，解析 18,373,686 条指令、0 个 ETM packet issue。 [25 MHz 实板](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/h743-etm-ribbon-20261111/README.md) · [20 MHz 原始记录](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/h743-comprehensive-20261101/raw/etm20-4ms-matrix/1000ms-1/session.json) · [本次离线复验](summary.json)
 
 当前能确认的是这套 H743 工况的 **TRACECLK/TRACED 接收及 formatter 成帧阶段**持续失步，连历史通过的 bit/ELF 和冻结的主线 CLI 也能复现。GPIO 驱动档和有限的 CLK tap 试验都未得到零错误窗口。当前 HSI64 dbgstress 与历史已通过的 Trace 源时钟、目标负载不同。要判定具体是源端时钟/数据、线路电气还是探针输入采样裕量，需要在同一排线上复现已核对的 20 MHz Trace 源，并同时核对 J7 的 TRACECLK 与四条数据线。本次保留现有目标时钟，精确物理根因仍待定位。
 

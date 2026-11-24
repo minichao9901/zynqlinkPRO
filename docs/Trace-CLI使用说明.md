@@ -1,18 +1,16 @@
 # Trace CLI
 
-SelectIO 独立端点配对通过 IF3 的 EP9 IN 下载 ETM DDR 数据。Trace CLI 根据设备枚举选择相应端点，目标控制仍走 IF0 的标准 DAP 会话。 [独立端点协议](selectio-native.md) · [H743 复验](validation/usb-split-20261123/README.md)
+SelectIO 独立端点配对通过 IF3 的 EP9 IN 下载 ETM DDR 数据。Trace CLI 根据设备枚举选择相应端点，目标控制仍走 IF0 的标准 DAP 会话。 [独立端点协议](selectio-native.md) · [H743 RAW4 验收](validation/h743-cdc-golden-requal-20261123/README.md)
 
-F103ZE新增环形飞行记录：`capture --flight --ring-bytes 8388608 --seconds 0.02 --trigger manual --arm-timeout 60`，其中seconds为触发后窗口；`trace trigger --record <记录目录>`从另一终端请求触发，`--cancel`请求停止。需要匹配的新bit/ELF；Fault模式为主机轮询，可错过短暂异常。覆盖/帧对齐移除及起点未知显式保留，详情与范围见[飞行记录验收](validation/session-flight-recorder-20261105/README.md)。
+F103ZE新增环形飞行记录：`capture --flight --ring-bytes 8388608 --seconds 0.02 --trigger manual --arm-timeout 60`，其中seconds为触发后窗口；`trace trigger --record <记录目录>`从另一终端请求触发，`--cancel`请求停止。需要匹配的新bit/ELF；Fault模式为主机轮询，可错过短暂异常。覆盖/帧对齐移除及起点未知显式保留，详情与范围见[飞行记录验收](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/session-flight-recorder-20261105/README.md)。
 
 统一入口`python -X utf8 toolbox.py trace`，转交`etm-service/trace.py`。该入口的`capture/doctor`是Zynq原生路径；离线decode/query/export等转交`etm-service/tools/cli_entry.py`及`trace_cli.py`，沿用原生二进制/TraceStore协议。
 
 源码 `trace capture` 的目标访问由 Node.js 执行同一份 OpenOCD Wasm，通过采集进程已持有的 USB 句柄操作物理 MEM-AP0。目标识别、ELF 读回、寄存器配置、暂停/继续、起点、故障轮询和恢复均由该适配器执行。FPGA 布防、窗口/DDR 协议和 Bulk 下载使用原生采集通路。需要 PATH 中的 Node.js，`trace doctor --offline` 会核对依赖且不枚举探针。原生采集结果的 `targetControl` 为 `openocd-wasm/mem-ap0`。
 
-主线和固定EXE已集成C++完整查询索引、默认视图和最终store；要求配套具备 `complete-index-v1` 的 `etm_storebuild.exe`。离线研发显式设置 `ETM_COMPLETE_INDEX=0` 可运行旧facts/NumPy索引对照，缺少新能力时不会静默回退。集成范围见[主线验收](validation/etm-main-integration-20261103/README.md)。
+原生核心已接管ELF/DWARF/Thumb静态字典和TraceStore查询读取，默认 `ETM_NATIVE_STATIC=1`、`ETM_NATIVE_QUERY=1`（未设置时同样启用）。Python保留任务、记录身份和发布；查询经私有常驻C++进程返回DTO，不由Python解析执行块或查询数组。显式设置这两个变量为0用于旧实现研发对照，不能把对照耗时算作默认原生路径。配套目录必须保留 `libdwarf.dll`；静态读取需要 `native-static-v1`，查询协议为 `etm-query/1`。
 
-原生核心已接管ELF/DWARF/Thumb静态字典和TraceStore查询读取，默认 `ETM_NATIVE_STATIC=1`、`ETM_NATIVE_QUERY=1`（未设置时同样启用）。Python保留任务、记录身份和发布；查询经私有常驻C++进程返回DTO，不由Python解析执行块或查询数组。显式设置这两个变量为0用于旧实现研发对照，不能把对照耗时算作默认原生路径。配套目录必须保留 `libdwarf.dll`；静态读取需要 `native-static-v1`，查询协议为 `etm-query/1`。主线和固定EXE的验收范围见下述集成报告。
-
-2026-11-03 已合入 main；固定程序与本轮记录回归以[主线集成报告](validation/etm-main-integration-20261103/README.md)为准。旧 Python 参考代码继续保留，合并前流程固定为 tag `archive/main-before-etm-cpp-20261103`，范围和复测方法见 [Golden Reference](etm-golden-reference.md)。
+原生索引要求具备 `complete-index-v1` 的 `etm_storebuild.exe`。差分检查和参考输入见 [ETM 差分参考](etm-golden-reference.md)。
 
 ```powershell
 python toolbox.py trace --help
@@ -37,15 +35,16 @@ ETM目标配置默认SWD为10 MHz。网页控制使用 OpenOCD Wasm 的物理 ME
 
 F103ZE常用目标ELF为`prebuilt/golden/f103ze-cdc48.elf`。Zynq原生capture要求明确传`--elf`（目标MCU）、`--bit`（探针PL）和`--zynq-elf`（探针PS）；它不会加载所声明配对。doctor的默认Golden路径不证明板上身份；Golden、release及实验版的哈希/范围以各manifest和报告为准。业务记录清单在retained-records.json，数据包含源码和配置，不依赖旧build/worktree。
 
-H743已单独完成CPU/HCLK60MHz、TRACECLK20MHz、SWD10MHz的10/200/500/1000ms连续DDR USB实板验收，使用 `prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf`。构建入口及SDK在 `firmware/target/stm32h743_cdc_trace/`；H743原生capture当前明确拒绝F103专用entry/reset选项。GUI起点/首屏及旧固定EXE不在此次验收范围，详见 [H743综合报告](validation/h743-comprehensive-20261101/README.md)。
+H743已单独完成CPU/HCLK60MHz、TRACECLK20MHz、SWD10MHz的10/200/500/1000ms连续DDR USB实板验收，使用 `prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf`。构建入口及SDK在 `firmware/target/stm32h743_cdc_trace/`；H743原生capture当前明确拒绝F103专用entry/reset选项。融合配对已完成严格解码复验，见 [H743 RAW4 验收](validation/h743-cdc-golden-requal-20261123/README.md)。
 
 ```powershell
 # 硬件示例：先核对空闲并加载同一配对；输出目录须不存在。
-python -X utf8 toolbox.py trace capture --elf prebuilt/golden/f103ze-cdc48.elf --bit prebuilt/fclk133-release-20261101/probe.bit --zynq-elf prebuilt/fclk133-release-20261101/application.elf --out build/trace-capture-new --seconds 1 --swd-khz 10000
+$pair = 'prebuilt/selectio-usb-split-raw4-20261123'
+python -X utf8 toolbox.py trace capture --elf prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf --bit "$pair/probe.bit" --zynq-elf "$pair/application.elf" --out build/trace-capture-new --seconds 1 --swd-khz 10000
 ```
 
 新会话协作规则见根 [AGENTS.md](../AGENTS.md)。遇到异常或验收缺口时，同步更新 [项目问题跟踪列表](项目问题跟踪列表.md)，原始证据保留在`docs/validation/`对应目录。
 
-SVG支持timeline/aggregate及选定seq范围。完整timeline有200000段上限，超宽聚合图也有实际限制；精简不消除这些边界。HPM6800EVK缺首DEF已按用户恢复授权修复，修复配对/范围见[R23](validation/hpm6800-def-cdc-fix-20261102/README.md)；旧报告暂停结论仍按历史保留。
+SVG支持timeline/aggregate及选定seq范围。完整timeline有200000段上限，超宽聚合图也有实际限制；精简不消除这些边界。HPM6800EVK缺首DEF已按用户恢复授权修复，修复配对/范围见[R23](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/hpm6800-def-cdc-fix-20261102/README.md)；旧报告暂停结论仍按历史保留。
 
 交互火焰图新增 `--format flame-html`，HTML内含Timeline/周期权重双标签，默认Timeline，支持框选放大；可保留 `--from-seq/--to-seq` 区间并离线缩放、平移、查找。Web导出与CLI共用实现；bridge EXE也可用 `--trace-cli export/query/...` 直接操作记录，无需系统Python。完整用法见 [可缩放火焰图HTML](flame-html-export.md)。

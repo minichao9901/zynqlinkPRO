@@ -19,7 +19,7 @@ pwsh -File firmware/target/stm32h743_cdc_trace/flash.ps1 -Elf build/h743-new/fw.
 
 `-CoreMHz 60 -TraceR 8` 为30MHz TRACECLK诊断档；本次Zynq接线未通过，不能作为Golden。`-CoreMHz 480 -TraceR 24` 为CPU480/HCLK240/TRACECLK20的独立吞吐配置，不能把其结果混入CPU60的历史ETM比较。供电/VOS、Flash等待周期随例程设置，其他芯片修订和板型须单独核对。
 
-输出 `fw.elf/bin/hex/map/symbols/disasm`；交付目录为 `prebuilt/targets/stm32h743-cdc-trace-20261101/`，各档身份和验收范围见manifest及 [综合报告](../../../docs/validation/h743-comprehensive-20261101/README.md)。默认不复制历史频率变体二进制。
+输出 `fw.elf/bin/hex/map/symbols/disasm`；交付目录为 `prebuilt/targets/stm32h743-cdc-trace-20261101/`，各档身份和验收范围见manifest及 [综合报告](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/h743-comprehensive-20261101/README.md)。默认不复制历史频率变体二进制。
 
 ## 采集与测速
 

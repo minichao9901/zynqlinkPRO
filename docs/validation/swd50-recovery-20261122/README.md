@@ -4,7 +4,7 @@ J7 `12345678` 与 HS3 `210299008529` 恢复枚举。候选经 HS3 临时加载�
 
 ## 历史同条件对照
 
-2026-10-31 基线的 F103 HCLK 为 96 MHz，标准 CMSIS-DAP 每块 512 字，深度 32，每方向 256 块，三轮取中位数。RTT 使用相同的 8 KiB 环和 2 KiB 搬运块，经 CDC 运行两个 3 秒窗口。当前固件以同样的参数重放。RTT 恢复过程调整为先停转发、再暂停目标，避免同时请求 AP 所有权，计时窗口位于切换之前。[历史原件](../combined-20261031/README.md) · [HCLK96 SRAM](historical-hclk96-cmsis.json) · [HCLK96 RTT](historical-hclk96-rtt.json) · [HCLK128 SRAM](historical-hclk128-cmsis.json) · [HCLK128 RTT](historical-hclk128-rtt.json)
+2026-10-31 基线的 F103 HCLK 为 96 MHz，标准 CMSIS-DAP 每块 512 字，深度 32，每方向 256 块，三轮取中位数。RTT 使用相同的 8 KiB 环和 2 KiB 搬运块，经 CDC 运行两个 3 秒窗口。当前固件以同样的参数重放。RTT 恢复过程调整为先停转发、再暂停目标，避免同时请求 AP 所有权，计时窗口位于切换之前。[历史原件](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/combined-20261031/README.md) · [HCLK96 SRAM](historical-hclk96-cmsis.json) · [HCLK96 RTT](historical-hclk96-rtt.json) · [HCLK128 SRAM](historical-hclk128-cmsis.json) · [HCLK128 RTT](historical-hclk128-rtt.json)
 
 | 条件 | CMSIS-DAP SRAM 读 / 写 | RTT→CDC |
 |---|---:|---:|

@@ -481,7 +481,9 @@ class BoardAcceptance:
                 break
         return dict(data, profile=profile, clock=clock, target=state, byteExact=True, attempts=len(attempts),
                     historicalComparison=comparison, historicalVariance=any(row['deltaPercent'] < -2 for row in comparison.values()),
-                    historicalSource='docs/validation/h743-board-rerun-20261115/README.md')
+                    historicalSource=('https://github.com/minichao9901/zynqlinkPRO/blob/'
+                                      '03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/validation/'
+                                      'h743-board-rerun-20261115/README.md'))
 
     @staticmethod
     def memory_check(addr, payload, read, write):
