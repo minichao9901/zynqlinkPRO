@@ -12,7 +12,7 @@
 ## 新会话先读与现状核对
 
 1. 先执行 `git status --short`、`git log -5 --oneline`，辨认已有修改与当前分支；不要覆盖、清理或批量提交他人的工作。
-2. 从[工程入口](docs/README.md)按任务找到命令和证据。需要精确的脚本、参数、探针配对或目标 ELF 时查根目录的 [acceptance-cases.json](acceptance-cases.json)。按任务阅读对应问题、报告和产物 manifest；涉及硬件前核对当前现场。
+2. 从[工程入口](docs/README.md)按任务找到命令和证据。用 `python -X utf8 toolbox.py project case <用例ID>` 查看根目录 [acceptance-cases.json](acceptance-cases.json) 中的脚本、参数、探针配对和目标 ELF。按任务阅读对应问题、报告和产物 manifest。涉及硬件前核对当前现场。
 3. 问题表是当前状态索引，历史报告保留当时结论；若矛盾，追查较新证据及实际配对，不把历史“待验”或单次通过直接当成现状。
 4. 任何报告中的“最后板上状态”都是带时间的快照。切换分支/worktree、启动另一目录的脚本或 EXE，都不会自动切换板上 bit/ELF。
 

@@ -13,7 +13,16 @@
 | ETM | `f103ze-etm`、`h743-etm` | [Trace CLI](Trace-CLI使用说明.md) · [H743 RAW4 严格复验](validation/h743-cdc-golden-requal-20261123/README.md#etm-对照)。目标 ELF 与探针 PS ELF 分开核对。 |
 | 构建、探针加载和发布 | `target-acceptance-build`、`probe-raw4-load`、`probe-qspi-release` | [目标构建](../firmware/target/README.md) · [探针配对索引](../prebuilt/README.md) · [发布流程](github-release.md)。 |
 
-用例角色为 `regular`（常用入口）、`diagnostic`（定向诊断）、`historical`（历史条件或复现）。知道工具名时用 `python -X utf8 toolbox.py project describe <入口>`。阅读具体参数用原脚本的 `--help`。用例记录只表达运行依赖和已知范围。
+用例角色为 `regular`（常用入口）、`diagnostic`（定向诊断）、`historical`（历史条件或复现）。下列命令只查询数据，`project case` 输出脚本、产物、证据和含 `--dry-run` 的参数数组。
+
+```powershell
+python -X utf8 toolbox.py project cases --board h743 --feature spi
+python -X utf8 toolbox.py project case h743-spi-j7-rx
+python -X utf8 toolbox.py project case f103ze-etm
+python -X utf8 toolbox.py project case hpm6800evk-rtt
+```
+
+知道工具名时用 `project describe <入口>`。具体参数以原脚本的 `--help` 为准。增加或变更用例时维护入口、参数和证据引用。文件 SHA-256 由产物 manifest 维护，问题状态由问题表维护。`targetElf` 缺省表示要从实际读回核对。固定历史资料写为 `提交号:路径`，可用 `git show` 查看。
 
 ## 配对与手册
 

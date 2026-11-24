@@ -177,6 +177,53 @@ def resolve(name,root=ROOT):
     return match
 
 
+def acceptance_catalog(root=ROOT):
+    catalog = json.loads((root / 'acceptance-cases.json').read_text(encoding='utf-8'))
+    if catalog['schemaVersion'] != 1:
+        raise ValueError('不支持的验收用例清单版本')
+    return catalog
+
+
+def acceptance_case(case_id, root=ROOT):
+    catalog = acceptance_catalog(root)
+    case = next((item for item in catalog['cases'] if item['id'] == case_id), None)
+    if case is None:
+        raise ValueError('未知验收用例：' + case_id)
+    entry = resolve(case['entry'], root)
+    if not entry['runnable']:
+        raise ValueError('验收用例入口不可独立运行：' + case['entry'])
+
+    tokens = {'{targetElf}': case.get('targetElf', '<matched-target-elf>')}
+    pair = catalog['probePairs'].get(case.get('probePair'))
+    if case.get('probePair') and pair is None:
+        raise ValueError('验收用例引用了未知探针配对：' + case['probePair'])
+    if pair:
+        directory = Path(pair['manifest']).parent
+        files = {
+            **pair,
+            'bit': (directory / 'probe.bit').as_posix(),
+            'psElf': (directory / 'application.elf').as_posix(),
+            'initTcl': (directory / 'ps7_init.tcl').as_posix(),
+        }
+        tokens.update({
+            '{pair}': directory.as_posix(),
+            '{bit}': files['bit'],
+            '{psElf}': files['psElf'],
+        })
+    unknown = [arg for arg in case['args'] if arg.startswith('{') and arg not in tokens]
+    if unknown:
+        raise ValueError('验收用例含未解析的依赖：' + ', '.join(unknown))
+    args = [tokens.get(arg, arg) for arg in case['args']]
+    prefix = ['python', '-X', 'utf8', 'toolbox.py', 'project', 'run', case['entry']]
+    return {
+        **case,
+        'script': entry['source'],
+        **({'probeFiles': files} if pair else {}),
+        'preview': [*prefix, '--dry-run', '--', *args],
+        'help': [*prefix, '--', '--help'],
+    }
+
+
 def plan(name,args=(),env=None,root=ROOT):
     entry=resolve(name,root)
     if not entry['runnable']:raise ValueError('这是支持库/上下文脚本，请通过其构建或Trace/Web上层入口调用：'+name)
@@ -227,6 +274,14 @@ def main(argv=None):
     sub=p.add_subparsers(dest='action',required=True)
     listing=sub.add_parser('list');listing.add_argument('--out');listing.add_argument('--all',action='store_true',help='包括支持库/非独立脚本');listing.add_argument('--category')
     info=sub.add_parser('describe');info.add_argument('name');info.add_argument('--out')
+    cases = sub.add_parser('cases', help='按板卡、功能或用途查看验收用例')
+    cases.add_argument('--board')
+    cases.add_argument('--feature')
+    cases.add_argument('--role', choices=('regular', 'diagnostic', 'historical'))
+    cases.add_argument('--out')
+    case = sub.add_parser('case', help='查看单个用例的入口、依赖、历史证据和离线预览')
+    case.add_argument('id')
+    case.add_argument('--out')
     run=sub.add_parser('run');run.add_argument('name');run.add_argument('--dry-run',action='store_true');run.add_argument('--env-json',default='{}');run.add_argument('--out')
     a=p.parse_args(argv[:split])
     try:
@@ -235,6 +290,17 @@ def main(argv=None):
             entries=inventory();filtered=[e for e in entries if (a.all or e['runnable']) and (not a.category or e['category']==a.category)]
             value={'protocol':'project-cli/1','entries':filtered,'counts':{'indexed':len(entries),'runnable':sum(e['runnable'] for e in entries),'support':sum(not e['runnable'] for e in entries)},'validation':'Entry coverage is not hardware/function acceptance.'}
         elif a.action=='describe':value=resolve(a.name)
+        elif a.action == 'cases':
+            catalog = acceptance_catalog()
+            filters = {'board': a.board, 'feature': a.feature, 'role': a.role}
+            fields = ('id', 'board', 'feature', 'role', 'title', 'entry')
+            value = {
+                'schemaVersion': catalog['schemaVersion'],
+                'cases': [{field: item[field] for field in fields} for item in catalog['cases']
+                          if all(expected is None or item[key] == expected for key, expected in filters.items())],
+            }
+        elif a.action == 'case':
+            value = acceptance_case(a.id)
         else:
             value=plan(a.name,child,json.loads(a.env_json))
             if not a.dry_run:

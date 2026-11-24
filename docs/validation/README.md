@@ -9,6 +9,13 @@
 | HCLK60/240 相同负载对照、JTAG SRAM 与独立 RTT 长窗 | [时钟及 JTAG 档位](h743-hclk-ab-20261123/README.md) |
 | USB ABI 2 拆分、并发与读尾部 | [USB 拆分验证](usb-split-20261123/README.md) |
 | ETM400 的成帧故障与 RAW4 复验 | [同板诊断](h743-etm-source-audit-20261123/README.md) |
+| H743 → J7 EP10 从机持续接收 | [修订 3 长窗](h743-spi2-cdc-20261124/README.md#实板验收结果与收尾)。50 MHz 按 Mode 1/2，12.5 MHz 按 Mode 0/3。 |
+| J7 原生主机 → H743 只收 | [100 MHz Mode 3 三轮记录](h743-spi2-cdc-20261124/native-master-100-mode3.json)。目标修订 2，单帧 4,096 B。 |
+| J7 ↔ H743 全双工 | [四模式对拍](h743-spi2-cdc-20261124/README.md#实板验收结果与收尾)。原始波形路径约 25 MHz。 |
+
+## SPI 定向诊断
+
+[三线采样、固定码型与速度对照](h743-spi2-100mhz-20261124/README.md)使用诊断配对和 H743 修订 4。固定码型的 100 MHz 通过点与任意数据的失败边界单独记录。用例的脚本和镜像见[根目录清单](../../acceptance-cases.json)，最新状态查问题表。
 
 ## 融合方案历次实测
 

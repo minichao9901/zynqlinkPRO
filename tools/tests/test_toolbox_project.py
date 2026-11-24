@@ -6,6 +6,34 @@ from unittest.mock import patch
 from tools import project_cli as project
 
 class ProjectCliTests(unittest.TestCase):
+    def test_acceptance_catalog_resolves_all_current_dependencies(self):
+        catalog = project.acceptance_catalog()
+        ids = [case['id'] for case in catalog['cases']]
+        self.assertEqual(len(ids), len(set(ids)))
+        for case_id in ids:
+            with self.subTest(case=case_id), patch('subprocess.call') as run:
+                case = project.acceptance_case(case_id)
+                self.assertTrue((project.ROOT / case['script']).is_file())
+                self.assertEqual(case['preview'][7:9], ['--dry-run', '--'])
+                paths = [*case['evidence'], *case.get('referenceElfs', [])]
+                paths.extend(case.get('probeFiles', {}).values())
+                if case.get('targetElf'):
+                    paths.append(case['targetElf'])
+                for path in paths:
+                    if ':' not in path:  # Git-pinned historical references may be absent from source exports.
+                        self.assertTrue((project.ROOT / path).is_file(), path)
+                run.assert_not_called()
+
+    def test_acceptance_preview_keeps_target_and_probe_elf_distinct(self):
+        etm = project.acceptance_case('f103ze-etm')
+        argv = etm['preview']
+        self.assertEqual(argv[argv.index('--elf') + 1], etm['targetElf'])
+        self.assertNotEqual(argv[argv.index('--zynq-elf') + 1], etm['targetElf'])
+        hpm = project.acceptance_case('hpm6800evk-rtt')
+        self.assertIn('<matched-target-elf>', hpm['preview'])
+        with self.assertRaisesRegex(ValueError, '未知验收用例'):
+            project.acceptance_case('unknown-case')
+
     def test_aliases_resolve_to_versioned_project_sources(self):
         entries={e['id']:e for e in project.inventory()}
         for name,path in project.ALIASES.items():
