@@ -1,0 +1,2761 @@
+[
+  {
+    "point": {
+      "id": "fusion-f103ze-scope",
+      "point": {
+        "image": "performance",
+        "transport": "swd",
+        "rate": 50000000,
+        "channels": 1,
+        "group_rate": 1000
+      },
+      "exit": 0,
+      "status": "pending",
+      "reason": null,
+      "restored": true,
+      "seconds": 196.1817910671234,
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-f103ze-scope\\20261124-raw4-grid-swd-50000000-1-1000",
+      "guard": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\grid-scope-swd-50000000-1-1000-guard"
+    },
+    "summary": {
+      "campaign": {
+        "plan": "fusion-full-acceptance-v2",
+        "serial": "12345678",
+        "probe": {
+          "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+          "files": {
+            "probe.bit": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+              "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+            },
+            "application.elf": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+              "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+            },
+            "ps7_init.tcl": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+              "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+            }
+          }
+        }
+      },
+      "case": "fusion-f103ze-scope",
+      "receipt": {
+        "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+        "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+      },
+      "point": {
+        "image": null,
+        "transport": "swd",
+        "rate": 50000000,
+        "tap": 8,
+        "slot": 24,
+        "idle": 0,
+        "channels": 1,
+        "group_rate": 1000,
+        "encoding": null,
+        "spi_mode": null,
+        "frame_bytes": null
+      },
+      "target": {
+        "image": "performance",
+        "manifest": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\manifest.json",
+        "files": {
+          "fw.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.elf",
+            "sha256": "71971d460f5d0fb4302b022b3af23e2bab8e3ff753b4ed681e331779bb5204ea"
+          },
+          "fw.bin": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.bin",
+            "sha256": "7491b1934190ede498a2cdb19fe9bc45caecc2bc27f3880d7fb74f4cc7341c90"
+          },
+          "fw.hex": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.hex",
+            "sha256": "cbfdffff8f144f970f454e17d4a6a087cfce082d35b732e41d419e74550f46d1"
+          }
+        }
+      },
+      "status": "pending",
+      "windows": [
+        {
+          "round": 1,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 2793472,
+            "status": [
+              16777492,
+              49999999,
+              59994,
+              0,
+              40960,
+              0,
+              5456,
+              0,
+              714161669,
+              357564416,
+              0,
+              822238656
+            ],
+            "seconds": 60.001056599998265
+          },
+          "waveform": {
+            "groups": 59994,
+            "changes": 59993,
+            "torn_groups": 0
+          }
+        },
+        {
+          "round": 2,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 2793472,
+            "status": [
+              16777492,
+              49999999,
+              59994,
+              0,
+              40960,
+              0,
+              5456,
+              0,
+              714161669,
+              357564416,
+              0,
+              822238656
+            ],
+            "seconds": 60.001010199997836
+          },
+          "waveform": {
+            "groups": 59994,
+            "changes": 59993,
+            "torn_groups": 0
+          }
+        },
+        {
+          "round": 3,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 2793472,
+            "status": [
+              16777492,
+              49999999,
+              59994,
+              0,
+              40960,
+              0,
+              5456,
+              0,
+              714161669,
+              357564416,
+              0,
+              822238656
+            ],
+            "seconds": 60.00096520000079
+          },
+          "waveform": {
+            "groups": 59994,
+            "changes": 59993,
+            "torn_groups": 0
+          }
+        }
+      ],
+      "remaining": []
+    },
+    "probe": [
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 2793472,
+        "status": [
+          16777492,
+          49999999,
+          59994,
+          0,
+          40960,
+          0,
+          5456,
+          0,
+          714161669,
+          357564416,
+          0,
+          822238656
+        ],
+        "seconds": 60.001056599998265
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 2793472,
+        "status": [
+          16777492,
+          49999999,
+          59994,
+          0,
+          40960,
+          0,
+          5456,
+          0,
+          714161669,
+          357564416,
+          0,
+          822238656
+        ],
+        "seconds": 60.001010199997836
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 2793472,
+        "status": [
+          16777492,
+          49999999,
+          59994,
+          0,
+          40960,
+          0,
+          5456,
+          0,
+          714161669,
+          357564416,
+          0,
+          822238656
+        ],
+        "seconds": 60.00096520000079
+      }
+    ]
+  },
+  {
+    "point": {
+      "id": "fusion-f103ze-scope",
+      "point": {
+        "image": "performance",
+        "transport": "swd",
+        "rate": 50000000,
+        "channels": 8,
+        "group_rate": 1000
+      },
+      "exit": 0,
+      "status": "pending",
+      "reason": null,
+      "restored": true,
+      "seconds": 196.99068975448608,
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-f103ze-scope\\20261124-raw4-grid-swd-50000000-8-1000",
+      "guard": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\grid-scope-swd-50000000-8-1000-guard"
+    },
+    "summary": {
+      "campaign": {
+        "plan": "fusion-full-acceptance-v2",
+        "serial": "12345678",
+        "probe": {
+          "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+          "files": {
+            "probe.bit": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+              "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+            },
+            "application.elf": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+              "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+            },
+            "ps7_init.tcl": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+              "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+            }
+          }
+        }
+      },
+      "case": "fusion-f103ze-scope",
+      "receipt": {
+        "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+        "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+      },
+      "point": {
+        "image": null,
+        "transport": "swd",
+        "rate": 50000000,
+        "tap": 8,
+        "slot": 24,
+        "idle": 0,
+        "channels": 8,
+        "group_rate": 1000,
+        "encoding": null,
+        "spi_mode": null,
+        "frame_bytes": null
+      },
+      "target": {
+        "image": "performance",
+        "manifest": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\manifest.json",
+        "files": {
+          "fw.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.elf",
+            "sha256": "71971d460f5d0fb4302b022b3af23e2bab8e3ff753b4ed681e331779bb5204ea"
+          },
+          "fw.bin": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.bin",
+            "sha256": "7491b1934190ede498a2cdb19fe9bc45caecc2bc27f3880d7fb74f4cc7341c90"
+          },
+          "fw.hex": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.hex",
+            "sha256": "cbfdffff8f144f970f454e17d4a6a087cfce082d35b732e41d419e74550f46d1"
+          }
+        }
+      },
+      "status": "pending",
+      "windows": [
+        {
+          "round": 1,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 2793472,
+            "status": [
+              134219796,
+              49999999,
+              59994,
+              0,
+              40960,
+              0,
+              5456,
+              0,
+              2007932581,
+              357564416,
+              0,
+              822238656
+            ],
+            "seconds": 60.00089300000036
+          },
+          "waveform": {
+            "groups": 59994,
+            "changes": 59993,
+            "torn_groups": 4135
+          }
+        },
+        {
+          "round": 2,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 2793472,
+            "status": [
+              134219796,
+              49999999,
+              59994,
+              0,
+              40960,
+              0,
+              5456,
+              0,
+              2007932581,
+              357564416,
+              0,
+              822238656
+            ],
+            "seconds": 60.00091020000036
+          },
+          "waveform": {
+            "groups": 59994,
+            "changes": 59993,
+            "torn_groups": 4145
+          }
+        },
+        {
+          "round": 3,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 2793472,
+            "status": [
+              134219796,
+              49999999,
+              59994,
+              0,
+              40960,
+              0,
+              5456,
+              0,
+              2007932581,
+              357564416,
+              0,
+              822238656
+            ],
+            "seconds": 60.0007689999984
+          },
+          "waveform": {
+            "groups": 59994,
+            "changes": 59993,
+            "torn_groups": 4147
+          }
+        }
+      ],
+      "remaining": []
+    },
+    "probe": [
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 2793472,
+        "status": [
+          134219796,
+          49999999,
+          59994,
+          0,
+          40960,
+          0,
+          5456,
+          0,
+          2007932581,
+          357564416,
+          0,
+          822238656
+        ],
+        "seconds": 60.00089300000036
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 2793472,
+        "status": [
+          134219796,
+          49999999,
+          59994,
+          0,
+          40960,
+          0,
+          5456,
+          0,
+          2007932581,
+          357564416,
+          0,
+          822238656
+        ],
+        "seconds": 60.00091020000036
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 2793472,
+        "status": [
+          134219796,
+          49999999,
+          59994,
+          0,
+          40960,
+          0,
+          5456,
+          0,
+          2007932581,
+          357564416,
+          0,
+          822238656
+        ],
+        "seconds": 60.0007689999984
+      }
+    ]
+  },
+  {
+    "point": {
+      "id": "fusion-f103ze-scope",
+      "point": {
+        "image": "performance",
+        "transport": "swd",
+        "rate": 50000000,
+        "channels": 1,
+        "group_rate": 10000
+      },
+      "exit": 0,
+      "status": "pending",
+      "reason": null,
+      "restored": true,
+      "seconds": 200.4597828388214,
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-f103ze-scope\\20261124-raw4-grid-swd-50000000-1-10000",
+      "guard": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\grid-scope-swd-50000000-1-10000-guard"
+    },
+    "summary": {
+      "campaign": {
+        "plan": "fusion-full-acceptance-v2",
+        "serial": "12345678",
+        "probe": {
+          "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+          "files": {
+            "probe.bit": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+              "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+            },
+            "application.elf": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+              "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+            },
+            "ps7_init.tcl": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+              "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+            }
+          }
+        }
+      },
+      "case": "fusion-f103ze-scope",
+      "receipt": {
+        "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+        "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+      },
+      "point": {
+        "image": null,
+        "transport": "swd",
+        "rate": 50000000,
+        "tap": 8,
+        "slot": 24,
+        "idle": 0,
+        "channels": 1,
+        "group_rate": 10000,
+        "encoding": null,
+        "spi_mode": null,
+        "frame_bytes": null
+      },
+      "target": {
+        "image": "performance",
+        "manifest": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\manifest.json",
+        "files": {
+          "fw.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.elf",
+            "sha256": "71971d460f5d0fb4302b022b3af23e2bab8e3ff753b4ed681e331779bb5204ea"
+          },
+          "fw.bin": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.bin",
+            "sha256": "7491b1934190ede498a2cdb19fe9bc45caecc2bc27f3880d7fb74f4cc7341c90"
+          },
+          "fw.hex": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.hex",
+            "sha256": "cbfdffff8f144f970f454e17d4a6a087cfce082d35b732e41d419e74550f46d1"
+          }
+        }
+      },
+      "status": "pending",
+      "windows": [
+        {
+          "round": 1,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 3042304,
+            "status": [
+              16777492,
+              49999999,
+              599934,
+              0,
+              27648,
+              0,
+              5942,
+              0,
+              714161669,
+              389414912,
+              0,
+              822217056
+            ],
+            "seconds": 60.00117540000065
+          },
+          "waveform": {
+            "groups": 599934,
+            "changes": 599135,
+            "torn_groups": 0
+          }
+        },
+        {
+          "round": 2,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 3042304,
+            "status": [
+              16777492,
+              49999999,
+              599934,
+              0,
+              27648,
+              0,
+              5942,
+              0,
+              714161669,
+              389414912,
+              0,
+              822217056
+            ],
+            "seconds": 60.001130399999965
+          },
+          "waveform": {
+            "groups": 599934,
+            "changes": 599147,
+            "torn_groups": 0
+          }
+        },
+        {
+          "round": 3,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 3042304,
+            "status": [
+              16777492,
+              49999999,
+              599932,
+              0,
+              27648,
+              0,
+              5942,
+              0,
+              714161669,
+              389414912,
+              0,
+              822217056
+            ],
+            "seconds": 60.001071099999535
+          },
+          "waveform": {
+            "groups": 599932,
+            "changes": 599114,
+            "torn_groups": 0
+          }
+        }
+      ],
+      "remaining": []
+    },
+    "probe": [
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 3042304,
+        "status": [
+          16777492,
+          49999999,
+          599934,
+          0,
+          27648,
+          0,
+          5942,
+          0,
+          714161669,
+          389414912,
+          0,
+          822217056
+        ],
+        "seconds": 60.00117540000065
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 3042304,
+        "status": [
+          16777492,
+          49999999,
+          599934,
+          0,
+          27648,
+          0,
+          5942,
+          0,
+          714161669,
+          389414912,
+          0,
+          822217056
+        ],
+        "seconds": 60.001130399999965
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 3042304,
+        "status": [
+          16777492,
+          49999999,
+          599932,
+          0,
+          27648,
+          0,
+          5942,
+          0,
+          714161669,
+          389414912,
+          0,
+          822217056
+        ],
+        "seconds": 60.001071099999535
+      }
+    ]
+  },
+  {
+    "point": {
+      "id": "fusion-f103ze-scope",
+      "point": {
+        "image": "performance",
+        "transport": "swd",
+        "rate": 50000000,
+        "channels": 1,
+        "group_rate": 25000
+      },
+      "exit": 0,
+      "status": "pending",
+      "reason": null,
+      "restored": true,
+      "seconds": 202.82092452049255,
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-f103ze-scope\\20261124-raw4-grid-swd-50000000-1-25000",
+      "guard": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\grid-scope-swd-50000000-1-25000-guard"
+    },
+    "summary": {
+      "campaign": {
+        "plan": "fusion-full-acceptance-v2",
+        "serial": "12345678",
+        "probe": {
+          "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+          "files": {
+            "probe.bit": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+              "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+            },
+            "application.elf": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+              "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+            },
+            "ps7_init.tcl": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+              "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+            }
+          }
+        }
+      },
+      "case": "fusion-f103ze-scope",
+      "receipt": {
+        "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+        "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+      },
+      "point": {
+        "image": null,
+        "transport": "swd",
+        "rate": 50000000,
+        "tap": 8,
+        "slot": 24,
+        "idle": 0,
+        "channels": 1,
+        "group_rate": 25000,
+        "encoding": null,
+        "spi_mode": null,
+        "frame_bytes": null
+      },
+      "target": {
+        "image": "performance",
+        "manifest": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\manifest.json",
+        "files": {
+          "fw.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.elf",
+            "sha256": "71971d460f5d0fb4302b022b3af23e2bab8e3ff753b4ed681e331779bb5204ea"
+          },
+          "fw.bin": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.bin",
+            "sha256": "7491b1934190ede498a2cdb19fe9bc45caecc2bc27f3880d7fb74f4cc7341c90"
+          },
+          "fw.hex": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.hex",
+            "sha256": "cbfdffff8f144f970f454e17d4a6a087cfce082d35b732e41d419e74550f46d1"
+          }
+        }
+      },
+      "status": "pending",
+      "windows": [
+        {
+          "round": 1,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 6194176,
+            "status": [
+              16777492,
+              49999999,
+              1499833,
+              0,
+              33792,
+              0,
+              12098,
+              0,
+              714161669,
+              792854528,
+              0,
+              822215616
+            ],
+            "seconds": 60.00111139999717
+          },
+          "waveform": {
+            "groups": 1499833,
+            "changes": 600023,
+            "torn_groups": 0
+          }
+        },
+        {
+          "round": 2,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 6194176,
+            "status": [
+              16777492,
+              49999999,
+              1499833,
+              0,
+              33792,
+              0,
+              12098,
+              0,
+              714161669,
+              792854528,
+              0,
+              822215616
+            ],
+            "seconds": 60.00107299999945
+          },
+          "waveform": {
+            "groups": 1499833,
+            "changes": 600022,
+            "torn_groups": 0
+          }
+        },
+        {
+          "round": 3,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 6194176,
+            "status": [
+              16777492,
+              49999999,
+              1499830,
+              0,
+              33792,
+              0,
+              12098,
+              0,
+              714161669,
+              792854528,
+              0,
+              822215616
+            ],
+            "seconds": 60.00092570000197
+          },
+          "waveform": {
+            "groups": 1499830,
+            "changes": 600021,
+            "torn_groups": 0
+          }
+        }
+      ],
+      "remaining": []
+    },
+    "probe": [
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 6194176,
+        "status": [
+          16777492,
+          49999999,
+          1499833,
+          0,
+          33792,
+          0,
+          12098,
+          0,
+          714161669,
+          792854528,
+          0,
+          822215616
+        ],
+        "seconds": 60.00111139999717
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 6194176,
+        "status": [
+          16777492,
+          49999999,
+          1499833,
+          0,
+          33792,
+          0,
+          12098,
+          0,
+          714161669,
+          792854528,
+          0,
+          822215616
+        ],
+        "seconds": 60.00107299999945
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 6194176,
+        "status": [
+          16777492,
+          49999999,
+          1499830,
+          0,
+          33792,
+          0,
+          12098,
+          0,
+          714161669,
+          792854528,
+          0,
+          822215616
+        ],
+        "seconds": 60.00092570000197
+      }
+    ]
+  },
+  {
+    "point": {
+      "id": "fusion-f103ze-scope",
+      "point": {
+        "image": "performance",
+        "transport": "swd",
+        "rate": 50000000,
+        "channels": 1,
+        "group_rate": 50000
+      },
+      "exit": 0,
+      "status": "pending",
+      "reason": null,
+      "restored": true,
+      "seconds": 209.85567712783813,
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-f103ze-scope\\20261124-raw4-grid-swd-50000000-1-50000",
+      "guard": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\grid-scope-swd-50000000-1-50000-guard"
+    },
+    "summary": {
+      "campaign": {
+        "plan": "fusion-full-acceptance-v2",
+        "serial": "12345678",
+        "probe": {
+          "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+          "files": {
+            "probe.bit": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+              "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+            },
+            "application.elf": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+              "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+            },
+            "ps7_init.tcl": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+              "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+            }
+          }
+        }
+      },
+      "case": "fusion-f103ze-scope",
+      "receipt": {
+        "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+        "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+      },
+      "point": {
+        "image": null,
+        "transport": "swd",
+        "rate": 50000000,
+        "tap": 8,
+        "slot": 24,
+        "idle": 0,
+        "channels": 1,
+        "group_rate": 50000,
+        "encoding": null,
+        "spi_mode": null,
+        "frame_bytes": null
+      },
+      "target": {
+        "image": "performance",
+        "manifest": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\manifest.json",
+        "files": {
+          "fw.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.elf",
+            "sha256": "71971d460f5d0fb4302b022b3af23e2bab8e3ff753b4ed681e331779bb5204ea"
+          },
+          "fw.bin": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.bin",
+            "sha256": "7491b1934190ede498a2cdb19fe9bc45caecc2bc27f3880d7fb74f4cc7341c90"
+          },
+          "fw.hex": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.hex",
+            "sha256": "cbfdffff8f144f970f454e17d4a6a087cfce082d35b732e41d419e74550f46d1"
+          }
+        }
+      },
+      "status": "pending",
+      "windows": [
+        {
+          "round": 1,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 12386816,
+            "status": [
+              16777492,
+              49999999,
+              2999673,
+              0,
+              512,
+              0,
+              24193,
+              0,
+              714161669,
+              1585512448,
+              0,
+              822215136
+            ],
+            "seconds": 60.00100470000325
+          },
+          "waveform": {
+            "groups": 2999673,
+            "changes": 600024,
+            "torn_groups": 0
+          }
+        },
+        {
+          "round": 2,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 12386816,
+            "status": [
+              16777492,
+              49999999,
+              2999665,
+              0,
+              512,
+              0,
+              24193,
+              0,
+              714161669,
+              1585512448,
+              0,
+              822215136
+            ],
+            "seconds": 60.00123739999981
+          },
+          "waveform": {
+            "groups": 2999665,
+            "changes": 600023,
+            "torn_groups": 0
+          }
+        },
+        {
+          "round": 3,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 12386816,
+            "status": [
+              16777492,
+              49999999,
+              2999659,
+              0,
+              512,
+              0,
+              24193,
+              0,
+              714161669,
+              1585512448,
+              0,
+              822215136
+            ],
+            "seconds": 60.000992999997834
+          },
+          "waveform": {
+            "groups": 2999659,
+            "changes": 600021,
+            "torn_groups": 0
+          }
+        }
+      ],
+      "remaining": []
+    },
+    "probe": [
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 12386816,
+        "status": [
+          16777492,
+          49999999,
+          2999673,
+          0,
+          512,
+          0,
+          24193,
+          0,
+          714161669,
+          1585512448,
+          0,
+          822215136
+        ],
+        "seconds": 60.00100470000325
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 12386816,
+        "status": [
+          16777492,
+          49999999,
+          2999665,
+          0,
+          512,
+          0,
+          24193,
+          0,
+          714161669,
+          1585512448,
+          0,
+          822215136
+        ],
+        "seconds": 60.00123739999981
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 12386816,
+        "status": [
+          16777492,
+          49999999,
+          2999659,
+          0,
+          512,
+          0,
+          24193,
+          0,
+          714161669,
+          1585512448,
+          0,
+          822215136
+        ],
+        "seconds": 60.000992999997834
+      }
+    ]
+  },
+  {
+    "point": {
+      "id": "fusion-f103ze-scope",
+      "point": {
+        "image": "performance",
+        "transport": "swd",
+        "rate": 50000000,
+        "channels": 1,
+        "group_rate": 100000
+      },
+      "exit": 0,
+      "status": "pending",
+      "reason": null,
+      "restored": true,
+      "seconds": 232.22017312049866,
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-f103ze-scope\\20261124-raw4-grid-swd-50000000-1-100000",
+      "guard": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\grid-scope-swd-50000000-1-100000-guard"
+    },
+    "summary": {
+      "campaign": {
+        "plan": "fusion-full-acceptance-v2",
+        "serial": "12345678",
+        "probe": {
+          "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+          "files": {
+            "probe.bit": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+              "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+            },
+            "application.elf": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+              "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+            },
+            "ps7_init.tcl": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+              "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+            }
+          }
+        }
+      },
+      "case": "fusion-f103ze-scope",
+      "receipt": {
+        "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+        "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+      },
+      "point": {
+        "image": null,
+        "transport": "swd",
+        "rate": 50000000,
+        "tap": 8,
+        "slot": 24,
+        "idle": 0,
+        "channels": 1,
+        "group_rate": 100000,
+        "encoding": null,
+        "spi_mode": null,
+        "frame_bytes": null
+      },
+      "target": {
+        "image": "performance",
+        "manifest": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\manifest.json",
+        "files": {
+          "fw.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.elf",
+            "sha256": "71971d460f5d0fb4302b022b3af23e2bab8e3ff753b4ed681e331779bb5204ea"
+          },
+          "fw.bin": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.bin",
+            "sha256": "7491b1934190ede498a2cdb19fe9bc45caecc2bc27f3880d7fb74f4cc7341c90"
+          },
+          "fw.hex": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.hex",
+            "sha256": "cbfdffff8f144f970f454e17d4a6a087cfce082d35b732e41d419e74550f46d1"
+          }
+        }
+      },
+      "status": "pending",
+      "windows": [
+        {
+          "round": 1,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 24772608,
+            "status": [
+              16777492,
+              49999999,
+              5999331,
+              0,
+              0,
+              0,
+              48384,
+              0,
+              714161669,
+              3170893824,
+              0,
+              822214896
+            ],
+            "seconds": 60.00113720000081
+          },
+          "waveform": {
+            "groups": 5999331,
+            "changes": 600023,
+            "torn_groups": 0
+          }
+        },
+        {
+          "round": 2,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 24772608,
+            "status": [
+              16777492,
+              49999999,
+              5999334,
+              0,
+              0,
+              0,
+              48384,
+              0,
+              714161669,
+              3170893824,
+              0,
+              822214896
+            ],
+            "seconds": 60.00116820000039
+          },
+          "waveform": {
+            "groups": 5999334,
+            "changes": 600023,
+            "torn_groups": 0
+          }
+        },
+        {
+          "round": 3,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 24772608,
+            "status": [
+              16777492,
+              49999999,
+              5999332,
+              0,
+              0,
+              0,
+              48384,
+              0,
+              714161669,
+              3170893824,
+              0,
+              822214896
+            ],
+            "seconds": 60.00132830000075
+          },
+          "waveform": {
+            "groups": 5999332,
+            "changes": 600023,
+            "torn_groups": 0
+          }
+        }
+      ],
+      "remaining": []
+    },
+    "probe": [
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 24772608,
+        "status": [
+          16777492,
+          49999999,
+          5999331,
+          0,
+          0,
+          0,
+          48384,
+          0,
+          714161669,
+          3170893824,
+          0,
+          822214896
+        ],
+        "seconds": 60.00113720000081
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 24772608,
+        "status": [
+          16777492,
+          49999999,
+          5999334,
+          0,
+          0,
+          0,
+          48384,
+          0,
+          714161669,
+          3170893824,
+          0,
+          822214896
+        ],
+        "seconds": 60.00116820000039
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 24772608,
+        "status": [
+          16777492,
+          49999999,
+          5999332,
+          0,
+          0,
+          0,
+          48384,
+          0,
+          714161669,
+          3170893824,
+          0,
+          822214896
+        ],
+        "seconds": 60.00132830000075
+      }
+    ]
+  },
+  {
+    "point": {
+      "id": "fusion-f103ze-scope",
+      "point": {
+        "image": "performance",
+        "transport": "swd",
+        "rate": 50000000,
+        "channels": 8,
+        "group_rate": 10000
+      },
+      "exit": 0,
+      "status": "pending",
+      "reason": null,
+      "restored": true,
+      "seconds": 205.68431663513184,
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-f103ze-scope\\20261124-raw4-grid-swd-50000000-8-10000",
+      "guard": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\grid-scope-swd-50000000-8-10000-guard"
+    },
+    "summary": {
+      "campaign": {
+        "plan": "fusion-full-acceptance-v2",
+        "serial": "12345678",
+        "probe": {
+          "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+          "files": {
+            "probe.bit": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+              "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+            },
+            "application.elf": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+              "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+            },
+            "ps7_init.tcl": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+              "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+            }
+          }
+        }
+      },
+      "case": "fusion-f103ze-scope",
+      "receipt": {
+        "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+        "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+      },
+      "point": {
+        "image": null,
+        "transport": "swd",
+        "rate": 50000000,
+        "tap": 8,
+        "slot": 24,
+        "idle": 0,
+        "channels": 8,
+        "group_rate": 10000,
+        "encoding": null,
+        "spi_mode": null,
+        "frame_bytes": null
+      },
+      "target": {
+        "image": "performance",
+        "manifest": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\manifest.json",
+        "files": {
+          "fw.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.elf",
+            "sha256": "71971d460f5d0fb4302b022b3af23e2bab8e3ff753b4ed681e331779bb5204ea"
+          },
+          "fw.bin": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.bin",
+            "sha256": "7491b1934190ede498a2cdb19fe9bc45caecc2bc27f3880d7fb74f4cc7341c90"
+          },
+          "fw.hex": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.hex",
+            "sha256": "cbfdffff8f144f970f454e17d4a6a087cfce082d35b732e41d419e74550f46d1"
+          }
+        }
+      },
+      "status": "pending",
+      "windows": [
+        {
+          "round": 1,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 20478976,
+            "status": [
+              134219796,
+              49999999,
+              599932,
+              0,
+              31744,
+              0,
+              39998,
+              0,
+              2007932581,
+              2621308928,
+              0,
+              822217056
+            ],
+            "seconds": 60.00077349999992
+          },
+          "waveform": {
+            "groups": 599932,
+            "changes": 599134,
+            "torn_groups": 41797
+          }
+        },
+        {
+          "round": 2,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 20478976,
+            "status": [
+              134219796,
+              49999999,
+              599933,
+              0,
+              31744,
+              0,
+              39998,
+              0,
+              2007932581,
+              2621308928,
+              0,
+              822217056
+            ],
+            "seconds": 60.00079689999984
+          },
+          "waveform": {
+            "groups": 599933,
+            "changes": 599135,
+            "torn_groups": 41722
+          }
+        },
+        {
+          "round": 3,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 20478976,
+            "status": [
+              134219796,
+              49999999,
+              599933,
+              0,
+              31744,
+              0,
+              39998,
+              0,
+              2007932581,
+              2621308928,
+              0,
+              822217056
+            ],
+            "seconds": 60.000847400002385
+          },
+          "waveform": {
+            "groups": 599933,
+            "changes": 599146,
+            "torn_groups": 41722
+          }
+        }
+      ],
+      "remaining": []
+    },
+    "probe": [
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 20478976,
+        "status": [
+          134219796,
+          49999999,
+          599932,
+          0,
+          31744,
+          0,
+          39998,
+          0,
+          2007932581,
+          2621308928,
+          0,
+          822217056
+        ],
+        "seconds": 60.00077349999992
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 20478976,
+        "status": [
+          134219796,
+          49999999,
+          599933,
+          0,
+          31744,
+          0,
+          39998,
+          0,
+          2007932581,
+          2621308928,
+          0,
+          822217056
+        ],
+        "seconds": 60.00079689999984
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 20478976,
+        "status": [
+          134219796,
+          49999999,
+          599933,
+          0,
+          31744,
+          0,
+          39998,
+          0,
+          2007932581,
+          2621308928,
+          0,
+          822217056
+        ],
+        "seconds": 60.000847400002385
+      }
+    ]
+  },
+  {
+    "point": {
+      "id": "fusion-f103ze-scope",
+      "point": {
+        "image": "performance",
+        "transport": "swd",
+        "rate": 50000000,
+        "channels": 8,
+        "group_rate": 25000
+      },
+      "exit": 0,
+      "status": "pending",
+      "reason": null,
+      "restored": true,
+      "seconds": 223.69188022613525,
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-f103ze-scope\\20261124-raw4-grid-swd-50000000-8-25000",
+      "guard": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\grid-scope-swd-50000000-8-25000-guard"
+    },
+    "summary": {
+      "campaign": {
+        "plan": "fusion-full-acceptance-v2",
+        "serial": "12345678",
+        "probe": {
+          "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+          "files": {
+            "probe.bit": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+              "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+            },
+            "application.elf": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+              "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+            },
+            "ps7_init.tcl": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+              "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+            }
+          }
+        }
+      },
+      "case": "fusion-f103ze-scope",
+      "receipt": {
+        "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+        "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+      },
+      "point": {
+        "image": null,
+        "transport": "swd",
+        "rate": 50000000,
+        "tap": 8,
+        "slot": 24,
+        "idle": 0,
+        "channels": 8,
+        "group_rate": 25000,
+        "encoding": null,
+        "spi_mode": null,
+        "frame_bytes": null
+      },
+      "target": {
+        "image": "performance",
+        "manifest": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\manifest.json",
+        "files": {
+          "fw.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.elf",
+            "sha256": "71971d460f5d0fb4302b022b3af23e2bab8e3ff753b4ed681e331779bb5204ea"
+          },
+          "fw.bin": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.bin",
+            "sha256": "7491b1934190ede498a2cdb19fe9bc45caecc2bc27f3880d7fb74f4cc7341c90"
+          },
+          "fw.hex": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.hex",
+            "sha256": "cbfdffff8f144f970f454e17d4a6a087cfce082d35b732e41d419e74550f46d1"
+          }
+        }
+      },
+      "status": "pending",
+      "windows": [
+        {
+          "round": 1,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 51195392,
+            "status": [
+              134219796,
+              49999999,
+              1499834,
+              0,
+              11776,
+              0,
+              99991,
+              0,
+              2007932581,
+              2258042880,
+              0,
+              822215616
+            ],
+            "seconds": 60.00111940000352
+          },
+          "waveform": {
+            "groups": 1499834,
+            "changes": 600023,
+            "torn_groups": 104582
+          }
+        },
+        {
+          "round": 2,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 51195392,
+            "status": [
+              134219796,
+              49999999,
+              1499832,
+              0,
+              11776,
+              0,
+              99991,
+              0,
+              2007932581,
+              2258042880,
+              0,
+              822215616
+            ],
+            "seconds": 60.000842600002215
+          },
+          "waveform": {
+            "groups": 1499832,
+            "changes": 600022,
+            "torn_groups": 103444
+          }
+        },
+        {
+          "round": 3,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 51195392,
+            "status": [
+              134219796,
+              49999999,
+              1499832,
+              0,
+              11776,
+              0,
+              99991,
+              0,
+              2007932581,
+              2258042880,
+              0,
+              822215616
+            ],
+            "seconds": 60.00104629999987
+          },
+          "waveform": {
+            "groups": 1499832,
+            "changes": 600023,
+            "torn_groups": 104660
+          }
+        }
+      ],
+      "remaining": []
+    },
+    "probe": [
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 51195392,
+        "status": [
+          134219796,
+          49999999,
+          1499834,
+          0,
+          11776,
+          0,
+          99991,
+          0,
+          2007932581,
+          2258042880,
+          0,
+          822215616
+        ],
+        "seconds": 60.00111940000352
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 51195392,
+        "status": [
+          134219796,
+          49999999,
+          1499832,
+          0,
+          11776,
+          0,
+          99991,
+          0,
+          2007932581,
+          2258042880,
+          0,
+          822215616
+        ],
+        "seconds": 60.000842600002215
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 51195392,
+        "status": [
+          134219796,
+          49999999,
+          1499832,
+          0,
+          11776,
+          0,
+          99991,
+          0,
+          2007932581,
+          2258042880,
+          0,
+          822215616
+        ],
+        "seconds": 60.00104629999987
+      }
+    ]
+  },
+  {
+    "point": {
+      "id": "fusion-f103ze-scope",
+      "point": {
+        "image": "performance",
+        "transport": "swd",
+        "rate": 50000000,
+        "channels": 8,
+        "group_rate": 50000
+      },
+      "exit": 0,
+      "status": "pending",
+      "reason": null,
+      "restored": true,
+      "seconds": 258.8609662055969,
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-f103ze-scope\\20261124-raw4-grid-swd-50000000-8-50000",
+      "guard": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\grid-scope-swd-50000000-8-50000-guard"
+    },
+    "summary": {
+      "campaign": {
+        "plan": "fusion-full-acceptance-v2",
+        "serial": "12345678",
+        "probe": {
+          "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+          "files": {
+            "probe.bit": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+              "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+            },
+            "application.elf": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+              "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+            },
+            "ps7_init.tcl": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+              "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+            }
+          }
+        }
+      },
+      "case": "fusion-f103ze-scope",
+      "receipt": {
+        "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+        "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+      },
+      "point": {
+        "image": null,
+        "transport": "swd",
+        "rate": 50000000,
+        "tap": 8,
+        "slot": 24,
+        "idle": 0,
+        "channels": 8,
+        "group_rate": 50000,
+        "encoding": null,
+        "spi_mode": null,
+        "frame_bytes": null
+      },
+      "target": {
+        "image": "performance",
+        "manifest": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\manifest.json",
+        "files": {
+          "fw.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.elf",
+            "sha256": "71971d460f5d0fb4302b022b3af23e2bab8e3ff753b4ed681e331779bb5204ea"
+          },
+          "fw.bin": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.bin",
+            "sha256": "7491b1934190ede498a2cdb19fe9bc45caecc2bc27f3880d7fb74f4cc7341c90"
+          },
+          "fw.hex": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.hex",
+            "sha256": "cbfdffff8f144f970f454e17d4a6a087cfce082d35b732e41d419e74550f46d1"
+          }
+        }
+      },
+      "status": "pending",
+      "windows": [
+        {
+          "round": 1,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 102389760,
+            "status": [
+              134219796,
+              49999999,
+              2999662,
+              0,
+              22528,
+              0,
+              199980,
+              0,
+              2007932581,
+              220987392,
+              0,
+              822215136
+            ],
+            "seconds": 60.00121410000065
+          },
+          "waveform": {
+            "groups": 2999662,
+            "changes": 600022,
+            "torn_groups": 206566
+          }
+        },
+        {
+          "round": 2,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 102389760,
+            "status": [
+              134219796,
+              49999999,
+              2999659,
+              0,
+              22528,
+              0,
+              199980,
+              0,
+              2007932581,
+              220987392,
+              0,
+              822215136
+            ],
+            "seconds": 60.00094099999842
+          },
+          "waveform": {
+            "groups": 2999659,
+            "changes": 600022,
+            "torn_groups": 206684
+          }
+        },
+        {
+          "round": 3,
+          "probe": {
+            "protocol": "ZLK1",
+            "reference_hz": 199999996,
+            "link_hz": 99999998.0,
+            "features": "0x4450ffff",
+            "integrated_pl": true,
+            "max_frame": 16384,
+            "firmware_abi": 2,
+            "bulk_header_bytes": 16,
+            "serial_buffer_bytes": 2162688,
+            "fclk0_hz": 133333332,
+            "negotiated_frame": 16384,
+            "max_queue_depth": 4,
+            "dedicated_pipes": true,
+            "bytes": 102389760,
+            "status": [
+              134219796,
+              49999999,
+              2999664,
+              0,
+              22528,
+              0,
+              199980,
+              0,
+              2007932581,
+              220987392,
+              0,
+              822215136
+            ],
+            "seconds": 60.00150980000035
+          },
+          "waveform": {
+            "groups": 2999664,
+            "changes": 600022,
+            "torn_groups": 206621
+          }
+        }
+      ],
+      "remaining": []
+    },
+    "probe": [
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 102389760,
+        "status": [
+          134219796,
+          49999999,
+          2999662,
+          0,
+          22528,
+          0,
+          199980,
+          0,
+          2007932581,
+          220987392,
+          0,
+          822215136
+        ],
+        "seconds": 60.00121410000065
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 102389760,
+        "status": [
+          134219796,
+          49999999,
+          2999659,
+          0,
+          22528,
+          0,
+          199980,
+          0,
+          2007932581,
+          220987392,
+          0,
+          822215136
+        ],
+        "seconds": 60.00094099999842
+      },
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 102389760,
+        "status": [
+          134219796,
+          49999999,
+          2999664,
+          0,
+          22528,
+          0,
+          199980,
+          0,
+          2007932581,
+          220987392,
+          0,
+          822215136
+        ],
+        "seconds": 60.00150980000035
+      }
+    ]
+  },
+  {
+    "point": {
+      "id": "fusion-f103ze-scope",
+      "point": {
+        "image": "performance",
+        "transport": "swd",
+        "rate": 50000000,
+        "channels": 8,
+        "group_rate": 100000
+      },
+      "exit": 1,
+      "status": "fail",
+      "reason": "Skipped 2999685 sample groups above the limit",
+      "restored": true,
+      "seconds": 93.44232439994812,
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-f103ze-scope\\20261124-raw4-grid-swd-50000000-8-100000",
+      "guard": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\grid-scope-swd-50000000-8-100000-guard"
+    },
+    "summary": {
+      "campaign": {
+        "plan": "fusion-full-acceptance-v2",
+        "serial": "12345678",
+        "probe": {
+          "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+          "files": {
+            "probe.bit": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+              "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+            },
+            "application.elf": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+              "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+            },
+            "ps7_init.tcl": {
+              "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+              "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+            }
+          }
+        }
+      },
+      "case": "fusion-f103ze-scope",
+      "receipt": {
+        "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+        "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+      },
+      "point": {
+        "image": null,
+        "transport": "swd",
+        "rate": 50000000,
+        "tap": 8,
+        "slot": 24,
+        "idle": 0,
+        "channels": 8,
+        "group_rate": 100000,
+        "encoding": null,
+        "spi_mode": null,
+        "frame_bytes": null
+      },
+      "target": {
+        "image": "performance",
+        "manifest": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\manifest.json",
+        "files": {
+          "fw.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.elf",
+            "sha256": "71971d460f5d0fb4302b022b3af23e2bab8e3ff753b4ed681e331779bb5204ea"
+          },
+          "fw.bin": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.bin",
+            "sha256": "7491b1934190ede498a2cdb19fe9bc45caecc2bc27f3880d7fb74f4cc7341c90"
+          },
+          "fw.hex": {
+            "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\performance\\fw.hex",
+            "sha256": "cbfdffff8f144f970f454e17d4a6a087cfce082d35b732e41d419e74550f46d1"
+          }
+        }
+      },
+      "status": "fail",
+      "reason": "Skipped 2999685 sample groups above the limit"
+    },
+    "probe": [
+      {
+        "protocol": "ZLK1",
+        "reference_hz": 199999996,
+        "link_hz": 99999998.0,
+        "features": "0x4450ffff",
+        "integrated_pl": true,
+        "max_frame": 16384,
+        "firmware_abi": 2,
+        "bulk_header_bytes": 16,
+        "serial_buffer_bytes": 2162688,
+        "fclk0_hz": 133333332,
+        "negotiated_frame": 16384,
+        "max_queue_depth": 4,
+        "dedicated_pipes": true,
+        "bytes": 1535840256,
+        "status": [
+          134219796,
+          49999999,
+          2999686,
+          2999685,
+          4096,
+          0,
+          2999688,
+          50565,
+          2007932581,
+          3314024448,
+          0,
+          822214896
+        ],
+        "seconds": 60.002090699999826
+      }
+    ]
+  }
+]
