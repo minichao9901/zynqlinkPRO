@@ -37,3 +37,9 @@
 - 25 MHz 原始波形全双工在发钟前触发 DMA1 TX Stream 1 的 FEIF。当时 TX 已提交 16 B，RX 为 0。修订 2 为 TX 启用 DMA FIFO，并保留错误检查。
 
 修订 2 已编译，新增 `SPI READ` 和 `SPI PINS`。修订 1 的失败证据保留。修订 2 的实板结论待重烧、接线和对拍。 [首轮数值](first-spi-attempt.json) · [修订 2 产物](../../../prebuilt/targets/stm32h743-spi2-cdc-r2-20261124/README.md)
+
+## 修订 2 USB DFU 烧录
+
+保留 SPI 接线，通过 H743 原生 USB 烧录。板载 CH340 控制线尝试未引起 CDC 断开，用户手动设置 BOOT0 并复位。Windows 枚举 ROM DFU `0483:df11`、序列号 `200364500000`，DFU alt 0 为 `0x08000000` 内部 Flash。烧前读取前 1,024 B 核对旧夹具身份。dfu-util 0.11 写入修订 2，共 39,392 B，全量独立读回一致。Option Bytes 未写入。
+
+自动退出 DFU 时 dfu-util 返回 74，ROM DFU 仍枚举。待 BOOT0 回到 0 并复位后确认修订号、CDC 与 SPI 实测。 [烧录证据](revision2-usb-dfu.json) · [ST AN2606](https://www.st.com/resource/en/application_note/an2606-stm32-microcontroller-system-memory-boot-mode-stmicroelectronics.pdf)
