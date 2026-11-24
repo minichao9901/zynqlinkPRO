@@ -1,0 +1,546 @@
+{
+  "planSource": "ccf3b6e9",
+  "planSha256": "b8b0f0a1b77032b7c1fe39fe1b81dc535dcbf0cbe8c9511efd58df9f00f56897",
+  "campaign": {
+    "plan": "fusion-full-acceptance-v2",
+    "serial": "12345678",
+    "probe": {
+      "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+      "files": {
+        "probe.bit": {
+          "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+          "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+        },
+        "application.elf": {
+          "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+          "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+        },
+        "ps7_init.tcl": {
+          "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+          "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+        }
+      }
+    }
+  },
+  "load": {
+    "operation": "JTAG/RAM",
+    "dryRun": false,
+    "out": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load",
+    "files": {
+      "bit": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+        "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+      },
+      "zynq_elf": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+        "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+      },
+      "ps_init": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+        "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+      }
+    },
+    "cableSerial": "210299008529",
+    "usbSerial": "12345678",
+    "commands": {
+      "load": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "E:\\zynqlinkPRO-efficiency\\tools\\run_xsct.py",
+        "E:\\zynqlinkPRO-efficiency\\tools\\download_dap_fpga.tcl",
+        "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+        "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+        "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+        "210299008529",
+        "--sdk",
+        "E:\\Xilinx\\SDK\\2018.3"
+      ],
+      "verify": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "E:\\zynqlinkPRO-efficiency\\tools\\verify_probe_ocm_code.py",
+        "--elf",
+        "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+        "--out-dir",
+        "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\ocm",
+        "--sdk",
+        "E:\\Xilinx\\SDK\\2018.3",
+        "--cable-serial",
+        "210299008529"
+      ]
+    },
+    "stage": "complete",
+    "passed": true,
+    "streams": {},
+    "before": {
+      "PS_IDCODE": "0x23727093",
+      "LEVEL_SHIFTERS": "0x0",
+      "FPGA_RESET": "0x1f33f0f",
+      "BOOT_MODE": "0x0"
+    },
+    "verifiedBytes": 80668,
+    "FCLK_Hz": 133333332
+  },
+  "identity": {
+    "campaign": {
+      "plan": "fusion-full-acceptance-v2",
+      "serial": "12345678",
+      "probe": {
+        "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+        "files": {
+          "probe.bit": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+            "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+          },
+          "application.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+            "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+          },
+          "ps7_init.tcl": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+            "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+          }
+        }
+      }
+    },
+    "case": null,
+    "receipt": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+      "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+    },
+    "status": "identity-checked"
+  },
+  "first": {
+    "campaign": {
+      "plan": "fusion-full-acceptance-v2",
+      "serial": "12345678",
+      "probe": {
+        "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+        "files": {
+          "probe.bit": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+            "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+          },
+          "application.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+            "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+          },
+          "ps7_init.tcl": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+            "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+          }
+        }
+      }
+    },
+    "case": "fusion-f103ze-etm-golden",
+    "receipt": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+      "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+    },
+    "point": {
+      "image": null,
+      "transport": null,
+      "rate": null,
+      "tap": null,
+      "slot": null,
+      "idle": null,
+      "channels": null,
+      "group_rate": null,
+      "encoding": null,
+      "spi_mode": null,
+      "frame_bytes": null
+    },
+    "target": {
+      "image": "golden",
+      "files": {
+        "fw.elf": {
+          "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\golden\\f103ze-cdc48.elf",
+          "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f"
+        }
+      }
+    },
+    "status": "fail",
+    "reason": "capture-1000ms-1 returned 4; see build\\runs\\fusion-f103ze-etm-golden\\20261124-raw4-v2"
+  },
+  "firstError": {
+    "type": "CliError",
+    "message": "上板采集失败",
+    "details": {
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "E:\\zynqlinkPRO-efficiency\\tools\\test_orbtrace_board.py",
+        "--target-elf",
+        "E:\\zynqlinkPRO-efficiency\\prebuilt\\golden\\f103ze-cdc48.elf",
+        "--bit",
+        "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+        "--elf",
+        "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+        "--output",
+        "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-f103ze-etm-golden\\20261124-raw4-v2\\capture-1000ms-1",
+        "--milliseconds",
+        "1000.0",
+        "--trace-id",
+        "2",
+        "--speed-khz",
+        "10000",
+        "--gpio-speed",
+        "1",
+        "--transport",
+        "auto",
+        "--wasm-target-control",
+        "--running-window"
+      ],
+      "output": "tools\\probe_ownership.py\", line 68, in managed_open\n    try:return original_open()\n               ~~~~~~~~~~~~~^^\n  File \"C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\usb\\core.py\", line 113, in wrapper\n    return f(self, *args, **kwargs)\n  File \"C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\usb\\core.py\", line 132, in managed_open\n    self.handle = self.backend.open_device(self.dev)\n                  ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^\n  File \"C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\usb\\backend\\libusb1.py\", line 808, in open_device\n    return _DeviceHandle(dev)\n  File \"C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\usb\\backend\\libusb1.py\", line 656, in __init__\n    _check(_lib.libusb_open(self.devid, byref(self.handle)))\n    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\usb\\backend\\libusb1.py\", line 604, in _check\n    raise USBError(_strerror(ret), ret, _libusb_errno[ret])\nusb.core.USBError: [Errno 13] Access denied (insufficient permissions)"
+    }
+  },
+  "retry": {
+    "campaign": {
+      "plan": "fusion-full-acceptance-v2",
+      "serial": "12345678",
+      "probe": {
+        "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+        "files": {
+          "probe.bit": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+            "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+          },
+          "application.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+            "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+          },
+          "ps7_init.tcl": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+            "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+          }
+        }
+      }
+    },
+    "case": "fusion-f103ze-etm-golden",
+    "receipt": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+      "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+    },
+    "point": {
+      "image": null,
+      "transport": null,
+      "rate": null,
+      "tap": null,
+      "slot": null,
+      "idle": null,
+      "channels": null,
+      "group_rate": null,
+      "encoding": null,
+      "spi_mode": null,
+      "frame_bytes": null
+    },
+    "target": {
+      "image": "golden",
+      "files": {
+        "fw.elf": {
+          "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\golden\\f103ze-cdc48.elf",
+          "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f"
+        }
+      }
+    },
+    "status": "pending",
+    "captures": [
+      {
+        "milliseconds": 1000,
+        "round": 1,
+        "record": "build\\runs\\fusion-f103ze-etm-golden\\20261124-raw4-v2-usb-release\\capture-1000ms-1"
+      },
+      {
+        "milliseconds": 1000,
+        "round": 2,
+        "record": "build\\runs\\fusion-f103ze-etm-golden\\20261124-raw4-v2-usb-release\\capture-1000ms-2"
+      },
+      {
+        "milliseconds": 1000,
+        "round": 3,
+        "record": "build\\runs\\fusion-f103ze-etm-golden\\20261124-raw4-v2-usb-release\\capture-1000ms-3"
+      }
+    ],
+    "remaining": [
+      "Attach the pre/post target CDC, clocks, workload and restoration evidence before signing off."
+    ]
+  },
+  "windows": [
+    {
+      "round": 1,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 1,
+        "captureNonce": 18382431197001454027,
+        "loss": false,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": true,
+        "requestedWindowComplete": true,
+        "completionReason": "time",
+        "ended": true,
+        "records": 963163,
+        "hardwareTicks": 199999998,
+        "requestedTicks": 199999998,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 1.0,
+        "hardwareStartBracketUnix": [
+          1795517996.686818,
+          1795517996.6873636
+        ],
+        "stopReason": 0,
+        "formatterBytes": 15410611,
+        "tailBytes": 3,
+        "tailAmbiguous": false,
+        "usbSeconds": 0.4031040000008943,
+        "usbPayloadMBps": 38.229863757158974,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 0,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 1,
+          "observedFrames": 963163,
+          "capacityReached": false,
+          "writerError": 0
+        },
+        "fclk": 133333332,
+        "tckKhz": 9523.809428571429
+      },
+      "decode": {
+        "packets": 3854329,
+        "ranges": 19188158,
+        "instructions": 19188158,
+        "executed": 17270405,
+        "sourceMapped": 19188158,
+        "exceptions": 1000,
+        "gaps": 1,
+        "packetIssues": 0,
+        "unknownExecution": 0,
+        "functions": {
+          "cdc_poll": 8630521,
+          "main": 8629884,
+          "HAL_IncTick": 7000,
+          "SysTick_Handler": 3000
+        }
+      },
+      "control": {
+        "fclk_hz": 133333332,
+        "cfg": "0x4ca01",
+        "SWCLK_Hz": 9523809.42857143,
+        "half_period_fclk": 7,
+        "short_high": false,
+        "intended_high_ns": 52.500000525000004
+      },
+      "rccBefore": [
+        50548355,
+        5309450
+      ],
+      "rccCapture": [
+        50548355,
+        5309450
+      ],
+      "rccAfter": [
+        50548355,
+        5309450
+      ],
+      "restored": true,
+      "fpbRestored": true,
+      "verify": {
+        "passed": true,
+        "failures": {},
+        "terminalBoundaryPackets": [],
+        "note": "尾部INCOMPLETE_EOT单列保留；初始化未同步/条件未知不视作已证实执行；字节核算不等于无损证明"
+      },
+      "etmSha256": "08f337c1cbffa4faa76e1e1e1ad67c8efc37a652428fee6f1db6c2bbafb1de99"
+    },
+    {
+      "round": 2,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 2,
+        "captureNonce": 2525589229763287943,
+        "loss": false,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": true,
+        "requestedWindowComplete": true,
+        "completionReason": "time",
+        "ended": true,
+        "records": 963810,
+        "hardwareTicks": 199999998,
+        "requestedTicks": 199999998,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 1.0,
+        "hardwareStartBracketUnix": [
+          1795518007.2255712,
+          1795518007.2262797
+        ],
+        "stopReason": 0,
+        "formatterBytes": 15420960,
+        "tailBytes": 0,
+        "tailAmbiguous": true,
+        "usbSeconds": 0.40663750000021537,
+        "usbPayloadMBps": 37.9231133380267,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 0,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 1,
+          "observedFrames": 963810,
+          "capacityReached": false,
+          "writerError": 0
+        },
+        "fclk": 133333332,
+        "tckKhz": 9523.809428571429
+      },
+      "decode": {
+        "packets": 3855186,
+        "ranges": 19192707,
+        "instructions": 19192707,
+        "executed": 17274500,
+        "sourceMapped": 19192707,
+        "exceptions": 1000,
+        "gaps": 1,
+        "packetIssues": 0,
+        "unknownExecution": 1,
+        "functions": {
+          "cdc_poll": 8632558,
+          "main": 8631917,
+          "HAL_IncTick": 7000,
+          "SysTick_Handler": 3000,
+          "trace_hook_mark": 23,
+          "HAL_GPIO_WritePin": 2
+        }
+      },
+      "control": {
+        "fclk_hz": 133333332,
+        "cfg": "0x4ca01",
+        "SWCLK_Hz": 9523809.42857143,
+        "half_period_fclk": 7,
+        "short_high": false,
+        "intended_high_ns": 52.500000525000004
+      },
+      "rccBefore": [
+        50548355,
+        5309450
+      ],
+      "rccCapture": [
+        50548355,
+        5309450
+      ],
+      "rccAfter": [
+        50548355,
+        5309450
+      ],
+      "restored": true,
+      "fpbRestored": true,
+      "verify": {
+        "passed": true,
+        "failures": {},
+        "terminalBoundaryPackets": [],
+        "note": "尾部INCOMPLETE_EOT单列保留；初始化未同步/条件未知不视作已证实执行；字节核算不等于无损证明"
+      },
+      "etmSha256": "8b00bed6f5f7f46f61fe42a483c2134ccc20ae46d2cd4c099d815d8b63b10112"
+    },
+    {
+      "round": 3,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 3,
+        "captureNonce": 1374121264468007066,
+        "loss": false,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": true,
+        "requestedWindowComplete": true,
+        "completionReason": "time",
+        "ended": true,
+        "records": 963928,
+        "hardwareTicks": 199999998,
+        "requestedTicks": 199999998,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 1.0,
+        "hardwareStartBracketUnix": [
+          1795518018.4035969,
+          1795518018.4041455
+        ],
+        "stopReason": 0,
+        "formatterBytes": 15422856,
+        "tailBytes": 8,
+        "tailAmbiguous": false,
+        "usbSeconds": 0.41471869999804767,
+        "usbPayloadMBps": 37.18871611063741,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 0,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 1,
+          "observedFrames": 963928,
+          "capacityReached": false,
+          "writerError": 0
+        },
+        "fclk": 133333332,
+        "tckKhz": 9523.809428571429
+      },
+      "decode": {
+        "packets": 3855029,
+        "ranges": 19191866,
+        "instructions": 19191866,
+        "executed": 17273743,
+        "sourceMapped": 19191866,
+        "exceptions": 1000,
+        "gaps": 1,
+        "packetIssues": 0,
+        "unknownExecution": 1,
+        "functions": {
+          "cdc_poll": 8632178,
+          "main": 8631540,
+          "HAL_IncTick": 7000,
+          "SysTick_Handler": 3000,
+          "trace_hook_mark": 23,
+          "HAL_GPIO_WritePin": 2
+        }
+      },
+      "control": {
+        "fclk_hz": 133333332,
+        "cfg": "0x4ca01",
+        "SWCLK_Hz": 9523809.42857143,
+        "half_period_fclk": 7,
+        "short_high": false,
+        "intended_high_ns": 52.500000525000004
+      },
+      "rccBefore": [
+        50548355,
+        5309450
+      ],
+      "rccCapture": [
+        50548355,
+        5309450
+      ],
+      "rccAfter": [
+        50548355,
+        5309450
+      ],
+      "restored": true,
+      "fpbRestored": true,
+      "verify": {
+        "passed": true,
+        "failures": {},
+        "terminalBoundaryPackets": [],
+        "note": "尾部INCOMPLETE_EOT单列保留；初始化未同步/条件未知不视作已证实执行；字节核算不等于无损证明"
+      },
+      "etmSha256": "5be21a3871e1d97035610e8168d748224eabfb0576bd72027cb732ecb2ffe0f9"
+    }
+  ],
+  "cdcWorkload": "COM34 appeared under F103CDC0001; serial SetCommState failed twice with WinError 31."
+}

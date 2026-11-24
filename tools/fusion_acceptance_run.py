@@ -168,11 +168,19 @@ def run_spi(case, serial, args):
 def run_etm(case, pair, out, target, serial):
     import libusb_package
     import usb.core
+    import usb.util
 
-    devices = [d for d in usb.core.find(find_all=True, idVendor=0x0d28, idProduct=0x0204,
-               backend=libusb_package.get_libusb1_backend()) if d.manufacturer == 'CherryUSB']
-    if [d.serial_number for d in devices] != [serial]:
-        raise RuntimeError('The current Trace CLI requires exactly one J7, matching the campaign serial.')
+    devices = list(usb.core.find(find_all=True, idVendor=0x0d28, idProduct=0x0204,
+                                 backend=libusb_package.get_libusb1_backend()))
+    try:
+        serials = [device.serial_number for device in devices if device.manufacturer == 'CherryUSB']
+        if serials != [serial]:
+            raise RuntimeError('The current Trace CLI requires exactly one J7, matching the campaign serial.')
+    finally:
+        # Reading string descriptors opens WinUSB handles. Release them before
+        # the capture subprocess claims the same device.
+        for device in devices:
+            usb.util.dispose_resources(device)
     elf=target['files']['fw.elf']['path']
     rows=[]
     for ms in case['parameters']['windowsMs']:

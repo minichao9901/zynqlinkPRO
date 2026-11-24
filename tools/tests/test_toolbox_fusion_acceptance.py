@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import Mock, patch
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -115,6 +116,25 @@ class FusionAcceptanceTests(unittest.TestCase):
         self.assertEqual(result['usbSerial'], 'STUB-USB')
         self.assertEqual(result['commands']['load'][-3], 'STUB-HS3')
         self.assertEqual(result['commands']['verify'][-2:], ['--cable-serial', 'STUB-HS3'])
+
+    def test_etm_releases_enumeration_handles_before_capture(self):
+        from fusion_acceptance_run import run_etm
+
+        matching = Mock(manufacturer='CherryUSB', serial_number='USB')
+        other = Mock(manufacturer='Other probe')
+        case = find_case(load_plan(), 'fusion-f103ze-etm-golden')
+        target = select_target(case, None)
+        with tempfile.TemporaryDirectory() as directory, \
+             patch('usb.core.find', return_value=iter((matching, other))), \
+             patch('usb.util.dispose_resources') as dispose, \
+             patch('fusion_acceptance_run.run_capture') as capture:
+            def check_released(*_):
+                self.assertEqual([call.args[0] for call in dispose.call_args_list], [matching, other])
+
+            capture.side_effect = check_released
+            result = run_etm(case, required_pair(), Path(directory), target, 'USB')
+            self.assertEqual(len(result['captures']), 3)
+            self.assertEqual(capture.call_count, 6)
 
     def test_binary_checks_reject_gap_truncation_or_wrong_pattern(self):
         with tempfile.TemporaryDirectory() as directory:
