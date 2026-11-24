@@ -13,3 +13,7 @@
 | 新接线实板与最高稳定速度 | 待测。未写目标 Flash，未下载 Zynq bit/ELF，未改动 QSPI。 |
 
 [构建配对和复测入口](../../../prebuilt/targets/stm32h743-spi2-cdc-20261124/README.md) · [端口及离线证据](evidence.txt)
+
+## HS3 驱动复装
+
+2026-11-24，按用户要求只恢复 HS3 驱动，SPI 验收暂缓。使用 Xilinx SDK 2018.3 随附的 Digilent 签名安装程序。Windows 驱动库已导入同包的 Microsoft 签名 FTDI `ftdibus.inf` 2.12.28.0，发布名 `oem6.inf`，并确认为 `0403:6014`、序列号 `210299008529` 的最佳匹配。复查时该设备实例仍显示 `Disconnected`，XSCT 未列出 JTAG 目标。H743 原固件仍枚举为 `COM33`，Zynq 装载、目标 Flash 和 SPI 实板验收留待恢复后继续。
