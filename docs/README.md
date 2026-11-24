@@ -6,10 +6,10 @@
 
 | 任务 | 从这里开始 | 配对与证据 |
 |---|---|---|
-| SRAM、RTT、J-Scope | `f103ze-sram-rtt-scope`、`h743-sram-rtt-scope`、`hpm6800evk-rtt`、`hpm6800evk-scope` | [融合板测索引](validation/README.md)。F103ZE ABI 1、H743 RAW4 ABI 2、HPM QSPI 历史对照各有独立条件。 |
+| SRAM、RTT、J-Scope | F103ZE CDC48 功能回归用 `f103ze-sram-rtt-scope`，HCLK128 的 50 MHz SWD 性能用 `f103ze-hclk128-swd50`。另有 `h743-sram-rtt-scope`、`hpm6800evk-rtt`、`hpm6800evk-scope`。 | [融合板测索引](validation/README.md)。F103ZE 功能与性能、H743 RAW4 ABI 2、HPM QSPI 历史对照各有独立条件。 |
 | 调试、烧录和复位 | 三板的 `*-debug-flash` | [统一入口与验收判据](板卡精简验收与交付.md) · [目标固件](../firmware/target/README.md)。实板启动前以实际读回绑定目标 ELF。 |
 | 物理 UART、SWO | `f103ze-uart-swo`、`h743-uart-swo`（历史证据） | [接线与控制](selectio/README.md#物理串口swo-和-spi) · [ABI 2 端点证据](validation/usb-split-20261123/README.md)。 |
-| SPI | `f103ze-spi-cdc`、`h743-spi-j7-rx`、`h743-spi-j7-tx`、`h743-spi-full-duplex`、`h743-spi-pad-diagnostic` | [主从持续结果](validation/h743-spi2-cdc-20261124/README.md#实板验收结果与收尾) · [100 MHz 诊断](validation/h743-spi2-100mhz-20261124/README.md)。按方向、模式、目标修订和配对引用。 |
+| SPI | 滤波 v2 的四模式长窗用 `h743-spi-j7-rx-filter-v2-50`。原配对用 `h743-spi-j7-rx`、`h743-spi-j7-tx`、`h743-spi-full-duplex`，诊断用 `h743-spi-pad-diagnostic`，F103ZE 对照用 `f103ze-spi-cdc`。 | [滤波 v2 长窗](validation/h743-spi2-100mhz-20261124/README.md#50-mhz-持续验收) · [原配对结果](validation/h743-spi2-cdc-20261124/README.md#实板验收结果与收尾)。 |
 | ETM | `f103ze-etm`、`h743-etm` | [Trace CLI](Trace-CLI使用说明.md) · [H743 RAW4 严格复验](validation/h743-cdc-golden-requal-20261123/README.md#etm-对照)。目标 ELF 与探针 PS ELF 分开核对。 |
 | 构建、探针加载和发布 | `target-acceptance-build`、`probe-raw4-load`、`probe-qspi-release` | [目标构建](../firmware/target/README.md) · [探针配对索引](../prebuilt/README.md) · [发布流程](github-release.md)。 |
 

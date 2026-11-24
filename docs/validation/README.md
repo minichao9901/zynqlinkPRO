@@ -17,6 +17,8 @@
 
 [三线采样、固定码型与速度对照](h743-spi2-100mhz-20261124/README.md)使用诊断配对和 H743 修订 4。固定码型的 100 MHz 通过点与任意数据的失败边界单独记录。用例的脚本和镜像见[根目录清单](../../acceptance-cases.json)，最新状态查问题表。
 
+[滤波 v2 专用配对](../../prebuilt/selectio-spi-pad-filter-v2-20261124/README.md)与 H743 修订 4 的 **50 MHz 四模式各 3×60 秒**均通过。源端三线速度全 1，SCK/NSS 与 MOSI tap 为 0。按 `h743-spi-j7-rx-filter-v2-50` 复查 12 个长窗。100 MHz 任意载荷仍未通过短测。 [持续验收](h743-spi2-100mhz-20261124/README.md#50-mhz-持续验收)
+
 ## 融合方案历次实测
 
 - [首轮双协议集成](selectio-integration/README.md)与[F103ZE 整体回归](selectio-fusion-20261121/README.md)

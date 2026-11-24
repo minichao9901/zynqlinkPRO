@@ -20,6 +20,14 @@
     "release-ram": {
       "manifest": "prebuilt/release-20261106/manifest.json",
       "readme": "prebuilt/release-20261106/README.md"
+    },
+    "f103-swd50-standard": {
+      "manifest": "prebuilt/selectio-swd50-standard/manifest.json",
+      "readme": "prebuilt/selectio-swd50-standard/README.md"
+    },
+    "spi-pad-filter-v2": {
+      "manifest": "prebuilt/selectio-spi-pad-filter-v2-20261124/manifest.json",
+      "readme": "prebuilt/selectio-spi-pad-filter-v2-20261124/README.md"
     }
   },
   "cases": [
@@ -59,6 +67,49 @@
         "docs/validation/spi-cdc-20261123/README.md"
       ],
       "note": "CDC48 和已验证的 ABI 1 配对。临时 SRAM 夹具由脚本准备。RAW4 ABI 2 结果另计。"
+    },
+    {
+      "id": "f103ze-hclk128-swd50",
+      "board": "f103ze",
+      "feature": "sram-rtt-scope",
+      "role": "regular",
+      "title": "F103ZE HCLK128 的 50 MHz SWD 标准 SRAM 与 RTT 性能对照",
+      "entry": "tools/selectio_f103_clock_accept.py",
+      "args": [
+        "--pair",
+        "{pair}",
+        "--hclk-mhz",
+        "128",
+        "--only",
+        "historical",
+        "--swd-slot",
+        "22",
+        "--swd-tap",
+        "8",
+        "--swd-idle",
+        "0",
+        "--rtt-cdc-seconds",
+        "60",
+        "--rtt-cdc-rounds",
+        "2",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "f103-swd50-standard",
+      "targetElf": "prebuilt/targets/f103ze-etm-clock-loop/fw.elf",
+      "referenceElfs": [
+        "prebuilt/golden/f103ze-cdc48.elf"
+      ],
+      "evidence": [
+        "docs/validation/swd50-standard-20261122/README.md"
+      ],
+      "issues": [
+        "ZL-297"
+      ],
+      "note": "预置现场为 CDC48。目标 ELF 为脚本加载到 SRAM 的时钟夹具。正式计时前用 RCC 和 DWT 核对 HCLK128，收尾恢复现场。historical 是脚本中标准 CMSIS-DAP 和 RTT→CDC 对照的选项名。",
+      "prerequisites": [
+        "确认临时 SRAM 夹具、切换 HCLK128 和现有 CDC48 现场均在本轮授权内。"
+      ]
     },
     {
       "id": "h743-sram-rtt-scope",
@@ -388,6 +439,55 @@
         "ZL-332"
       ],
       "note": "签收档为修订 3 的 50 MHz Mode 1/2 下的持续窗。修订 4 和诊断配对的 25 MHz 四模式、100 MHz 固定码型各用自己的证据。 按 resultRows 对应的报告行独立判定，共用脚本可运行其他方向。",
+      "resultRows": [
+        "j7_slave_sustained"
+      ]
+    },
+    {
+      "id": "h743-spi-j7-rx-filter-v2-50",
+      "board": "h743",
+      "feature": "spi",
+      "role": "regular",
+      "title": "H743 发送、J7 滤波版 EP10 从机 50 MHz 四模式长窗",
+      "entry": "tools/h743_spi_accept.py",
+      "args": [
+        "--j7-slave-only",
+        "--modes",
+        "0",
+        "1",
+        "2",
+        "3",
+        "--dividers",
+        "4",
+        "--edge",
+        "1",
+        "1",
+        "1",
+        "--mosi-tap",
+        "0",
+        "--seconds",
+        "60",
+        "--repeats",
+        "3",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "spi-pad-filter-v2",
+      "targetElf": "prebuilt/targets/stm32h743-spi2-cdc-r4-20261124/fw.elf",
+      "evidence": [
+        "docs/validation/h743-spi2-100mhz-20261124/README.md",
+        "docs/validation/h743-spi2-100mhz-20261124/filter-v2-50mhz-round1.json",
+        "docs/validation/h743-spi2-100mhz-20261124/filter-v2-50mhz-round2.json",
+        "docs/validation/h743-spi2-100mhz-20261124/filter-v2-50mhz-round3.json"
+      ],
+      "issues": [
+        "ZL-332",
+        "ZL-336"
+      ],
+      "note": "复验四模式各 3×60 秒。确认 12 个长窗报告行均存在，每窗按原始记录核对实收、丢弃、成帧、字节错误及 FIFO 尾差。100 MHz 任意载荷的边界见同一报告。",
+      "prerequisites": [
+        "先核对 J7 已加载滤波 v2、H743 SPI2 修订 4、当前接线及 SCK/NSS 共用 tap 0。"
+      ],
       "resultRows": [
         "j7_slave_sustained"
       ]

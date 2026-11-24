@@ -1,110 +1,30 @@
-# 仓库协作规则
+# E:\zynqlinkPRO-efficiency 协作规则
 
-本文件适用于整个仓库。路径相对仓库根目录，文档归入 `docs/`。
+适用于此 worktree。项目说明见 [README](README.md)，文档与验收入口见 [工程索引](docs/README.md)。
 
-## 验收与收尾
+## 开工与验收入口
 
-1. **开工先定范围。** 按下节核对工作区。涉及实板时确认目标和探针。明确本轮要验收的功能和性能，以及要交付到源码、固定 EXE、公开 Pages/Release 或 QSPI 的哪些位置。定向修改按受影响范围验收。
-2. **从统一入口验收。** [板卡精简验收](docs/板卡精简验收与交付.md)规定 F103ZE、H743 和 HPM6800EVK 的链路、档位、性能判据和三轮跨页压力测试。[一键执行](docs/板卡精简验收与交付.md#一键执行)用 `python -X utf8 toolbox.py project run board.accept -- --board f103ze` 预览，实板执行需显式 `--execute`，多份报告用 `--review` 汇总。每轮保留结果，可恢复的失败继续，恢复未确认时剩余项记为阻塞。
-3. **收尾逐项打勾。** 按[验收后的收尾清单](docs/板卡精简验收与交付.md#验收后的收尾清单)完成现场恢复、归档证据、更新问题表、按交付范围更新与复核、清理本轮临时资源。交接分别写远端 `main`、固定 EXE、Pages、Release 下载包和 QSPI 冷启动的结果，附证据或标记待办、不适用。
-4. **提交与交付按本轮范围。** 提交前核对 diff 和问题表，只纳入本任务文件，保留其他人的改动。文档变更按文档范围验证。只有本轮要求推送时才推送。上板、写入、更新安装和发版按本轮授权执行，发布步骤见[GitHub 发布](docs/github-release.md)。
+- 先看 `git status --short`、`git log -5 --oneline`，确认 worktree、分支和在途修改。明确本轮板卡、功能、性能及交付范围，保留其他任务的修改和生成物。
+- 从 [acceptance-cases.json](acceptance-cases.json) 查板卡、功能、参数、探针配对、目标 ELF 和证据。用 `python -X utf8 toolbox.py project case <用例ID>` 查看详情。用 `project describe` 或底层 `--help` 核对实际支持的入口。使用 `project run --dry-run` 可离线预览参数。
+- 融合工程的通用参考配对为 RAW4 ABI 2。按用例显式指定 `--pair`。在动硬件前核对实际加载配对和启动方式。`serve --j7` 使用命令的正式 J7 默认配对，融合版或 QSPI 实物现场按实载 bit/PS ELF 声明。
+- [板卡验收与交付](docs/板卡精简验收与交付.md)规定三板标准工作台回归和跨页压力。标准 `board.accept` 与融合 `board.accept --selectio` 分开取证，后者当前只支持 F103ZE。按用例预览，按脚本要求用 `--execute` 实际操作，`--review` 汇总结果。每轮保留数据，可恢复的失败继续，恢复未确认时剩余项记为阻塞。
+- 本机工作台使用独立 `--runtime`，服务仅绑定本机，运行时令牌留在本机。页内操作先用 `page <页面> describe` 发现。操作后核对状态、数据质量、日志和恢复。共享 Web 驱动改动后执行 `tools/sync_etm_shared.py --check`，必要时同步两份驱动。按影响范围选 CLI、Web 或离线 Trace 回归。
+- [构建、工具链、加载和发布](docs/README.md#配对与手册)记录具体入口。部分旧 `validate` 会写目标 Flash。历史报告中的 `.py.txt` 和 `.tcl.txt` 只供复查，实板用当前确认的入口。
 
-## 新会话先读与现状核对
+## 硬件和性能取证
 
-1. 先执行 `git status --short`、`git log -5 --oneline`，辨认已有修改与当前分支；不要覆盖、清理或批量提交他人的工作。
-2. 从[工程入口](docs/README.md)按任务找到命令和证据。用 `python -X utf8 toolbox.py project case <用例ID>` 查看根目录 [acceptance-cases.json](acceptance-cases.json) 中的脚本、参数、探针配对和目标 ELF。按任务阅读对应问题、报告和产物 manifest。涉及硬件前核对当前现场。
-3. 问题表是当前状态索引，历史报告保留当时结论；若矛盾，追查较新证据及实际配对，不把历史“待验”或单次通过直接当成现状。
-4. 任何报告中的“最后板上状态”都是带时间的快照。切换分支/worktree、启动另一目录的脚本或 EXE，都不会自动切换板上 bit/ELF。
+- 核对探针、USB 序列号、目标板、当前 COM、实际 bit/PS ELF 和目标 ELF。J7 与 SuperLinkPRO 并接时按任务指定身份。报告中的板上状态带有时间，切换工作树或运行目录后重新核对。
+- 单板操作串行执行。先查占用及采集、DDR、DMA 状态。只停止本任务进程，保留共享 `hw_server` 和其他会话。上板、写入、更新安装和发版按本轮授权执行。
+- 默认保持目标 PLL、AHB/APB、Flash 和 QSPI。备份并核对临时 SRAM、核心寄存器、AFIO、时钟和 Trace 配置的恢复，记录最终运行或暂停状态。失败按实际条件保留，避免用重刷、复位或降频覆盖原现场。
+- F103ZE **后续性能验收使用 HCLK128**，仅在已授权的临时 SRAM 夹具中执行。核对 RCC 和 DWT，记录实际链路、运行态和恢复。CDC48 用于功能回归及 ETM 基线。HCLK72 及历史 HCLK96（含 4.0 MB/s 对照）分别保留各自条件。用例见 [F103ZE 入口](docs/README.md#从任务找入口)。
+- H743 的 ETM 与吞吐按各自目标时钟、ELF 和缓存状态取证。记录 SRAM/RTT 实际使用的 AXI 或 DTCM，内存访问和备份兼容 1 KiB TAR 回绕。原生 ETM 使用连续 DDR USB 窗口，F103 专用 entry/reset 仅用于 F103。历史 JTAG 1/10 MHz 支持 SRAM/RTT，当 FCLK 低于 24 MHz 时 HSS 无法启动。按[同板复验](docs/validation/h743-cdc-golden-requal-20261123/README.md)和 [HCLK 对照](docs/validation/h743-hclk-ab-20261123/README.md)核对条件。
+- ETM 业务按低频 SWD 取证，默认 10 MHz。`trace capture --elf` 指目标 MCU，`--zynq-elf` 指探针 PS，`--swd-khz` 用 kHz，底层 Trace Web 的 `--swd-hz` 用 Hz。150 MHz FCLK 和 36 MHz TRACECLK 等研究按用户暂停范围保留。高频 ETM 与 RTT 并发按本轮任务范围取证。
+- DDR/OCM 身份经物理 MEM-AP0 核对。完整 Trace 窗口、执行流和逐线校准分别保留证据。性能对比固定配对、目标固件及时钟、事务、队列、窗口及重复次数，记录实际 FCLK/SWCLK/TCK 和来源，区分寄存器折算与实测。控制、硬件窗口、下载、解码、索引和首屏分开报告。
 
-## 工程入口与目录
+## 问题、证据和交付
 
-| 路径 | 用途 |
-|---|---|
-| `toolbox.py` | AI统一CLI入口：工具索引、Web工作台控制、Trace、构建与验收转交 |
-| `web/`、`etm-service/web/` | 工作台及ETM前端；共享驱动由 `tools/sync_etm_shared.py` 管理 |
-| `etm-service/trace.py` | Zynq原生采集/doctor入口；离线查询、解码、导出转交保留的Trace CLI |
-| `etm-service/tools/trace_cli.py` | 完整Trace命令实现；底层参数以各入口的 `--help` 为准 |
-| `tools/` | 构建、加载、身份核对、回归和板测脚本；优先经 `toolbox.py project` 发现入口 |
-| `fpga/`、`firmware/xusbps_daplink_dma/` | PL RTL/构建及 Zynq PS 固件。目标 MCU 源码和各板已编译镜像从 [目标固件首页](firmware/target/README.md) 进入 |
-| `prebuilt/` | 已版本管理的交付或明确命名的实验配对，身份/范围以各 manifest、README 为准 |
-| `dist/zynq-etm-bridge/` | 用户本机程序入口；更新由 `python toolbox.py bridge-build` 完成 |
-| `docs/validation/`、`build/` | 已归档证据、工作输出；`build/` 可能混有历史/共享缓存，不能整目录删除或add |
-
-## CLI 使用方法
-
-在仓库根目录执行，Windows 建议加 `-X utf8`。从 `toolbox.py` 发现子命令和参数。首次使用参照[从接线到验收](docs/toolbox-cli-first-run.md)，工具链和换机参照[依赖说明](docs/dependencies.md)。
-
-### 发现入口与不操作板卡的检查
-
-```powershell
-python -X utf8 toolbox.py --help
-python -X utf8 toolbox.py project list
-python -X utf8 toolbox.py project describe probe.regression
-python -X utf8 toolbox.py project run sim.cm3 --dry-run -- --top tb_cm3_jtag
-python -X utf8 toolbox.py trace doctor --offline
-python -X utf8 tools/verify_dependencies.py
-```
-
-`project list/describe` 与 `project run --dry-run` 只查看入口和计划。`project run` 默认执行底层入口，其参数放在 `--` 后，`--execute` 等要求以该工具为准。实板结论引用实际运行证据。
-
-主机/Web检查可按改动运行 `python -X utf8 toolbox.py project run web.check`、`project run test.web`、`project run test.cli`。修改共享驱动后核对 `python tools/sync_etm_shared.py --check`；需要同步时用 `--write`，再验证，不能只改一份副本。
-
-### Web工作台与Trace
-
-- 用户日常双击 `dist/zynq-etm-bridge/zynq-etm-bridge.exe`。AI需要完整Web流程时，用 `toolbox.py --runtime <新目录> serve` 启动，浏览器打开启动时给出的鉴权URL并保持页面运行；页内方法先用 `page <页面> describe` 发现，不用内部对象猜调用。
-- 开启本机硬件路径时，用 `--native-probe --bit <实际运行的 bit> --zynq-elf <配套 Zynq ELF>` 声明配对。`serve --j7` 是默认 JTAG/RAM 配对的简写。正式 QSPI 冷启动后显式传入 `prebuilt/qspi-release/` 中的配对。加载和写入使用各自入口，服务只绑定本机，运行时令牌留在本机。
-- 对运行中的工作台：`python -X utf8 toolbox.py --runtime <运行目录> page etm describe --target target`。`click/set` 返回投递成功不代表业务完成；还要核对状态、数据质量、日志及恢复结果。
-- Zynq原生Trace不必依赖浏览器：先看 `python -X utf8 toolbox.py trace capture --help`。`--elf` 是**目标MCU ELF**，`--zynq-elf` 是**探针PS ELF**，不要混淆。
-
-```powershell
-# 硬件采集示例：仅在已核对/加载配对、确认板卡空闲且任务允许操作硬件后执行。
-$pair = 'prebuilt/selectio-usb-split-raw4-20261123'
-python -X utf8 toolbox.py trace capture --elf prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf --bit "$pair/probe.bit" --zynq-elf "$pair/application.elf" --out build/etm-capture-new --seconds 1 --swd-khz 10000
-# 已保存记录的离线查询示例，不采集、不烧录。
-python -X utf8 toolbox.py trace query --record <记录目录> --view summary
-```
-
-ETM配置默认SWD为 **10MHz**，前端、本地采集服务接管和恢复连接保持所选档位。`toolbox.py trace capture` / `etm-service/trace.py capture` 用 **`--swd-khz`（kHz）**；底层 `etm-service/tools/trace_cli.py` 的目标/Web命令用 **`--swd-hz`（Hz）**。不要跨入口照搬单位；显式1MHz对照分别是1000kHz和1000000Hz。
-
-### 构建与加载
-
-- `python -X utf8 toolbox.py bridge-build` 先验收候选，再更新固定 `dist/zynq-etm-bridge/`，保留用户 `data/`，归档旧程序。需要分发时加 `--zip`。
-- PL/PS入口、工具链与BSP见依赖文档及 `project describe`；不要直接双击 `docs/validation/` 中的 `.py.txt/.tcl.txt` 历史驱动，它们可能含旧路径和硬件动作。
-- `probe-load` 默认经 JTAG 临时加载 `prebuilt/release-20261106/` 的 bit/PS ELF，并通过物理 MEM-AP0 核对 OCM。该目录的历史实板范围以配对报告为准。加 `--dry-run` 离线预检输入，自选配对及 SDK 路径见[临时加载说明](docs/toolbox-cli-ai.md#探针-bit--elf-临时加载)。
-- `probe-flash` 使用[固定 QSPI 包](prebuilt/qspi-release/README.md)固化。冷启动核对和 Web 手册重包使用该目录的配对。默认受限 helper 在 EF4019 的 bank0 写 BOOT，SDK 原生后端故障见 ZL-167。更换镜像依照收尾清单，构建和固化见[启动链说明](firmware/boot/README.md)。
-- `validate` 的部分旧套件会写目标 Flash。执行前用帮助确认范围，精简实板验收优先使用 `board.accept`。
-
-## 问题跟踪必须同步更新
-
-**以后遇到问题、bug、失败验收、复现变化、修复或能力边界变化，必须在同一工作过程中同步更新 [docs/项目问题跟踪列表.md](docs/项目问题跟踪列表.md)，并随相关改动一起提交。不能只留在聊天、终端或未跟踪的build输出中。**
-
-- 先搜已有稳定编号；同一问题更新原条目，不重复建项。新问题即使当场修复，也要登记现象、处理和验证证据。
-- 至少填写编号、优先级、状态、模块/触发条件、影响、当前处理/下一步、证据日期/更新日期、报告路径或提交。尚无根因就明确写“待定位”，区分事实与假设。
-- “代码已改”“重载后恢复”“未再复现”“仿真通过”不等于问题已关闭。关闭必须写明实际修复及相应验证范围；未上板或缺少设备时保留待验证。
-- 用户暂停/排除的项目继续保留相应状态；登记问题本身不授权重新开展已暂停的高频扫描、硬件修改或固化。
-- 保留失败/对照证据和原编号，不删除历史来制造全通过；修复说明和交接引用问题编号。只有状态或证据变化时更新日期，不做无意义的每日改写。
-
-## 硬件和验收边界
-
-- F103ZE 后续性能验收统一采用 **目标 HCLK 128 MHz**；保存 RCC 实值、DWT 计时、实际链路时钟、运行态与恢复证明。128 MHz 超出芯片额定范围，仅在用户已授权的临时 SRAM 夹具中运行。原应用时钟和 Flash 保持可恢复。HCLK48/72 数据属于较早的现场或诊断，重放 4.0 MB/s 历史记录时另标 HCLK96，不混入 128 MHz 验收。原生 50 MHz SWD SRAM、RTT、ETM 及历史同条件对照入口为 `tools/selectio_f103_clock_accept.py`。其他套件须先证实执行窗口的 HCLK 才计入验收。
-
-- 核对探针型号和 USB 序列号，串口按序列号匹配当前 COM。J7 与 SuperLinkPRO 并接时，按本轮指定身份选取探针，记录实际配对与启动方式。
-- 单板操作不能并行抢占；先查占用、采集/DDR/DMA状态，再动时钟或加载。只停止本任务进程，不结束共享 `hw_server` 或其他会话服务。
-- 默认保持目标PLL、AHB/APB、Flash和QSPI；需要改变时按任务授权执行，不能用重刷、复位或降频掩盖失败。临时SRAM/核心寄存器/AFIO/Trace夹具必须备份并核对恢复，记录最终运行/暂停状态。
-- DAP Golden 在 `prebuilt/golden/`，历史 QSPI 恢复包在 `prebuilt/recovery/`。分别记录 JTAG/RAM 加载和 QSPI 冷启动的实板证据。ETM 24 MHz 研究基线见[主线与基线说明](https://github.com/minichao9901/zynqlinkPRO/blob/03b6a1dad8ee62aa7902b6bc37d0f0d9c3c3f451/docs/ETM%E4%B8%BB%E7%BA%BF%E5%90%88%E5%B9%B6%E4%B8%8E%E6%9C%80%E4%BD%B3%E5%9F%BA%E7%BA%BF-20261101.md)。
-- 固定133MHz实验 `prebuilt/fclk133-swd-fixed-test-20261101/` 已归档在tag `archive/main-before-formal-release-20261106`，是SWD-only，不能代替正式release；其中60MHz请求实际可落到33.333MHz。测试必须记录实际FCLK/SWCLK/TCK和来源，不只写请求频率；寄存器计算频率不冒充外部频率计实测。
-- 当前ETM业务只要求低频SWD配置；高频ETM输出+RTT并发不是产品必验组合。150MHz FCLK/36MHz TRACECLK等已暂停研究不可因新会话而自动重启。
-- DDR/OCM身份核对使用物理MEM-AP0，CPU上下文 `mrd -force` 不能保证绕过缓存。包错误为0、FIFO无丢帧或IDELAYCTRL RDY不能单独证明完整窗口、完整执行流或完成逐线校准。
-- 性能对比固定配对、目标固件/时钟、事务规模、队列深度、窗口和重复次数；分别报告控制、硬件窗口、下载、解码/索引与首屏。离线时间、估算和旧JSON路径不得冒充当前E2E。
-- H743 Golden 源码和自包含 SDK 在 `firmware/target/h743/etm/cdc/`，配套目标 ELF 在 `prebuilt/targets/stm32h743-cdc-trace-20261101/`。ETM 用 CPU/HCLK 60 MHz、TRACECLK 20 MHz，吞吐用 CPU480/HCLK240，分别取证。原生 ETM 使用连续 DDR USB 窗口，F103 专用 entry/reset 选项仅用于 F103。内存控制与备份兼容 1 KiB TAR 回绕，RTT RAM 夹具用 AXI SRAM 并核对缓存和恢复。JTAG 1/10 MHz 可用于 SRAM/RTT，当前 HSS 在这些档位因 FCLK 低于 24 MHz 无法启动。[H743 RAW4 验收](docs/validation/h743-cdc-golden-requal-20261123/README.md) · [运行态 HCLK 对照](docs/validation/h743-hclk-ab-20261123/README.md)
-
-## FPGA bitstream 与 Zynq ELF 必须纳入 Git
-
-- 后续PL实现与路由时序验证默认按 **133.333333MHz（7.5ns）** 约束，除用户明确要求对照外不退回120MHz。约束频率不等于实际FCLK/TCK；运行时仍须记录读回值，不暗改目标MCU PLL。
-
-- FPGA bitstream（`.bit`）和配套 Zynq 固件（`.elf`）是可交付内容，必须提交到 Git，不能仅留在被忽略的 `build/` 目录中，也不能只提交源码或构建说明。
-- 修改 RTL、Zynq 固件或影响它们的构建配置后，交付或合并前必须生成并验收对应产物，把实际验收使用的 bit/ELF 配对与相关源码一起纳入版本管理。不得用旧 `prebuilt/` 产物冒充本次构建。
-- 默认把当前交付配对放在 `prebuilt/`；需要保留可复测基线或不同方案时，放在独立、有明确版本名称的目录，并记录加载路径。`build/`、`releases/` 中的 bit/ELF 也允许显式纳入 Git，不批量提交其他中间产物。
-- 随产物记录源码提交、构建选项、bit 与 ELF 的 SHA-256、时序结果及上板验收结果。记录的哈希必须对应实际提交和加载的文件；仅有提交号或文件名不足以确认产物身份。
-- 测速前核对实际运行的 bit/ELF 配对，记录实际 FCLK/SWCLK/TCK。按验收范围选择临时加载或已核对的冷启动现场。
-- 构建或验收未通过时，保留已知可用配对，明确报告未完成的验证；不得把失败产物标记为已验收。
+- 问题、失败验收、修复、复现和能力边界变化及时登记 [问题表](docs/项目问题跟踪列表.md)，随改动提交。沿用已有编号，记录编号、优先级、状态、触发条件、影响、处理、证据日期和报告路径。根因未定时标为待定位。关闭依据为实际修复和对应验证。保留失败及对照证据和用户暂停状态。
+- [验收索引](docs/validation/README.md)指向现有证据。历史报告保留当时结论。出现差异时查更新证据及其配对。保护 `build/` 的独有原始记录、恢复备份和共享输出。清理与暂存均逐项确认，按[保留约定](docs/validation/build-retention.md)处理。
+- 每完成一阶段，核对 diff 和问题表，完成对应验证后独立提交。交接按授权范围明确远端 main、固定 EXE、Pages、Release、QSPI 冷启动的结果，并附证据或状态。固定桌面程序更新通过 `toolbox.py bridge-build`，用候选验收后更新并保留用户 `data/`。推送和发布须在本轮授权内。
+- PL 实现和路由默认 **133.333333 MHz（7.5 ns）**，120 MHz 对照需明确授权。RTL、PS 固件及相关构建配置变更后的交付，必须生成、验收并提交实际配对的 bit/ELF，记录源码提交、构建选项、SHA-256、时序和上板结果。默认放版本化的 `prebuilt/`，明确选中的 bit/ELF 也可存于 `build/` 或 `releases/`。目标 MCU 镜像另见[各板 images](firmware/target/README.md)。
+- JTAG/RAM 临时加载与 QSPI 实体冷启动单独签收。固定启动包见 [prebuilt/qspi-release](prebuilt/qspi-release/README.md)，历史回退和实验配对见[产物索引](prebuilt/README.md)。构建或验收失败时保留已知可用配对，未完成的验证按实际状态记录。
