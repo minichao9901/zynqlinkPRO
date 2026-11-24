@@ -8,7 +8,7 @@ module tb_selectio_spi_slave_offset;
     wire valid, error;
     wire [7:0] data;
     selectio_spi_slave_rx dut(clk,reset,enable,mode,
-        sck_word,cs_word,mosi_word,valid,error,data);
+        sck_word,cs_word,mosi_word,valid,error,data,1'b0);
 
     // Exact 100 MHz source and a reference 0.08% slower than nominal.
     // This models phase drift at the output of the asynchronous samplers.

@@ -144,12 +144,15 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0, SPI_PAD_DIAG=0, SPI_PAD_F
                          {2{slave_cs_n[1]}},{2{slave_cs_n[0]}}};
         selectio_spi_slave_rx #(.WIDTH(8),.FILTER(1)) slave_rx(
             .clk(quad_clk),.reset(phy_reset),.enable(spi_slave_selected && pad_granted),
+            // AUX period uses the 400 MS/s quartet domain and Q8 units.
+            // Eight physical samples per bit is 50 MHz or slower.
+            .slow_nss(|rx_period[31:11]),
             .mode(slave_mode),.sck(slave_sck_wide),.cs_n(cs_n),.mosi(slave_mosi_wide),
             .valid(slave_valid),.error(slave_error),.data(slave_byte));
     end else begin: unfiltered_spi
         selectio_spi_slave_rx slave_rx(
             .clk(quad_clk),.reset(phy_reset),.enable(spi_slave_selected && pad_granted),
-            .mode(slave_mode),.sck(slave_sck),.cs_n(slave_cs_n),.mosi(slave_mosi),
+            .slow_nss(1'b0),.mode(slave_mode),.sck(slave_sck),.cs_n(slave_cs_n),.mosi(slave_mosi),
             .valid(slave_valid),.error(slave_error),.data(slave_byte));
     end endgenerate
     // Capture raw input words in a debug-only snapshot. The existing

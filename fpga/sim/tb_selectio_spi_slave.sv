@@ -14,7 +14,7 @@ module tb_selectio_spi_slave #(parameter FILTER=0);
     reg listener=0, master_sck=0, master_cs=1, master_data=0;
     reg [1:0] mode=0;
     tri sck, cs_n, mosi;
-    reg sck_glitch=0, nss_glitch=0;
+    reg sck_glitch=0, nss_glitch=0, slow_nss=0;
     assign #0.21 sck = master_sck ^ sck_glitch;
     assign #0.32 cs_n = master_cs | nss_glitch;
     assign #0.98 mosi = master_data;
@@ -39,10 +39,10 @@ module tb_selectio_spi_slave #(parameter FILTER=0);
         wire [7:0] cs_wide={{2{cs_samples[3]}},{2{cs_samples[2]}},
                             {2{cs_samples[1]}},{2{cs_samples[0]}}};
         selectio_spi_slave_rx #(.WIDTH(8),.FILTER(1)) receiver(
-            quad_clk,phy_reset,listener,mode,sck_wide,cs_wide,mosi_wide,valid,error,data);
+            quad_clk,phy_reset,listener,mode,sck_wide,cs_wide,mosi_wide,valid,error,data,slow_nss);
     end else begin: original
         selectio_spi_slave_rx receiver(quad_clk,phy_reset,listener,mode,
-            sck_samples,cs_samples,mosi_samples,valid,error,data);
+            sck_samples,cs_samples,mosi_samples,valid,error,data,1'b0);
     end endgenerate
 
     task automatic inject_glitches;
@@ -52,7 +52,7 @@ module tb_selectio_spi_slave #(parameter FILTER=0);
             sck_glitch <= #1.6 1;
             sck_glitch <= #3.3 0;
             nss_glitch <= #1.5 1;
-            nss_glitch <= #5.0 0;
+            nss_glitch <= #(slow_nss ? 12.5 : 5.0) 0;
         end
     endtask
 
@@ -110,6 +110,7 @@ module tb_selectio_spi_slave #(parameter FILTER=0);
             #50;
             for(f=0;f<3;f=f+1) begin
                 half_period=f==0 ? 10.0 : f==1 ? 6.875 : 5.0;
+                slow_nss=f==0;
                 for(phase=0;phase<8;phase=phase+1) begin
                     @(negedge quad_clk);
                     #(phase*1.25+0.17);

@@ -7,7 +7,8 @@ module selectio_spi_slave_rx #(parameter WIDTH=4, FILTER=0) (
     input wire [1:0] mode,
     input wire [WIDTH-1:0] sck, cs_n, mosi,
     output reg valid, error,
-    output reg [7:0] data
+    output reg [7:0] data,
+    input wire slow_nss
 );
     reg previous_sck, armed;
     wire rising_sample = !(mode[1] ^ mode[0]);
@@ -18,20 +19,23 @@ module selectio_spi_slave_rx #(parameter WIDTH=4, FILTER=0) (
     // from its predecessor. Ignore repeat edges closer than five slots.
     localparam SPACING = FILTER ? 5 : 1;
     generate if (FILTER) begin: nss_filter
-        reg [3:0] history;
+        reg [11:0] history;
         reg inactive;
-        wire [WIDTH+3:0] window = {cs_n,history};
+        wire [WIDTH+11:0] window = {cs_n,history};
         wire [WIDTH:0] inactive_chain;
         assign inactive_chain[0] = inactive;
         for (genvar i=0; i<WIDTH; i=i+1) begin: slot
-            // Preserve the first sampling edge on assertion. A high pulse
-            // must occupy at least five slots before it can end a frame.
-            assign inactive_chain[i+1] = cs_n[i] && (inactive_chain[i] || (&window[i +: 5]));
+            // Select immediately. At slower SPI rates allow a longer
+            // high transient while keeping the threshold below one bit time.
+            wire inactive_long = &window[i +: 13];
+            wire inactive_short = &window[i+8 +: 5];
+            assign inactive_chain[i+1] = cs_n[i] &&
+                (inactive_chain[i] || (slow_nss ? inactive_long : inactive_short));
             assign chip_select[i] = inactive_chain[i+1];
         end
         always @(posedge clk) begin
-            if (reset || !enable) begin history<=4'hf; inactive<=1; end
-            else begin history<=cs_n[WIDTH-1 -: 4]; inactive<=inactive_chain[WIDTH]; end
+            if (reset || !enable) begin history<=12'hfff; inactive<=1; end
+            else begin history<=window[WIDTH +: 12]; inactive<=inactive_chain[WIDTH]; end
         end
     end else begin
         assign chip_select=cs_n;

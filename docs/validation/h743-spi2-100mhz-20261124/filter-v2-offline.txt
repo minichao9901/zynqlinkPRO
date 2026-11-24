@@ -1,0 +1,18 @@
+SPI_SLAVE_PASS bytes=9424 modes=4 rates=50,72.727,100MHz phases=8 partial=4 glitches=0
+SPI_SLAVE_OFFSET_PASS 100MHz bytes=8192 modes=4 two_edge_words=53 same_word_cs_gap=pass
+SPI_SLAVE_PASS bytes=9424 modes=4 rates=50,72.727,100MHz phases=8 partial=4 glitches=1
+SPI_SLAVE_RING_PASS 100MHz continuous_bytes=73727 wrap=pass tail=pass overflow=7 frame_error=1 rearm=pass
+SPI_CDC_PUMP_PASS bytes=4194341 peak_ddr=1874900 submit_retries=10 short_packets=1
+SPI_CDC_PUMP_REARM_PASS mode=3 bytes=3
+SPI_CDC_PUMP_COUNTER_PASS bytes=4099 wrap=uint32
+CDC_EVENT_PASS empty_descriptor=2 RX_lengths=12 TX_routes=2
+SELECTIO_SPI_EXTERNAL_SCK_ASYNC system_i/swd_controller_0/inst/g_selectio.phy/spi_clock_wide.clock_rx/shift/DDLY
+SELECTIO_ROUTED_CLOCK clk_fpga_0 period=7.5 ns
+SELECTIO_ROUTED_CLOCK clk_selectio_ref period=20.0 ns
+SELECTIO_ROUTED_CLOCK clk_delay_ref period=5.0 ns
+SELECTIO_ROUTED_CLOCK quad_raw period=10.0 ns
+SELECTIO_ROUTED_CLOCK serial_raw period=5.0 ns
+SELECTIO_ROUTED_CLOCK rx_raw period=2.5 ns
+SELECTIO_ROUTED_CLOCK octet_raw period=20.0 ns
+VERIFIED_BITSTREAM_READY
+{"FCLK_max_Hz": 133333333, "SWCLK_max_Hz": 66666666, "setup_slack_ns": 0.089, "hold_slack_ns": 0.05, "requested_FCLK_Hz": 133333333, "RTL_DEBUG": 0, "optional_observation_cells": 0, "formal_product_acceptance": false}
