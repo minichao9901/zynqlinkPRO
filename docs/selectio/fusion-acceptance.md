@@ -1,16 +1,16 @@
 # 新融合配对的三板验收
 
-在 `E:\zynqlinkPRO-efficiency` 根目录执行。根目录 JSON 的 `fusionAcceptance` 规定必验用例、档位、目标镜像、判据和当前执行器。每次交付使用一个批准的新融合 bit/PS ELF 配对。CDC Golden 用例是该配对上的实板对照，新编目标镜像也有自己的必验行。原有回归用例和报告用于查条件和历史数据。 [验收清单](../../acceptance-cases.json) · [目标镜像](../../firmware/target/README.md)
+在 `E:\zynqlinkPRO-efficiency` 根目录执行。根目录 JSON 的 `fusionAcceptance` 规定必验用例、档位、目标镜像、判据和当前执行器。三板所有功能和性能用例固定使用 `prebuilt/selectio-usb-split-raw4-20261123`。CDC Golden 指用来产生 ETM 工作负载的目标 MCU 固件。 [RAW4 ABI 2 配对](../../prebuilt/selectio-usb-split-raw4-20261123/manifest.json) · [验收清单](../../acceptance-cases.json) · [目标镜像](../../firmware/target/README.md)
 
 ## 查询和绑定配对
 
 ```powershell
 python -X utf8 toolbox.py project run fusion.accept -- list --board h743
 python -X utf8 toolbox.py project run fusion.accept -- describe fusion-h743-combo
-python -X utf8 toolbox.py project run fusion.accept -- campaign --pair <已批准的配对目录> --serial <J7序列号> --out build/runs/fusion-campaign/<批次ID>
+python -X utf8 toolbox.py project run fusion.accept -- campaign --serial <J7序列号> --out build/runs/fusion-campaign/<批次ID>
 ```
 
-第三条离线核对 bit、PS ELF 和初始化 Tcl 的 SHA-256，并生成 `campaign.json`。取得现场授权后，通过 `toolbox.py probe-load --pair <同一目录> --cable-serial <实接HS3序列号> --usb-serial <J7序列号> --out <新的加载证据目录>` 临时加载探针。从加载目录取 `result.json`。重载后使用新的加载回执。实板执行核对回执的哈希和序列号，通过物理 MEM-AP0 核对探针 PS 代码，并交叉核对 USB 与 HS3 是否连接同一探针。
+第三条离线核对 bit、PS ELF 和初始化 Tcl 的 SHA-256，并生成 `campaign.json`。旧批次需要重新创建。取得现场授权后，通过 `toolbox.py probe-load --selectio --cable-serial <实接HS3序列号> --usb-serial <J7序列号> --out <新的加载证据目录>` 临时加载探针。从加载目录取 `result.json`。重载后使用新的加载回执。实板执行核对回执的哈希和序列号，通过物理 MEM-AP0 核对探针 PS 代码，并交叉核对 USB 与 HS3 是否连接同一探针。
 
 按 `describe` 输出准备唯一连接的目标、指定镜像与接线。实板执行前确认其他程序已经释放 USB 和目标，并备份要更改的 Flash、RAM 和外设状态。对 ARM 性能用例，先确认当前档位的采样 tap、slot 和 idle。SPI 加 `--manual-spi-switch`，使用能隔离 SWD 和 SPI 的切换夹具。H743 通过目标 USB CDC 控制。F103ZE 主发有 5 秒切换并使能 J7 接收的窗口。每个命令只执行一个档位组合。
 

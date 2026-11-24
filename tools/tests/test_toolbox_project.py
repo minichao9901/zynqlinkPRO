@@ -28,21 +28,16 @@ class ProjectCliTests(unittest.TestCase):
                         self.assertTrue((project.ROOT / path).is_file(), path)
                 run.assert_not_called()
 
-    def test_acceptance_preview_keeps_target_and_probe_elf_distinct(self):
+    def test_legacy_cases_are_evidence_only_and_raw4_load_is_discoverable(self):
+        catalog = project.acceptance_catalog()
+        self.assertEqual({item['id'] for item in catalog['cases'] if item['entry']},
+                         {'probe-raw4-load', 'target-acceptance-build'})
         etm = project.acceptance_case('f103ze-etm')
-        argv = etm['preview']
-        self.assertEqual(argv[argv.index('--elf') + 1], etm['targetElf'])
-        self.assertNotEqual(argv[argv.index('--zynq-elf') + 1], etm['targetElf'])
-        self.assertEqual(etm['help'][-3:], ['--', 'capture', '--help'])
-        h743 = project.acceptance_case('h743-etm')['preview']
-        self.assertEqual(h743[h743.index('--gpio-speed') + 1], '2')
-        hpm = project.acceptance_case('hpm6800evk-rtt')
-        self.assertIn('<matched-target-elf>', hpm['preview'])
-        self.assertIn('<matching-workbench-runtime>', hpm['preview'])
-        flash = project.acceptance_case('hpm6800evk-debug-flash')
-        self.assertIn('--openocd-scripts', flash['preview'])
-        qspi = project.acceptance_case('probe-qspi-release')['preview']
-        self.assertEqual(qspi[qspi.index('--image-dir') + 1], 'prebuilt/qspi-release')
+        self.assertNotIn('preview', etm)
+        self.assertNotEqual(etm['probeFiles']['psElf'], etm['targetElf'])
+        raw4 = project.acceptance_case('probe-raw4-load')['preview']
+        self.assertEqual(raw4[raw4.index('--pair') + 1], 'prebuilt/selectio-usb-split-raw4-20261123')
+        self.assertNotIn('preview', project.acceptance_case('probe-qspi-release'))
         spi = project.acceptance_case('h743-spi-full-duplex')
         self.assertEqual(spi['resultRows'], ['j7_raw_duplex'])
         with self.assertRaisesRegex(ValueError, '未知验收用例'):

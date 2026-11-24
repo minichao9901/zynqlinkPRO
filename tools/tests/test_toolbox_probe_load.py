@@ -27,7 +27,7 @@ class ProbeLoadTests(unittest.TestCase):
         self.assertEqual(plan['commands']['verify'][5], files['zynq_elf']['path'])
 
     def test_selectio_alias_previews_exact_manifest_pair(self):
-        root=probe_load.ROOT/'prebuilt/selectio-j7-fusion'
+        root=probe_load.ROOT/'prebuilt/selectio-usb-split-raw4-20261123'
         expected=json.loads((root/'manifest.json').read_text(encoding='utf8'))['hashes']
         with tempfile.TemporaryDirectory() as directory:
             out=Path(directory)/'unused'

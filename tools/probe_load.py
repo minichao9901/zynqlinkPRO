@@ -32,8 +32,11 @@ def inputs(args):
     if (selectio or pair) and args.bit:
         option = '--selectio' if selectio else '--pair'
         raise ValueError(f'{option} 从配对目录读取 bit、ELF 和初始化 Tcl。请只选择一套输入')
-    package = pair if pair is not None else (
-        ROOT / 'prebuilt/selectio-j7-fusion' if selectio else RELEASE)
+    package = pair if pair is not None else RELEASE
+    if selectio:
+        catalog = json.loads((ROOT / 'acceptance-cases.json').read_text(encoding='utf8'))
+        required = catalog['fusionAcceptance']['probe']['requiredPair']
+        package = (ROOT / catalog['probePairs'][required]['manifest']).parent
     bit = (args.bit or package / 'probe.bit').resolve()
     elf = (args.elf or package / 'application.elf').resolve()
     init = (args.ps_init or elf.with_name('ps7_init.tcl')).resolve()
@@ -173,7 +176,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(prog='toolbox.py probe-load', description=__doc__,
         epilog='默认使用正式 J7 配对。需要断电后自动启动时，请使用 toolbox.py probe-flash --help。')
     bundle = parser.add_mutually_exclusive_group()
-    bundle.add_argument('--selectio', action='store_true', help='选择本分支固定 SelectIO 配对并校验 manifest SHA-256')
+    bundle.add_argument('--selectio', action='store_true', help='选择本分支融合验收指定的 RAW4 ABI 2 配对')
     bundle.add_argument('--pair', type=Path, help='从指定配对目录读取 bit、ELF 和初始化 Tcl，并校验 manifest SHA-256')
     parser.add_argument('--bit', type=Path, help='探针 FPGA bitstream')
     parser.add_argument('--zynq-elf', '--elf', dest='elf', type=Path, help='探针 Zynq PS ELF')

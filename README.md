@@ -2,30 +2,30 @@
 
 基于 XC7Z020 和 J7 转接板。一个 bitstream 提供 SWD/JTAG 调试、原生 SRAM、RTT、J-Scope、物理 COM、标准 SWO、四线 SPI 和四位 ETM。PS 通过 USB 传输，ETM 数据在 PS DDR 缓冲后由主机下载。
 
-开发分支为 `codex/selectio-efficiency`。融合复验的通用参考为 [RAW4 ABI 2 配对](prebuilt/selectio-usb-split-raw4-20261123/README.md)，经 JTAG/RAM 临时加载。省略配对参数时，`probe-load` 的命令默认值为 [release-20261106](prebuilt/release-20261106/README.md)。融合复验按用例显式指定 `--pair`。 [USB 端点](docs/selectio-native.md) · [J7 接线与 CLI](docs/selectio/README.md)
+开发分支为 `codex/selectio-efficiency`。三板功能、性能和极限测试统一使用 [RAW4 ABI 2 配对](prebuilt/selectio-usb-split-raw4-20261123/README.md)，经 JTAG/RAM 临时加载。用 `probe-load --selectio` 选择验收配对。[USB 端点](docs/selectio-native.md) · [J7 接线与 CLI](docs/selectio/README.md)
 
 ## 开始使用
 
 在仓库根目录先查用例和预览配对。实际加载前核对已运行的配对、板卡占用和本轮授权。
 
 ```powershell
-$pair = 'prebuilt/selectio-usb-split-raw4-20261123'
-python -X utf8 toolbox.py project cases
-python -X utf8 toolbox.py probe-load --pair $pair --dry-run
+python -X utf8 toolbox.py project run fusion.accept -- list
+python -X utf8 toolbox.py probe-load --selectio --dry-run
 ```
 
 确认本轮允许 JTAG/RAM 临时加载后，执行加载并核对枚举。
 
 ```powershell
-$pair = 'prebuilt/selectio-usb-split-raw4-20261123'
-python -X utf8 toolbox.py probe-load --pair $pair --out build/fusion-load
-python -X utf8 toolbox.py selectio --serial 12345678 info
+python -X utf8 toolbox.py probe-load --selectio --cable-serial <HS3序列号> --usb-serial <J7序列号> --out build/fusion-load
+python -X utf8 toolbox.py selectio --serial <J7序列号> info
 python -X utf8 toolbox.py selectio --help
 ```
 
 ETM 采集时同时声明探针 bit、探针 PS ELF 和目标 MCU ELF。目标 ELF 必须与实际目标固件一致。[Trace CLI](docs/Trace-CLI使用说明.md)
 
-## 当前验收
+## 已归档的实板记录
+
+本批次的结果按 RAW4 ABI 2 验收清单逐档取证。
 
 | 项目 | 已确认范围 |
 |---|---|
@@ -52,4 +52,4 @@ python -X utf8 toolbox.py project run test.web
 
 - 构建、加载与验收从[工程文档](docs/README.md)进入。配对 SHA-256、实施时序和实板范围随产物提供。
 - `web/` 和 `etm-service/` 提供 Web 工作台与 Trace 分析。当前融合版实板以 CLI 记录为准，新 Web 的 ABI 2 对接另行验收。
-- 固定 EXE、公开 Pages、Release 和 QSPI 包沿用各自的发布配对。对融合固件使用显式 `probe-load --pair`。[发布与交付](docs/github-release.md)
+- 固定 EXE、公开 Pages、Release 和 QSPI 包按各自的发布流程操作。[发布与交付](docs/github-release.md)

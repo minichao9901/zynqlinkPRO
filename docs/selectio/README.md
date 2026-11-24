@@ -1,6 +1,6 @@
 # J7 SelectIO 多协议探针 CLI
 
-这套固件在同一块 Zynq-7020 上提供 CMSIS-DAP、RTT、变量采样、四线 SPI、串口、SWO 和四位并行 ETM。命令从本工作树根目录执行，输出使用新路径。融合通用参考为 [RAW4 ABI 2](../../prebuilt/selectio-usb-split-raw4-20261123/README.md)。F103ZE CDC48 的融合回归使用[已验收 ABI 1 配对](../../prebuilt/selectio-spi-cdc-rx-guard-20261123/README.md)。按[用例清单](../../acceptance-cases.json)选择配对及目标 ELF，并以各自清单核对 bit、PS ELF、初始化脚本和验证范围。Windows 主机依赖、Vivado/SDK 和 OpenOCD 的安装位置见[依赖说明](../dependencies.md)。标准串口示例需要 pyserial，验收脚本另用 NumPy 校验连续样本。
+这套固件在同一块 Zynq-7020 上提供 CMSIS-DAP、RTT、变量采样、四线 SPI、串口、SWO 和四位并行 ETM。命令从本工作树根目录执行，输出使用新路径。新验收固定使用 RAW4 ABI 2，目标 ELF 按用例选择。Windows 主机依赖、Vivado/SDK 和 OpenOCD 的安装位置见依赖说明。标准串口示例需要 pyserial，验收脚本另用 NumPy 校验连续样本。 [RAW4 ABI 2](../../prebuilt/selectio-usb-split-raw4-20261123/README.md) · [融合验收手册](fusion-acceptance.md) · [依赖说明](../dependencies.md)
 
 ## 架构和引脚
 
@@ -45,12 +45,11 @@ JTAG 占用 TDI/TDO，SPI 切换时取得四根线的独占权。F103 的 PB3 �
 
 独立端点版配对及 H743 验收入口见 [RAW4 配对说明](../../prebuilt/selectio-usb-split-raw4-20261123/README.md)。临时加载后，以 `selectio info` 中的 ABI 和枚举为准。
 
-按本分支验收记录选择配对目录。`probe-load --pair` 按清单逐一核对 bit、Zynq ELF 和 PS 初始化 Tcl 的 SHA-256，在写入探针易失配置前检查占用，加载后核对 OCM。目标 MCU ELF 与探针 ELF 分开传入。
+`probe-load --selectio` 按清单逐一核对 RAW4 ABI 2 的 bit、Zynq ELF 和 PS 初始化 Tcl 的 SHA-256，在写入探针易失配置前检查占用，加载后核对 OCM。目标 MCU ELF 与探针 ELF 分开传入。
 
 ```powershell
-$pair = 'prebuilt/selectio-usb-split-raw4-20261123'
-python -X utf8 toolbox.py probe-load --pair $pair --dry-run
-python -X utf8 toolbox.py probe-load --pair $pair --out build/my-load
+python -X utf8 toolbox.py probe-load --selectio --dry-run
+python -X utf8 toolbox.py probe-load --selectio --cable-serial <HS3序列号> --usb-serial <J7序列号> --out build/my-load
 python -X utf8 toolbox.py selectio --serial 12345678 info
 python -X utf8 toolbox.py selectio usb-test --seconds 60
 python -X utf8 toolbox.py selectio --help
@@ -110,11 +109,10 @@ python -X utf8 tools/selectio_transport_bench.py --serial 12345678 --seconds 10 
 python -X utf8 tools/selectio_f103_fixture.py --serial 12345678 --size 16384 --out build/swd50-state --execute -- python -X utf8 tools/selectio_pipeline_bench.py --transport swd --clock 50000000 --tap 8 --slot 24 --idle 0 --frame 16384 --bytes 16320 --depth 4 --seconds 60 --rounds 3 --out build/swd50-pc --execute
 ```
 
-F103ZE 统一融合验收入口支持按所选配对的 50 / 73 / 100 MHz 参数串行运行调试、内存、RTT、变量采样及 USB 对照。下例以 CDC48 目标和带 50 MHz 采样配置的已验收 ABI 1 配对打印计划。添加 `--execute` 后，经 HS3 临时加载对应 bit/ELF、检查身份、备份目标 SRAM，逐项测试并复核恢复。每个 SRAM 窗口的复算例见效率报告。
+F103ZE 验收从 `fusion.accept` 查询对应档位。历史 CDC48 回归报告保留原测试条件。
 
 ```powershell
-$f103Pair = 'prebuilt/selectio-spi-cdc-rx-guard-20261123'
-python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze --pair $f103Pair --clock 50000000 --frame 16384 --only switch --only debug --only memory --only rtt --only scope --only combo --only usb-ddr
+python -X utf8 toolbox.py project run fusion.accept -- list --board f103ze
 ```
 
 运行态 RTT 默认使用与 100 MHz 历史成绩相同的 1,024 B 目标环。给同一入口加 `--rtt-ring-bytes 8192` 可测大环并减少环尾截断。两种容量使用同一个 Cortex-M3 生产者，每次运行都从真实 RTT 描述符取环地址和大小。大环占用的区域由 16 KiB SRAM 夹具备份和复原。请分别保存两次的报告，以便区分环长和 USB 帧长带来的变化。
@@ -125,7 +123,6 @@ F103ZE HCLK128 的 50 MHz SWD 优化包见 [候选配对](../../prebuilt/selecti
 
 ```powershell
 python -X utf8 toolbox.py selectio --serial 12345678 rtt-queue --tap 8 --slot 22 --idle 0 --address 0x20008200 --seconds 60 --out build/rtt-queue.bin
-python -X utf8 tools/selectio_f103_clock_accept.py --pair prebuilt/selectio-swd50 --hclk-mhz 128 --only memory --only rtt --rtt-queue --memory-page-aligned --seconds 60 --rounds 3 --out build/swd50-accept --execute
 ```
 
 独立 RTT 的 `--chunk 1024` 或 `--chunk 2048` 控制每次确认目标 RdOff 之前最多搬运多少字节。CLI 默认在协商到 16 KiB 的 IF4 上使用 2,048 B，旧接口沿用 1,024 B。STOP 返回的状态字给出实际设置。统一验收入口的对应参数是 `--rtt-chunk`，例如固定 `--only rtt --clock 50000000 --rtt-ring-bytes 8192`，分别用两个块长运行。报告中的 `stream_MBps` 使用从服务启动确认到 STOP 尾部排空的窗口，`cli_process_MBps` 包含启动 CLI、连接与退出耗时，二者均使用已验证的主机有效字节。
@@ -207,23 +204,14 @@ python -X utf8 tools/selectio_spi_cdc_test.py --serial 12345678 --mode 0 --tap 0
 
 高速请求使用 Hz，例如 `--clock 50000000`、`73000000`、`100000000`，73 MHz 在当前时钟树上约为 **72.727 MHz**。以结果中的实际频率和时钟树为准。tap 范围 0–31，slot 范围 0–63。SWD idle 为 0–15，JTAG 的 slot 范围是 16–63。原生块、RTT 下行与并发读数要求 JTAG idle 为奇数。JTAG 实时路径的 idle 范围为 0–255。独立 `rtt` 和 `scope` 可以一起传入 `--tap --slot --idle`，省略时使用既有 profile。 [精简性能用例与校准](fusion-performance-cases.md)
 
-统一实板入口支持 50/73/100 MHz，需要配对清单提供相应采样档。HCLK96/128 的定向压测使用 `selectio_f103_clock_accept.py --pair ... --hclk-mhz ... --out ... --execute --command <子命令>`，由外层夹具核对时钟、暂停并备份 SRAM，子命令退出后恢复。需要完整 JTAG 时加 `--enable-jtag`。这些 HCLK 是 F103 实验档。
-
-F103ZE 候选性能用例可从同一个入口复跑，以下使用已完成相应实测的 ABI 1 配对。用 `--only` 选择本轮授权范围，先预览，再临时加载并验证指定配对。默认计划还包含 36 MHz TRACECLK 历史诊断，按暂停范围保留。每个测试点有单独的恢复记录。DBG-04 和 DBG-08 同时保存标准 CMSIS-DAP 的 2 KiB／深度 32 对照和原生 SRAM、RTT→CDC、J-Scope 长窗。`--only DBG-08-STREAMS` 可单独复验同条件的 RTT→CDC 和 J-Scope。RTT 停止时主机保持 COM 接收并限时处理忙状态，失败报告保存 STOP 与接收线程现场。
-
-```powershell
-$f103Pair = 'prebuilt/selectio-spi-cdc-rx-guard-20261123'
-python -X utf8 toolbox.py project run board.selectio-performance -- --pair $f103Pair --out build/perf-preview --only CAL-01 --only DBG-04 --only DBG-08
-python -X utf8 toolbox.py project run board.selectio-performance -- --pair $f103Pair --out build/calibration --only CAL-01 --execute
-python -X utf8 toolbox.py project run board.selectio-performance -- --pair $f103Pair --out build/perf-128 --only DBG-04 --only DBG-08 --execute
-```
+F103ZE HCLK128 的 SRAM、RTT、J-Scope 和并发档位及恢复要求见融合验收手册。旧版 DBG-04 和 DBG-08 参数保存在历史性能记录中。 [融合验收手册](fusion-acceptance.md) · [历史性能记录](fusion-performance-cases.md)
 
 ## ETM
 
-以下 F103ZE CDC48 采集示例声明已临时加载的 ABI 1 配对。H743 RAW4 采集见 `project case h743-etm`。
+以下 F103ZE CDC48 采集示例声明已临时加载的 RAW4 ABI 2 配对。F103ZE 和 H743 的验收由 `fusion.accept` 按各目标和窗口运行。
 
 ```powershell
-$f103Pair = 'prebuilt/selectio-spi-cdc-rx-guard-20261123'
+$f103Pair = 'prebuilt/selectio-usb-split-raw4-20261123'
 python -X utf8 toolbox.py trace doctor --offline
 python -X utf8 toolbox.py trace capture --elf prebuilt/golden/f103ze-cdc48.elf --bit "$f103Pair/probe.bit" --zynq-elf "$f103Pair/application.elf" --swd-khz 10000 --seconds 1 --out build/my-etm --json-out build/my-etm.json
 python -X utf8 toolbox.py trace query --record build/my-etm --view summary
@@ -253,16 +241,7 @@ python -X utf8 tools/selectio_spi_slave_sim.py --pump-only --out build/spi-cdc-p
 
 以上构建使用已复验的 RAW4 ETM 接收路径。`--etm400` 属于独立的双沿采样实验，在相同 H743 历史 CDC 工况复现了 TPIU 成帧错误。[H743 同板对照](../validation/h743-cdc-golden-requal-20261123/README.md)
 
-F103ZE CDC48 的整套融合回归使用归档 ABI 1 配对。以下依次为离线预览、经授权实际执行和报告复核。
-
-```powershell
-$f103Pair = 'prebuilt/selectio-spi-cdc-rx-guard-20261123'
-python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze --pair $f103Pair --clock 100000000 --seconds 60 --rounds 3 --rtt-ring-bytes 8192 --rtt-chunk 2048
-python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze --pair $f103Pair --clock 100000000 --seconds 60 --rounds 3 --rtt-ring-bytes 8192 --rtt-chunk 2048 --out build/accept-new --execute
-python -X utf8 toolbox.py project run board.accept -- --selectio --review build/accept-new/summary.json
-```
-
-自建配对按用例选相应验收入口，并核对 bit、PS ELF、PS 初始化 Tcl、采样配置和清单。高速模式使用独立的 SelectIO 参考时钟。对有写入的实板压力测试，`selectio_f103_fixture.py` 会核对目标映像、保存 4 KiB SRAM、两侧哨兵及初始运行状态，并在独立进程中读回恢复结果。下列示例仅用于该 F103 实验夹具。
+三板实板验收固定使用指定 RAW4 ABI 2 配对。高速模式使用独立的 SelectIO 参考时钟。历史 F103 实验夹具的 `selectio_f103_fixture.py` 会核对目标映像、保存 4 KiB SRAM、两侧哨兵及初始运行状态，并在独立进程中读回恢复结果。下列命令用于查证该夹具的历史取证口径。 [融合验收手册](fusion-acceptance.md)
 
 ```powershell
 python -X utf8 tools/selectio_f103_fixture.py --out build/my-guard --execute -- python -X utf8 tools/selectio_pipeline_bench.py @link --bytes 4032 --depth 4 --seconds 60 --rounds 3 --out build/my-pipeline --execute

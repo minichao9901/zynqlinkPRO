@@ -21,11 +21,14 @@ def sha(path):
 
 
 def load_plan():
-    return read_json(ROOT / 'acceptance-cases.json')['fusionAcceptance']
+    catalog = read_json(ROOT / 'acceptance-cases.json')
+    plan = catalog['fusionAcceptance']
+    plan['probe'].update(catalog['probePairs'][plan['probe']['requiredPair']])
+    return plan
 
 
-def inside(path, root):
-    return Path(path).resolve().is_relative_to(root.resolve())
+def required_pair():
+    return (ROOT / load_plan()['probe']['manifest']).resolve().parent
 
 
 def checked_files(directory, manifest, names, key):
@@ -40,14 +43,16 @@ def checked_files(directory, manifest, names, key):
     return result
 
 
-def probe_identity(pair):
-    pair = pair.resolve()
-    if not inside(pair, ROOT / 'prebuilt'):
-        raise ValueError('Select a named fusion pair directory under prebuilt.')
+def probe_identity(pair=None):
+    approved = required_pair()
+    pair = approved if pair is None else pair.resolve()
+    if pair != approved:
+        raise ValueError(f'Fusion acceptance requires the RAW4 ABI 2 pair at {approved}')
     path = pair / 'manifest.json'
     manifest = read_json(path)
-    if manifest.get('firmware_abi') != 2 or 'qspi' in pair.name.lower():
-        raise ValueError('The campaign requires a fusion ABI 2 RAM pair.')
+    trace = manifest.get('trace_receiver', {})
+    if manifest.get('firmware_abi') != 2 or trace.get('raw_diagnostic') != 4 or trace.get('double_sample') is not False:
+        raise ValueError('The required manifest must describe RAW4 single-sampling and USB ABI 2')
     return {'manifest': str(path), 'files': checked_files(
         pair, manifest, ('probe.bit', 'application.elf', 'ps7_init.tcl'), 'hashes')}
 
@@ -89,8 +94,10 @@ def create_campaign(pair, serial, out):
 
 def validated_campaign(path):
     record = read_json(path)
-    if record['plan'] != load_plan()['id'] or not record['serial'].strip():
-        raise ValueError('Campaign plan or probe serial does not match.')
+    if record['plan'] != load_plan()['id']:
+        raise ValueError('Campaign plan revision differs. Create a new RAW4 ABI 2 campaign.')
+    if not record['serial'].strip():
+        raise ValueError('Campaign is missing its J7 USB serial.')
     pair = Path(record['probe']['manifest']).parent
     if probe_identity(pair) != record['probe']:
         raise ValueError('Campaign probe pair changed. Start a new campaign.')
@@ -188,7 +195,7 @@ def main(argv=None):
     sub.add_parser('list').add_argument('--board')
     sub.add_parser('describe').add_argument('case')
     start = sub.add_parser('campaign')
-    start.add_argument('--pair', required=True, type=Path)
+    start.add_argument('--pair', type=Path, help='Optional explicit path to the required RAW4 ABI 2 directory')
     start.add_argument('--serial', required=True)
     start.add_argument('--out', required=True, type=Path)
     for action in ('identity', 'run'):

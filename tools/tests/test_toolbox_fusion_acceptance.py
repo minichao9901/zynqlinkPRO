@@ -13,7 +13,8 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tools'))
 
 from fusion_acceptance import (create_campaign, find_case, load_plan, probe_identity,
-                               select_target, targets, validate_point, verify_load_receipt)
+                               required_pair, select_target, targets, validate_point,
+                               validated_campaign, verify_load_receipt)
 from fusion_evidence import compare_pattern, compare_stream, u32_sequence
 
 
@@ -62,7 +63,7 @@ class FusionAcceptanceTests(unittest.TestCase):
         self.assertEqual(combo['execution']['mode'], 'blocked')
 
     def test_load_receipt_requires_all_hashes_and_actual_serials(self):
-        pair = (ROOT / load_plan()['probe']['candidate']).parent
+        pair = required_pair()
         with tempfile.TemporaryDirectory() as directory:
             out = Path(directory)
             campaign = create_campaign(pair, 'USB', out / 'campaign')
@@ -76,13 +77,37 @@ class FusionAcceptanceTests(unittest.TestCase):
             self.assertEqual(verify_load_receipt(receipt_path, campaign, 'HS3')['path'], str(receipt_path.resolve()))
             with self.assertRaisesRegex(ValueError, 'USB serial'):
                 verify_load_receipt(receipt_path, campaign, 'OTHER')
-            receipt['files']['bit'] = {'sha256': '0' * 64}
+            other = ROOT / 'prebuilt/selectio-spi-pad-filter-v2-20261124/manifest.json'
+            other_hashes = json.loads(other.read_text(encoding='utf8'))['hashes']
+            self.assertEqual(other_hashes['application.elf'], files['application.elf']['sha256'])
+            receipt['files']['bit'] = {'sha256': other_hashes['probe.bit']}
             receipt_path.write_text(json.dumps(receipt), encoding='utf8')
             with self.assertRaisesRegex(ValueError, 'probe.bit'):
                 verify_load_receipt(receipt_path, campaign, 'HS3')
 
+    def test_fusion_campaign_is_pinned_to_exact_raw4_pair(self):
+        pair = required_pair()
+        self.assertEqual(pair.name, 'selectio-usb-split-raw4-20261123')
+        old = ROOT / 'prebuilt/selectio-spi-pad-filter-v2-20261124'
+        with tempfile.TemporaryDirectory() as directory:
+            out = Path(directory) / 'campaign'
+            with self.assertRaisesRegex(ValueError, 'requires the RAW4 ABI 2 pair'):
+                create_campaign(old, 'USB', out)
+            self.assertFalse(out.exists())
+
+            campaign = create_campaign(None, 'USB', out)
+            path = out / 'campaign.json'
+            self.assertEqual(validated_campaign(path), (campaign, pair))
+            path.write_text(json.dumps({**campaign, 'plan': 'fusion-full-acceptance-v1'}), encoding='utf8')
+            with self.assertRaisesRegex(ValueError, 'Create a new RAW4 ABI 2 campaign'):
+                validated_campaign(path)
+            campaign['probe']['manifest'] = str(old / 'manifest.json')
+            path.write_text(json.dumps(campaign), encoding='utf8')
+            with self.assertRaisesRegex(ValueError, 'requires the RAW4 ABI 2 pair'):
+                validated_campaign(path)
+
     def test_load_cli_threads_serial_into_both_tools_without_hardware(self):
-        pair = (ROOT / load_plan()['probe']['candidate']).parent
+        pair = required_pair()
         run = subprocess.run([sys.executable, '-X', 'utf8', 'tools/probe_load.py', '--pair', str(pair),
                               '--cable-serial', 'STUB-HS3', '--usb-serial', 'STUB-USB', '--dry-run'],
                              cwd=ROOT, capture_output=True, encoding='utf8', check=True)

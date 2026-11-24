@@ -6,8 +6,8 @@
 
 - 先看 `git status --short`、`git log -5 --oneline`，确认 worktree、分支和在途修改。明确本轮板卡、功能、性能及交付范围，保留其他任务的修改和生成物。
 - 新融合 bit/PS ELF 的三板验收按 [融合验收手册](docs/selectio/fusion-acceptance.md) 执行。用 `python -X utf8 toolbox.py project run fusion.accept -- list` 查询 [acceptance-cases.json](acceptance-cases.json) 的必验项和脚本覆盖。探针回归、诊断与历史记录用 `project case <用例ID>` 查询。用 `project describe` 或底层 `--help` 核对入口。用 `project run --dry-run` 离线预览参数。
-- 融合工程的通用参考配对为 RAW4 ABI 2。按用例显式指定 `--pair`。在动硬件前核对实际加载配对和启动方式。`serve --j7` 使用命令的正式 J7 默认配对，融合版或 QSPI 实物现场按实载 bit/PS ELF 声明。
-- [板卡验收与交付](docs/板卡精简验收与交付.md)规定三板标准工作台回归和跨页压力。标准 `board.accept` 与融合 `board.accept --selectio` 分开取证，后者当前只支持 F103ZE。按用例预览，按脚本要求用 `--execute` 实际操作，`--review` 汇总结果。每轮保留数据，可恢复的失败继续，恢复未确认时剩余项记为阻塞。
+- 三板的全部功能、性能和临界档验收固定使用 [RAW4 ABI 2](prebuilt/selectio-usb-split-raw4-20261123/README.md)。`probe-load --selectio` 加载指定配对。按融合手册核对探针、bit/PS ELF、加载回执和启动方式。
+- 统一验收从 `fusion.accept` 进入。[板卡验收与交付](docs/板卡精简验收与交付.md)保留标准工作台和交付流程资料。每轮保留数据，可恢复的失败继续，恢复未确认时剩余项记为阻塞。
 - 本机工作台使用独立 `--runtime`，服务仅绑定本机，运行时令牌留在本机。页内操作先用 `page <页面> describe` 发现。操作后核对状态、数据质量、日志和恢复。共享 Web 驱动改动后执行 `tools/sync_etm_shared.py --check`，必要时同步两份驱动。按影响范围选 CLI、Web 或离线 Trace 回归。
 - [构建、工具链、加载和发布](docs/README.md#配对与手册)记录具体入口。部分旧 `validate` 会写目标 Flash。历史报告中的 `.py.txt` 和 `.tcl.txt` 只供复查，实板用当前确认的入口。
 

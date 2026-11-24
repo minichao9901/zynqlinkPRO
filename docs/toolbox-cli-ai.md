@@ -435,10 +435,10 @@ Web 支持 Cortex-M/SWD 和 RISC-V/JTAG。ARM/JTAG 的 CFG 导入会提示转到
 
 ## SelectIO 独立 USB 端点
 
-融合通用参考使用 [RAW4 ABI 2 配对](../prebuilt/selectio-usb-split-raw4-20261123/README.md) 的 bit、PS ELF 和初始化 Tcl。复验按[用例清单](../acceptance-cases.json)选实际配对。命令以 `selectio --help` 和对应子命令帮助为准。完整接口、时钟档和引脚见 [原生 CLI](selectio/README.md)。
+三板验收固定使用 RAW4 ABI 2 的 bit、PS ELF 和初始化 Tcl。命令以 `selectio --help` 和对应子命令帮助为准。 [融合验收手册](selectio/fusion-acceptance.md) · [原生 CLI](selectio/README.md)
 
 ```powershell
-python -X utf8 toolbox.py probe-load --pair prebuilt/selectio-usb-split-raw4-20261123 --dry-run
+python -X utf8 toolbox.py probe-load --selectio --dry-run
 python -X utf8 toolbox.py selectio --serial 12345678 info
 python -X utf8 toolbox.py selectio identify --transport swd --clock 1000000
 python -X utf8 toolbox.py selectio read --help
