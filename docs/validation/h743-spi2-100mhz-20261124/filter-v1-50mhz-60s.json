@@ -1,0 +1,189 @@
+{
+  "h743_com": "COM52",
+  "j7_serial": "12345678",
+  "rows": [
+    {
+      "case": "j7_slave",
+      "mode": 1,
+      "passed": true,
+      "sck_hz": 50000000,
+      "sck_source": "H743 PLL2 readback and SPI2 divider",
+      "mosi_tap": 0,
+      "bytes": 16384,
+      "first_bad": null,
+      "duration_seconds": 0.029596099999253056,
+      "pc_MBps": 0.5535864522830204,
+      "probe": {
+        "pending": 0,
+        "dropped": 0,
+        "errors": 0,
+        "flags": 0,
+        "cursor": 16384
+      },
+      "target": {
+        "state": "done",
+        "role": "master",
+        "mode": 1,
+        "sck_hz": 50000000,
+        "frames": 4,
+        "tx_dma": 16384,
+        "rx": 0,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 2
+      }
+    },
+    {
+      "case": "j7_slave_sustained",
+      "mode": 1,
+      "passed": true,
+      "sck_hz": 50000000,
+      "sck_source": "H743 PLL2 readback and SPI2 divider",
+      "mosi_tap": 0,
+      "bytes": 374998591,
+      "first_bad": null,
+      "duration_seconds": 60.00859049999963,
+      "pc_MBps": 6.2490818043793634,
+      "probe": {
+        "pending": 0,
+        "dropped": 0,
+        "errors": 0,
+        "flags": 0,
+        "cursor": 1599
+      },
+      "target": {
+        "state": "done",
+        "role": "master",
+        "mode": 1,
+        "sck_hz": 50000000,
+        "frames": 0,
+        "tx_dma": 374998604,
+        "rx": 0,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 60000
+      }
+    },
+    {
+      "case": "j7_slave",
+      "mode": 2,
+      "passed": true,
+      "sck_hz": 50000000,
+      "sck_source": "H743 PLL2 readback and SPI2 divider",
+      "mosi_tap": 0,
+      "bytes": 16384,
+      "first_bad": null,
+      "duration_seconds": 0.007163000000218744,
+      "pc_MBps": 2.2873097863324956,
+      "probe": {
+        "pending": 0,
+        "dropped": 0,
+        "errors": 0,
+        "flags": 0,
+        "cursor": 16384
+      },
+      "target": {
+        "state": "done",
+        "role": "master",
+        "mode": 2,
+        "sck_hz": 50000000,
+        "frames": 4,
+        "tx_dma": 16384,
+        "rx": 0,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 3
+      }
+    },
+    {
+      "case": "j7_slave_sustained",
+      "mode": 2,
+      "passed": false,
+      "sck_hz": 50000000,
+      "sck_source": "H743 PLL2 readback and SPI2 divider",
+      "mosi_tap": 0,
+      "bytes": 374511176,
+      "first_bad": 264572632,
+      "duration_seconds": 60.00873179999962,
+      "pc_MBps": 6.240944688652833,
+      "probe": {
+        "pending": 0,
+        "dropped": 483950,
+        "errors": 1,
+        "flags": 0,
+        "cursor": 38472
+      },
+      "target": {
+        "state": "done",
+        "role": "master",
+        "mode": 2,
+        "sck_hz": 50000000,
+        "frames": 0,
+        "tx_dma": 374995140,
+        "rx": 0,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 60000
+      },
+      "error": "J7 receive mismatch or loss"
+    }
+  ],
+  "fixture": "H743SPI/1 kernel_hz=200000000 div=2,4,8,16,32,64,128,256 max_bytes=32768 max_ms=120000 revision=4 drive=3",
+  "initial_status": {
+    "state": "done",
+    "role": "master",
+    "mode": 1,
+    "sck_hz": 50000000,
+    "frames": 1,
+    "tx_dma": 4096,
+    "rx": 0,
+    "bad": 0,
+    "first_bad": 4294967295,
+    "spi": 0,
+    "dma": 0,
+    "ms": 1
+  },
+  "edge": [
+    3,
+    3,
+    3
+  ],
+  "probe": {
+    "protocol": "ZLK1",
+    "reference_hz": 199999996,
+    "link_hz": 99999998.0,
+    "features": "0x4450ffff",
+    "integrated_pl": true,
+    "max_frame": 16384,
+    "firmware_abi": 2,
+    "bulk_header_bytes": 16,
+    "serial_buffer_bytes": 2162688,
+    "fclk0_hz": 133333332,
+    "negotiated_frame": 16384,
+    "max_queue_depth": 4,
+    "dedicated_pipes": true
+  },
+  "edge_restored": true,
+  "final_status": {
+    "state": "done",
+    "role": "master",
+    "mode": 2,
+    "sck_hz": 50000000,
+    "frames": 0,
+    "tx_dma": 374995140,
+    "rx": 0,
+    "bad": 0,
+    "first_bad": 4294967295,
+    "spi": 0,
+    "dma": 0,
+    "ms": 60000
+  }
+}

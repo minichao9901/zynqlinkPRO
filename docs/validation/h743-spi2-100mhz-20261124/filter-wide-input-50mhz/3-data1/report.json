@@ -1,0 +1,81 @@
+{
+  "snapshot_marker": "0x53504402",
+  "mode": 3,
+  "drive": 3,
+  "edge": [
+    3,
+    1,
+    3
+  ],
+  "fill": null,
+  "mosi_tap": 0,
+  "sck_nss_tap": 0,
+  "reference_hz_before_arm": 199999996,
+  "source_hz": 50000000,
+  "target": {
+    "state": "done",
+    "role": "master",
+    "mode": 3,
+    "sck_hz": 50000000,
+    "frames": 1,
+    "tx_dma": 4096,
+    "rx": 0,
+    "bad": 0,
+    "first_bad": 4294967295,
+    "spi": 0,
+    "dma": 0,
+    "ms": 1
+  },
+  "decoded": {
+    "bytes": 4094,
+    "pending": 0,
+    "dropped": 0,
+    "errors": 5
+  },
+  "sample_summary": {
+    "total_slots": 8192,
+    "transitions": {
+      "mosi": 271,
+      "sck": 1024,
+      "nss": 268
+    },
+    "nss_high_slots": 376,
+    "sck_low_high_run_lengths": [
+      {
+        "8": 350,
+        "7": 141,
+        "9": 21
+      },
+      {
+        "3": 1,
+        "8": 392,
+        "9": 119,
+        "6": 1
+      }
+    ],
+    "nss_low_high_run_lengths": [
+      {
+        "70": 1,
+        "110": 8,
+        "142": 4,
+        "44": 10,
+        "30": 9,
+        "78": 11,
+        "92": 4,
+        "94": 5,
+        "46": 22,
+        "62": 17,
+        "28": 32,
+        "126": 3,
+        "60": 6,
+        "76": 2,
+        "40": 1
+      },
+      {
+        "2": 80,
+        "4": 54
+      }
+    ]
+  },
+  "delay_restored": true
+}

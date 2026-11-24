@@ -132,8 +132,15 @@ def receive_on_j7(probe, h743, mode, divider, row, seconds=0, tap=0):
         deadline = time.monotonic() + max(3, seconds + 3)
         next_status = time.monotonic() if not seconds else time.monotonic() + seconds
         status = started
+        last_read_end = time.monotonic()
+        max_poll_gap = 0
+        max_usb_wait = 0
         while time.monotonic() < deadline:
+            read_start = time.monotonic()
+            max_poll_gap = max(max_poll_gap, read_start - last_read_end)
             data = probe.exchange(CHANNEL, 1)
+            last_read_end = time.monotonic()
+            max_usb_wait = max(max_usb_wait, last_read_end - read_start)
             accept(data)
             if time.monotonic() >= next_status:
                 status = h743.state()
@@ -148,7 +155,8 @@ def receive_on_j7(probe, h743, mode, divider, row, seconds=0, tap=0):
         pending, dropped, errors, flags, cursor = struct.unpack("<5I", probe.exchange(CHANNEL, 4))
         elapsed = time.monotonic() - start
         row.update(bytes=total, first_bad=first_bad, duration_seconds=elapsed,
-                   pc_MBps=total / elapsed / 1e6, probe=dict(pending=pending, dropped=dropped,
+                   pc_MBps=total / elapsed / 1e6, pc_max_poll_gap_ms=max_poll_gap * 1000,
+                   pc_max_usb_wait_ms=max_usb_wait * 1000, probe=dict(pending=pending, dropped=dropped,
                    errors=errors, flags=flags, cursor=cursor), target=status)
         assert_status(status)
         require(total and first_bad is None and not (pending or dropped or errors), "J7 receive mismatch or loss")
