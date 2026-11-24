@@ -17,7 +17,7 @@
 ## 只构建
 
 ```powershell
-python -X utf8 firmware/target/stm32f103_hal_storage/build.py --out build/hal-storage-new
+python -X utf8 firmware/target/f103ze/etm/hal-storage/build.py --out build/hal-storage-new
 ```
 
 依赖仓库内 `../stm32f103_cdc_trace/` 的已跟踪 CMSIS、HAL、链接脚本和 RTT；没有外部 SDK 绝对路径。新增 SPI/I2C HAL 源码固定到 ST 官方 v1.1.10、提交 `77fbb30b7a1d02533980400083e48c559aae5a4f`，版本与已有 HAL 一致，[来源和哈希](vendor/provenance.json)、[许可证](vendor/LICENSE.md)。构建输出 ELF/BIN/HEX、map、反汇编、符号及源码/编译参数/产物 SHA manifest；构建不会烧录。

@@ -65,7 +65,7 @@ def main():
         gcc = Path('E:/sdk_env_v1.11.0/toolchains/rv32imac_zicsr_zifencei_multilib_b_ext-win/bin/riscv32-unknown-elf-gcc.exe')
         elf, binary = a.out/'producer.elf', a.out/'producer.bin'
         subprocess.run([str(gcc), '-march=rv32imac_zicsr_zifencei', '-mabi=ilp32', '-nostdlib',
-                        '-Wl,-Ttext=0x10000', '-Wl,-e,producer', str(ROOT/'firmware/target/hpm6800_perf_ram.S'), '-o', str(elf)], check=True)
+                        '-Wl,-Ttext=0x10000', '-Wl,-e,producer', str(ROOT/'firmware/target/hpm6800evk/performance/hpm6800_perf_ram.S'), '-o', str(elf)], check=True)
         subprocess.run([str(gcc.with_name('riscv32-unknown-elf-objcopy.exe')), '-O', 'binary', str(elf), str(binary)], check=True)
         assert binary.stat().st_size < 256
         report['fixture'] = dict(elf_sha256=hashlib.sha256(elf.read_bytes()).hexdigest(),

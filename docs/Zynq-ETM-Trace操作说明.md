@@ -72,7 +72,7 @@ H743继续使用superlinkPRO迁入的目标识别、ETMv4配置、Funnel/ETF/TPI
 C++解码、TraceStore和Web分析/导出；接收设备使用Zynq ETM-LA。
 F103专用的ETMv3编程模式重启不用于H743。诊断CSR和后续DDR后端不应按F103协议硬编码。
 旧Kingst参考只证明离线回归。本轮H743接Zynq的连续原生CLI采集已单独验收，不能替代完整Web起点流程。
-当前自包含target Golden位于`firmware/target/stm32h743_cdc_trace/`，
+当前自包含target Golden位于`firmware/target/h743/etm/cdc/`，
 含源文件、SDK子集、许可证和构建脚本；旧`etm-service/firmware/`同名目录保留历史来源快照。
 
 换板后先核对接线、电平、板上HSE和实际固件，载入其匹配ELF/源码，

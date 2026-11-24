@@ -158,7 +158,7 @@ class Streams(Acceptance):
                 gaps=sum((int(b[1])-int(a[1]))%10000000!=1 for a,b in zip(matches,matches[1:]))
                 prefix=matches[0].start() if matches else len(data)
                 tail=len(data)-matches[-1].end() if matches else len(data)
-                fixture=(ROOT/'firmware/target/stm32f103_rtt_seq72/src/main.c').read_text(encoding='utf8')
+                fixture=(ROOT/'firmware/target/f103ze/performance/rtt72/src/main.c').read_text(encoding='utf8')
                 banners=[json.loads(m).encode('utf8') for m in re.findall(r'SEGGER_RTT_WriteString\(0,\s*("(?:[^"\\]|\\.)*")\);',fixture)]
                 prefix_ok=prefix<=12 or data[:prefix] in banners
                 valid=bool(matches and adjacent and not gaps and prefix_ok and tail<=12 and window['complete'] and

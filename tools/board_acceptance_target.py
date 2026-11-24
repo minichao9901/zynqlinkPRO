@@ -454,12 +454,12 @@ class Target:
         base = RTT_BASE[self.args.board]
         if self.rv:
             compiler = self.args.rv_gcc or RV_GCC
-            source = ROOT / 'firmware/target/hpm6800_usb_ram/producer.S'
+            source = ROOT / 'firmware/target/hpm6800evk/performance/rtt-ram/producer.S'
             flags = ['-march=rv32imac_zicsr_zifencei', '-mabi=ilp32', '-Wl,-Ttext=0x10000']
             maximum = 256
         else:
             compiler = self.args.arm_gcc or shutil.which('arm-none-eabi-gcc')
-            source = ROOT / 'firmware/target/probe_rtt_ram.S'
+            source = ROOT / 'tools/fixtures/target/probe_rtt_ram.S'
             flags = ['-mcpu=cortex-m3', '-mthumb', f'-Wl,-Ttext={base:#x}',
                      f'-Wl,--defsym,_SEGGER_RTT={base + 0x200:#x}',
                      f'-Wa,--defsym,FIXTURE_BASE={base:#x}']

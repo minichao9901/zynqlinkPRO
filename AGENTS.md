@@ -96,7 +96,7 @@ ETM配置默认SWD为 **10MHz**，前端、本地采集服务接管和恢复连�
 - 当前ETM业务只要求低频SWD配置；高频ETM输出+RTT并发不是产品必验组合。150MHz FCLK/36MHz TRACECLK等已暂停研究不可因新会话而自动重启。
 - DDR/OCM身份核对使用物理MEM-AP0，CPU上下文 `mrd -force` 不能保证绕过缓存。包错误为0、FIFO无丢帧或IDELAYCTRL RDY不能单独证明完整窗口、完整执行流或完成逐线校准。
 - 性能对比固定配对、目标固件/时钟、事务规模、队列深度、窗口和重复次数；分别报告控制、硬件窗口、下载、解码/索引与首屏。离线时间、估算和旧JSON路径不得冒充当前E2E。
-- H743 Golden 源码和自包含 SDK 在 `firmware/target/stm32h743_cdc_trace/`，配套目标 ELF 在 `prebuilt/targets/stm32h743-cdc-trace-20261101/`。ETM 用 CPU/HCLK 60 MHz、TRACECLK 20 MHz，吞吐用 CPU480/HCLK240，分别取证。原生 ETM 使用连续 DDR USB 窗口，F103 专用 entry/reset 选项仅用于 F103。内存控制与备份兼容 1 KiB TAR 回绕，RTT RAM 夹具用 AXI SRAM 并核对缓存和恢复。JTAG 1/10 MHz 可用于 SRAM/RTT，当前 HSS 在这些档位因 FCLK 低于 24 MHz 无法启动。[H743 RAW4 验收](docs/validation/h743-cdc-golden-requal-20261123/README.md) · [运行态 HCLK 对照](docs/validation/h743-hclk-ab-20261123/README.md)
+- H743 Golden 源码和自包含 SDK 在 `firmware/target/h743/etm/cdc/`，配套目标 ELF 在 `prebuilt/targets/stm32h743-cdc-trace-20261101/`。ETM 用 CPU/HCLK 60 MHz、TRACECLK 20 MHz，吞吐用 CPU480/HCLK240，分别取证。原生 ETM 使用连续 DDR USB 窗口，F103 专用 entry/reset 选项仅用于 F103。内存控制与备份兼容 1 KiB TAR 回绕，RTT RAM 夹具用 AXI SRAM 并核对缓存和恢复。JTAG 1/10 MHz 可用于 SRAM/RTT，当前 HSS 在这些档位因 FCLK 低于 24 MHz 无法启动。[H743 RAW4 验收](docs/validation/h743-cdc-golden-requal-20261123/README.md) · [运行态 HCLK 对照](docs/validation/h743-hclk-ab-20261123/README.md)
 
 ## FPGA bitstream 与 Zynq ELF 必须纳入 Git
 

@@ -23,7 +23,7 @@ def system_address(address):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--elf', type=Path, default=Path('firmware/target/hpm5301_perf/build/output/demo.elf'))
+    parser.add_argument('--elf', type=Path, default=Path('firmware/target-support/hpm5301_perf/build/output/demo.elf'))
     parser.add_argument('--output-dir', type=Path, default=Path('build/hpm5301_performance'))
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)

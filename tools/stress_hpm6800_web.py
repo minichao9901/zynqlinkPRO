@@ -36,7 +36,7 @@ def main():
     try:
         for index,kind in enumerate(plan):
             wanted='scope' if kind=='scope' else 'dbgstress' if kind=='debug' else 'rtt_flood'
-            elf=ROOT/'firmware/target/hpm6800_web_validation'/wanted/'fw.elf'
+            elf=ROOT/'prebuilt/targets/hpm6800-web-reference'/f'{wanted}.elf'
             row=dict(step=index+1,kind=kind,firmwareBefore=firmware,passed=False,started=time.time());report['steps'].append(row);save()
             if wanted!=firmware:
                 f=Web(args(a.out/f'{index+1:02d}-flash-{wanted}',elf,False));f.a.repeats=1
@@ -66,7 +66,7 @@ def main():
             previous=kind if row['passed'] else None
     finally:
         # Cleanup uses only this workbench's feature owners, no external server.
-        cleaner=Web(args(a.out/'cleanup',ROOT/'firmware/target/hpm6800_web_validation'/firmware/'fw.elf',False))
+        cleaner=Web(args(a.out/'cleanup',ROOT/'prebuilt/targets/hpm6800-web-reference'/f'{firmware}.elf',False))
         errors=[]
         before_cleanup=status(cleaner)
         cleanup=[('scope','stop','view'),('scope','disconnect','view'),('rtt','disconnect','view'),

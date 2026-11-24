@@ -22,4 +22,4 @@ Golden是已有验收产物。重新构建DMA应用时明确使用--project xusb
 
 SDK启动缓存与CM3快照默认位于项目外../zynqlinkPRO-work，可用ZYNQLINK_WORK_DIR指定。ETM原生重解按本次受测方式使用项目内临时工作目录，完成后清理；任意外部输出路径未在本轮接受。build/results为可清工作输出，不放唯一正式产物。
 
-H743 Golden的自包含SDK及来源哈希已纳入 `firmware/target/stm32h743_cdc_trace/sdk/`，不再依赖superlinkPRO目录。需要本机ARM GCC；`python toolbox.py project run target.h743-build -- -CoreMHz 60 -TraceR 12 -BannerEveryMs 20 -OutputDir build/h743-new -NoPublish` 只构建，不烧录。CPU60/TRACECLK20是ETM基线，CPU480/TRACECLK20是独立吞吐配置；详见该例程README及本轮综合报告。
+H743 Golden的自包含SDK及来源哈希已纳入 `firmware/target/h743/etm/cdc/sdk/`，不再依赖superlinkPRO目录。需要本机ARM GCC；`python toolbox.py project run target.h743-build -- -CoreMHz 60 -TraceR 12 -BannerEveryMs 20 -OutputDir build/h743-new -NoPublish` 只构建，不烧录。CPU60/TRACECLK20是ETM基线，CPU480/TRACECLK20是独立吞吐配置；详见该例程README及本轮综合报告。

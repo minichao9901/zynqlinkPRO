@@ -102,7 +102,7 @@ def main(argv=None):
         elf=out/(entry+".elf")
         subprocess.run(["arm-none-eabi-gcc","-mcpu=cortex-m3","-mthumb","-nostdlib",
                         "-Wl,--build-id=none","-Wl,-Ttext=0x20008000","-Wl,-e,"+entry,*parameters,
-                        ROOT/"firmware/target"/src,"-o",elf],check=True)
+                        ROOT/src,"-o",elf],check=True)
         subprocess.run(["arm-none-eabi-objcopy","-O","binary","-j",".text",elf,binary],check=True)
         return binary
     save()
@@ -128,7 +128,7 @@ def main(argv=None):
                  ["--clock",args.clock,"--tap",swd["tap"],"--slot",swd["slot"],"--idle",swd["idle"]])
     producer=None
     if "rtt" in selected or "combo" in selected:
-        producer=fixture("probe_rtt_ram.S","producer",["-Wa,--defsym,FIXTURE_BASE=0x20008000",
+        producer=fixture("tools/fixtures/target/probe_rtt_ram.S","producer",["-Wa,--defsym,FIXTURE_BASE=0x20008000",
                              "-Wa,--defsym,RTT_FROM_DESCRIPTOR=1"])
     for transport in ("swd","jtag"):
         cfg=profiles[transport]
@@ -167,7 +167,7 @@ def main(argv=None):
         if int(identity["bit_features"],16)&0x4000:
             test("manchester-bursts","selectio_manchester_stress.py",["--seconds",args.seconds])
     if "cdc" in selected:
-        cdc_options=["--binary",fixture("selectio_f103_uart_echo.S","echo"),"--swd-slot",identity["swd"]["slot"]]
+        cdc_options=["--binary",fixture("firmware/target/f103ze/uart/selectio_f103_uart_echo.S","echo"),"--swd-slot",identity["swd"]["slot"]]
         test("cdc","selectio_cdc_test.py",cdc_options)
         test("cdc-rtt-scope","selectio_cdc_test.py",[*cdc_options,"--combo"])
     if "cdc" in selected and identity.get("cdc_bypass_qualification"):
@@ -177,7 +177,7 @@ def main(argv=None):
             test(f"spi-cdc-mode{spi_mode}","selectio_spi_cdc_test.py",
                  ["--mode",spi_mode,"--f103-source",16384,"--seconds",10])
     if "itm" in selected:
-        binary=fixture("selectio_f103_itm_words.S","itm_words")
+        binary=fixture("firmware/target/f103ze/swo/selectio_f103_itm_words.S","itm_words")
         for path in ("native","cmsis-dap"):
             test("itm-"+path,"selectio_itm_test.py",["--usb-path",path,"--binary",binary,"--words",500000])
     if "etm" in selected:

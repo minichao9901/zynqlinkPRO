@@ -7,8 +7,8 @@ import shutil
 import subprocess
 
 HERE=Path(__file__).resolve().parent
-ROOT=HERE.parents[2]
-BASE=HERE.parent/'stm32f103_cdc_trace'
+ROOT=HERE.parents[4]
+BASE=HERE.parent/'cdc'
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)

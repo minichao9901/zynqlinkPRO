@@ -232,7 +232,7 @@ def main():
     elf, binary = build/'producer.elf', build/'producer.bin'
     subprocess.run([str(gcc), '-mcpu=cortex-m3', '-mthumb', '-nostdlib',
                     f'-Wl,-Ttext={base:#x}', f'-Wa,--defsym,FIXTURE_BASE={base:#x}', '-Wl,-e,producer',
-                    str(root/'firmware/target/probe_rtt_ram.S'), '-o', str(elf)], check=True)
+                    str(root/'tools/fixtures/target/probe_rtt_ram.S'), '-o', str(elf)], check=True)
     subprocess.run([str(objcopy), '-O', 'binary', str(elf), str(binary)], check=True)
     ir_lengths=tuple(map(int,args.jtag_ir.split(',')))
     code = binary.read_bytes()

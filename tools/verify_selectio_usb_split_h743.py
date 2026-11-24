@@ -60,7 +60,7 @@ def build_producer(folder, code_base, data_base):
     gcc = Path(gcc)
     objcopy = gcc.with_name("arm-none-eabi-objcopy" + gcc.suffix)
     elf, binary = folder / "producer.elf", folder / "producer.bin"
-    source = Path(__file__).resolve().parents[1] / "firmware/target/probe_rtt_ram.S"
+    source = Path(__file__).resolve().parents[1] / "tools/fixtures/target/probe_rtt_ram.S"
     subprocess.run([gcc, "-mcpu=cortex-m3", "-mthumb", "-nostdlib", "-Wl,--build-id=none",
                     f"-Wl,-Ttext={code_base:#x}", f"-Wa,--defsym,FIXTURE_BASE={data_base:#x}",
                     "-Wa,--defsym,RTT_FROM_DESCRIPTOR=1", "-Wl,-e,producer", source, "-o", elf], check=True)

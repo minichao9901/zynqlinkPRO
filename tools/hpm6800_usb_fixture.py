@@ -59,7 +59,7 @@ def main():
                 report['regions'].append(dict(address=address,size=size,file=name,sha256=sha(data)));save(meta,report)
             gcc=Path('E:/sdk_env_v1.11.0/toolchains/rv32imac_zicsr_zifencei_multilib_b_ext-win/bin/riscv32-unknown-elf-gcc.exe')
             elf=a.state/'producer.elf';binary=a.state/'producer.bin'
-            subprocess.run([str(gcc),*(['-DHPM_USB_AXI_RING=1']if a.memory=='axi32'else[]),'-march=rv32imac_zicsr_zifencei','-mabi=ilp32','-nostdlib','-Wl,-Ttext=0x10000','-Wl,-e,producer',str(ROOT/'firmware/target/hpm6800_usb_ram/producer.S'),'-o',str(elf)],check=True)
+            subprocess.run([str(gcc),*(['-DHPM_USB_AXI_RING=1']if a.memory=='axi32'else[]),'-march=rv32imac_zicsr_zifencei','-mabi=ilp32','-nostdlib','-Wl,-Ttext=0x10000','-Wl,-e,producer',str(ROOT/'firmware/target/hpm6800evk/performance/rtt-ram/producer.S'),'-o',str(elf)],check=True)
             subprocess.run([str(gcc.with_name('riscv32-unknown-elf-objcopy.exe')),'-O','binary',str(elf),str(binary)],check=True)
             code=binary.read_bytes();assert len(code)<256
             mem.write(CODE,code);assert mem.read(CODE,len(code))==code

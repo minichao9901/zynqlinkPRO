@@ -33,7 +33,7 @@ def build(dest,bsp):
     target=dest/'f103_gpio.elf';binary=dest/'f103_gpio.bin'
     run([gcc,'-mcpu=cortex-m3','-mthumb','-O2','-g','-ffreestanding','-nostdlib',
          '-Wl,-Ttext=0x20000000','-Wl,-e,probe_io_target',
-         ROOT/'firmware/target/probe_jtag_gpio.c','-o',target])
+         ROOT/'tools/fixtures/target/probe_jtag_gpio.c','-o',target])
     run([gcc.with_name('arm-none-eabi-objcopy'+ext),'-O','binary',target,binary])
     nm=run([gcc.with_name('arm-none-eabi-nm'+ext),target]).stdout
     entry=int(re.search(r'^([0-9a-fA-F]+) T probe_io_target$',nm,re.M)[1],16)

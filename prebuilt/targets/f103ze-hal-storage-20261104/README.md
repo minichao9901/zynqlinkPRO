@@ -1,6 +1,6 @@
 # F103ZE 精英板 HAL 存储 Trace 例程
 
-`fw.elf/bin/hex` 是本轮实际烧录、采集使用的 v3 字节；ELF SHA-256 `dbaff7a388bb66fb2d1439f729f60c4f6620ff464c623bda80e2a3f7ef6a4d44`。源码、受控写入和备份/恢复方法见 [例程说明](../../../firmware/target/stm32f103_hal_storage/README.md)。
+`fw.elf/bin/hex` 是本轮实际烧录、采集使用的 v3 字节；ELF SHA-256 `dbaff7a388bb66fb2d1439f729f60c4f6620ff464c623bda80e2a3f7ef6a4d44`。源码、受控写入和备份/恢复方法见 [例程说明](../../../firmware/target/f103ze/etm/hal-storage/README.md)。
 
 CPU/HCLK48MHz、TRACECLK24MHz、SPI2 1.5MHz、I2C1 100kHz。实际板载 JEDEC EF4018、EEPROM 0x50应答。上电只读；写入需有效主机备份和一次性arm。只允许 NOR 最后4KiB和 EEPROM 首256B，事务结束逐字节恢复并独立从外设重读。
 

@@ -238,7 +238,7 @@ def main():
         if "rtt" in suites:
             run("compile-producer",["arm-none-eabi-gcc","-mcpu=cortex-m3","-mthumb","-nostdlib","-Wl,--build-id=none",
                 "-Wl,-Ttext=0x20008000","-Wl,-e,producer","-Wa,--defsym,FIXTURE_BASE=0x20008000","-Wa,--defsym,RTT_FROM_DESCRIPTOR=1",
-                ROOT/"firmware/target/probe_rtt_ram.S","-o",folder/"producer.elf"])
+                ROOT/"tools/fixtures/target/probe_rtt_ram.S","-o",folder/"producer.elf"])
             run("extract-producer",["arm-none-eabi-objcopy","-O","binary","-j",".text",folder/"producer.elf",folder/"producer.bin"])
             run("rtt",[*py,ROOT/"tools/selectio_running_test.py","--serial",args.serial,"--transport","swd","--slot",args.swd_slot,
                 "--clock",50000000,"--idle",0,"--seconds",args.seconds,"--service","rtt","--binary",folder/"producer.bin",

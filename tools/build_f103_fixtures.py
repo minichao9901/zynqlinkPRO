@@ -14,7 +14,7 @@ def main():
     p.add_argument('--out',type=Path,required=True)
     p.add_argument('--gcc',type=Path,default=Path('E:/Share/env-windows/tools/gnu_gcc/arm_gcc/mingw/bin/arm-none-eabi-gcc.exe'))
     a=p.parse_args()
-    source=ROOT/'firmware/target'/('stm32f103_rtt_seq72' if a.kind=='rtt' else 'stm32f103_scope_rated')
+    source=ROOT/'firmware/target/f103ze/performance'/('rtt72' if a.kind=='rtt' else 'scope72')
     output=a.out.resolve();output.mkdir(parents=True,exist_ok=False)
     sources=[source/'src/main.c',source/'src/startup.c']
     flags=['-mcpu=cortex-m3','-mthumb','-Os','-g3','-gdwarf-4',

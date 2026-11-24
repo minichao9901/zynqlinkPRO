@@ -12,9 +12,9 @@
 python -X utf8 toolbox.py project run target.h743-build -- -CoreMHz 60 -TraceR 12 -BannerEveryMs 20 -OutputDir build/h743-new -NoPublish
 # 默认参数也是CPU60/HCLK60/TRACECLK20，周期banner20ms。
 # 只显示烧录计划：
-pwsh -File firmware/target/stm32h743_cdc_trace/flash.ps1 -Elf build/h743-new/fw.elf
+pwsh -File firmware/target/h743/etm/cdc/flash.ps1 -Elf build/h743-new/fw.elf
 # 确认目标程序可替换且已备份后，真正擦写目标Flash：
-pwsh -File firmware/target/stm32h743_cdc_trace/flash.ps1 -Elf build/h743-new/fw.elf -Execute
+pwsh -File firmware/target/h743/etm/cdc/flash.ps1 -Elf build/h743-new/fw.elf -Execute
 ```
 
 `-CoreMHz 60 -TraceR 8` 为30MHz TRACECLK诊断档；本次Zynq接线未通过，不能作为Golden。`-CoreMHz 480 -TraceR 24` 为CPU480/HCLK240/TRACECLK20的独立吞吐配置，不能把其结果混入CPU60的历史ETM比较。供电/VOS、Flash等待周期随例程设置，其他芯片修订和板型须单独核对。
@@ -34,4 +34,4 @@ python -X utf8 tools/validate_h743_performance.py --phase sram --out build/h743-
 
 RTT高带宽测试使用AXI SRAM `0x24040000` 的临时RAM producer，完整备份/恢复20KiB与核心寄存器，并要求D-cache关闭。例程I-cache开、D-cache关；SDK的GCC `at` 属性警告已保留，实际 `_SEGGER_RTT` 位于 `0x24000cf4`，不能沿用链接脚本注释所称的固定DTCM地址。`g_trace` 为 `0x20003000`，ready只表示USB初始化返回，不证明主机枚举；程序RTT满后非阻塞丢弃日志，CDC继续回显。
 
-发现问题或能力边界变化时同步更新 [项目问题跟踪列表](../../../docs/项目问题跟踪列表.md)，本轮关联ZL-011、060～070。没有进行QSPI写入。
+发现问题或能力边界变化时同步更新 [项目问题跟踪列表](../../../../../docs/项目问题跟踪列表.md)，本轮关联ZL-011、060～070。没有进行QSPI写入。

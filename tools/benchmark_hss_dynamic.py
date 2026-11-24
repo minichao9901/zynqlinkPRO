@@ -109,7 +109,7 @@ def main():
     gcc=Path(shutil.which('arm-none-eabi-gcc'))
     objcopy=gcc.with_name('arm-none-eabi-objcopy.exe' if gcc.suffix=='.exe' else 'arm-none-eabi-objcopy')
     subprocess.run([str(gcc),'-mcpu=cortex-m3','-mthumb','-nostdlib','-Wl,-Ttext=0x20000000','-Wl,-e,producer',
-                    str(root/'firmware/target/probe_hss_ram.S'),'-o',str(build/'producer.elf')],check=True)
+                    str(root/'tools/fixtures/target/probe_hss_ram.S'),'-o',str(build/'producer.elf')],check=True)
     subprocess.run([str(objcopy),'-O','binary',str(build/'producer.elf'),str(build/'producer.bin')],check=True)
     code=(build/'producer.bin').read_bytes()
     p=Probe();dev,out,inp=open_dap();mem=Memory(out,inp)

@@ -24,7 +24,7 @@ def f103_source(args, report):
     fixture.mkdir(exist_ok=False)
     elf, binary = fixture / "source.elf", fixture / "source.bin"
     subprocess.run(["arm-none-eabi-gcc", "-mcpu=cortex-m3", "-mthumb", "-nostdlib",
-                    f"-Wl,-Ttext={BASE:#x},-e,spi_source", ROOT / "firmware/target/f103_spi_cdc_source.S",
+                    f"-Wl,-Ttext={BASE:#x},-e,spi_source", ROOT / "firmware/target/f103ze/spi/f103_spi_cdc_source.S",
                     "-o", elf], check=True)
     subprocess.run(["arm-none-eabi-objcopy", "-O", "binary", "-j", ".text", elf, binary], check=True)
     code = binary.read_bytes()

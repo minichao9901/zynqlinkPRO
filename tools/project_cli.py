@@ -17,7 +17,7 @@ import sys
 import tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
-ROOTS=('tools/','fpga/','firmware/target/','firmware/boot/','etm-service/','web/tools/','web/bridge/')
+ROOTS=('tools/','fpga/','firmware/target/','firmware/target-support/','firmware/boot/','etm-service/','web/tools/','web/bridge/')
 EXCLUDED={'vendor','sdk','reference','records','build-native','node_modules','tests','selftest','as_run_helpers'}
 EXTENSIONS={'.py','.tcl','.ps1','.mjs'}
 ALIASES={
@@ -63,10 +63,10 @@ ALIASES={
  'etm.lane-calibrate':'tools/calibrate_etm_lanes.py',
  'etm.lane-package':'tools/package_etm_lane_delay.py',
  'deps.check':'tools/verify_dependencies.py',
- 'target.fixtures':'tools/build_f103_fixtures.py','target.cdc-build':'firmware/target/stm32f103_cdc_trace/build.ps1',
- 'target.cdc-tests':'firmware/target/stm32f103_cdc_trace/tests/run_tests.ps1',
- 'target.h743-build':'firmware/target/stm32h743_cdc_trace/build.ps1',
- 'target.scope-build':'firmware/target/stm32f103_scope/build.ps1','target.hpm-build':'firmware/target/hpm5301_perf/build.ps1',
+ 'target.fixtures':'tools/build_f103_fixtures.py','target.cdc-build':'firmware/target/f103ze/etm/cdc/build.ps1',
+ 'target.cdc-tests':'firmware/target/f103ze/etm/cdc/tests/run_tests.ps1',
+ 'target.h743-build':'firmware/target/h743/etm/cdc/build.ps1',
+ 'target.scope-build':'firmware/target/f103ze/performance/scope-legacy/build.ps1','target.hpm-build':'firmware/target-support/hpm5301_perf/build.ps1',
  'native.build':'etm-service/build-decoder.ps1',
  'web.shared-sync':'tools/sync_etm_shared.py',
  'web.publish':'tools/publish_github.py',
@@ -124,7 +124,7 @@ def describe_file(path,root=ROOT):
         comments=[line.lstrip('#/ *').strip() for line in text.splitlines()[:15] if line.lstrip().startswith(('#','//'))]
         summary=next((line for line in comments if line and not line.startswith('!')),source.stem)
     legacy=path.startswith('etm-service/tools/h743/') or (suffix=='.mjs' and path.startswith('etm-service/tools/'))
-    category=('fpga' if path.startswith('fpga/') else 'target' if path.startswith('firmware/target/') else
+    category=('fpga' if path.startswith('fpga/') else 'target' if path.startswith(('firmware/target/','firmware/target-support/')) else
               'boot' if 'boot' in source.stem or path.startswith('firmware/boot/') else
               'web-build' if path.startswith('web/') else 'etm' if path.startswith('etm-service/') or any(x in source.stem for x in ['etm','trace','orbtrace']) else
               'build' if source.stem.startswith('build') else 'validation' if source.stem.startswith(('test','run','verify','check','accept')) else

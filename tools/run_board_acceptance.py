@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT))
 BOARDS = {
     'f103ze': (60_000_000, ('swd',), 'prebuilt/golden/f103ze-cdc48.elf'),
     'h743': (50_000_000, ('swd',), 'prebuilt/targets/stm32h743-cdc-trace-20261101/cpu480-trace20/fw.elf'),
-    'hpm6800evk': (25_000_000, ('jtag',), 'firmware/target/hpm6800_web_validation/dbgstress/fw.elf'),
+    'hpm6800evk': (25_000_000, ('jtag',), 'prebuilt/targets/hpm6800-web-reference/dbgstress.elf'),
 }
 FEATURES = ('sram', 'flash', 'debug', 'rtt-viewer', 'rtt-forward', 'jscope', 'stress', 'etm')
 BUSINESSES = ('rtt-viewer', 'rtt-forward', 'jscope', 'debug')

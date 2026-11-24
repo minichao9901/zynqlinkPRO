@@ -28,7 +28,7 @@ def driver_hashes():
     root = Path(__file__).resolve().parents[1]
     paths = ['tools/validate_hpm6800_performance.py', 'tools/validate_hpm6800_streams.py',
              'tools/benchmark_hpm5301.py', 'tools/riscv_target.py', 'tools/test_probe_board.py',
-             'tools/dap_pipeline_bench.py', 'tools/probe_build_info.py', 'firmware/target/hpm6800_perf_ram.S']
+             'tools/dap_pipeline_bench.py', 'tools/probe_build_info.py', 'firmware/target/hpm6800evk/performance/hpm6800_perf_ram.S']
     return {name: hashlib.sha256((root/name).read_bytes()).hexdigest() for name in paths}
 
 
