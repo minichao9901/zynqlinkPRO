@@ -70,3 +70,9 @@ JTAG100 在相同 tap16／slot28、idle33 时通过短校准，60 秒读窗约 4
 
 SWD50 替代 tap8／slot22／idle0 通过短窗校准。随后的正式长窗夹具未发布新 SRAM 镜像 ready 标志，启动步骤中止，核对原状态已经恢复。这个尝试未进入正式长窗。
 [逐档与恢复](rtt-jtag-and-swd50-startup.json)
+
+## 同频复验补证
+
+SWD50 在同一 RAW4 和 128 MHz 目标、tap8／slot22／idle0 下正式 3×60 秒纯读／写／交替全部通过，中位 3.895／3.823／3.837 MB/s。跨页、方向计数、SRAM 和保护字恢复均确认。保留 slot24 两次失败和 slot22 首次装载中止。
+
+JTAG 72.727 MHz RTT 在 tap16／slot28 改 idle33 再次复现 0 B，退出 `ff`。目标恢复已核对。 [校准点长窗与 RTT 复验](sram-swd50-trained.json)
