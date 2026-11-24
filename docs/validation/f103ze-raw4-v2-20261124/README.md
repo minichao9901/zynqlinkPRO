@@ -24,3 +24,12 @@ HS3 `210299008529` 初次未枚举，用户重新接入后，探针经 JTAG/RAM 
 按新清单使用 `firmware/target/f103ze/images/etm/fw.elf`（`0aa69e56…`）。备份并双读 512 KiB Flash，只临时改写所含 20 KiB 扇区。NRST 后新 ELF 的装载字节和运行心跳通过。RAW4 上三轮 1 秒硬件窗口及严格解码通过，EP9 下载 38.17–38.35 MB/s，采集后的目标、RCC 和 FPB 恢复已记录。
 
 写回原烧录区并全量回读，512 KiB Flash 与原备份一致。原 CDC48 已重新启动。独立终态核对发现 OpenOCD 烧录路径更改了 FPB REMAP 和禁用的比较器内容。用此前同板两份一致的原备份恢复，回读一致并核对运行态和心跳。原应用重启后 COM34 仍有 WinError 31，CDC 并发和首屏证据待办。 [逐轮采集及恢复](etm-rebuild.json)
+
+## 启动、RTT 终端与真实 ITM
+
+- Flash A→B 共三轮，六次烧录均先备份必要扇区，编程后逐次独立核对整片 Flash、NRST、启动 ID、数据初始化和心跳。A/B ID 分别为 `0x44424741` / `0x44424742`。原 512 KiB Flash、CDC48、FPB 和 DEMCR 均已回读恢复。
+- RAM 版以实际向量启动，停在 `main=0x20000314` 并核对 .data、.bss，再继续到 ID `0x44424752`、初始化标记和递增心跳。恢复原 64 KiB SRAM、核心、RCC、NVIC 使能和 SysTick 配置。SysTick 相位重新起计。
+- `dbg-a` 的 help/version/echo 各 20 次回包成功，共 60 次。源码单步、调用栈、数据观察点等 GDB 证据仍需补做。
+- 实际新 ITM 夹具的 NRZ 3/48 Mbaud、Manchester 1.5/24 Mbit/s 各三轮，每轮 500,000 个 32 位 ITM 字全部经 ABI 2 标准 EP2 逐项比对，四档 STOP 尾量及错误计数均为零。接收端回读为 3,000,029／48,007,500 baud 和 1,499,993／23,998,125 bit/s。原目标 Flash 与运行态均已恢复。外部仪器测频仍待补证据。
+
+[启动、60 条回包和 12 个 SWO 窗](boot-swo.json)
