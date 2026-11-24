@@ -13,8 +13,12 @@ class ProjectCliTests(unittest.TestCase):
         for case_id in ids:
             with self.subTest(case=case_id), patch('subprocess.call') as run:
                 case = project.acceptance_case(case_id)
-                self.assertTrue((project.ROOT / case['script']).is_file())
-                self.assertEqual(case['preview'][7:9], ['--dry-run', '--'])
+                if case['entry'] is not None:
+                    self.assertTrue((project.ROOT / case['script']).is_file())
+                    self.assertEqual(case['preview'][7:9], ['--dry-run', '--'])
+                else:
+                    self.assertNotIn('preview', case)
+                    self.assertEqual(case['role'], 'historical')
                 paths = [*case['evidence'], *case.get('referenceElfs', [])]
                 paths.extend(case.get('probeFiles', {}).values())
                 if case.get('targetElf'):
@@ -29,10 +33,33 @@ class ProjectCliTests(unittest.TestCase):
         argv = etm['preview']
         self.assertEqual(argv[argv.index('--elf') + 1], etm['targetElf'])
         self.assertNotEqual(argv[argv.index('--zynq-elf') + 1], etm['targetElf'])
+        self.assertEqual(etm['help'][-3:], ['--', 'capture', '--help'])
+        h743 = project.acceptance_case('h743-etm')['preview']
+        self.assertEqual(h743[h743.index('--gpio-speed') + 1], '2')
         hpm = project.acceptance_case('hpm6800evk-rtt')
         self.assertIn('<matched-target-elf>', hpm['preview'])
+        self.assertIn('<matching-workbench-runtime>', hpm['preview'])
+        flash = project.acceptance_case('hpm6800evk-debug-flash')
+        self.assertIn('--openocd-scripts', flash['preview'])
+        qspi = project.acceptance_case('probe-qspi-release')['preview']
+        self.assertEqual(qspi[qspi.index('--image-dir') + 1], 'prebuilt/qspi-release')
+        spi = project.acceptance_case('h743-spi-full-duplex')
+        self.assertEqual(spi['resultRows'], ['j7_raw_duplex'])
         with self.assertRaisesRegex(ValueError, '未知验收用例'):
             project.acceptance_case('unknown-case')
+
+    def test_case_export_cannot_overwrite_a_file_created_after_precheck(self):
+        with tempfile.TemporaryDirectory() as folder:
+            output = Path(folder) / 'case.json'
+            original = project.acceptance_case
+
+            def concurrent_writer(case_id):
+                output.write_text('another process', encoding='utf8')
+                return original(case_id)
+
+            with patch.object(project, 'acceptance_case', side_effect=concurrent_writer), patch('builtins.print'):
+                self.assertEqual(project.main(['case', 'f103ze-etm', '--out', str(output)]), 2)
+            self.assertEqual(output.read_text(encoding='utf8'), 'another process')
 
     def test_aliases_resolve_to_versioned_project_sources(self):
         entries={e['id']:e for e in project.inventory()}

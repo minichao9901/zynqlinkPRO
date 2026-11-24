@@ -8,12 +8,12 @@
 |---|---|---|
 | SRAM、RTT、J-Scope | `f103ze-sram-rtt-scope`、`h743-sram-rtt-scope`、`hpm6800evk-rtt`、`hpm6800evk-scope` | [融合板测索引](validation/README.md)。F103ZE ABI 1、H743 RAW4 ABI 2、HPM QSPI 历史对照各有独立条件。 |
 | 调试、烧录和复位 | 三板的 `*-debug-flash` | [统一入口与验收判据](板卡精简验收与交付.md) · [目标固件](../firmware/target/README.md)。实板启动前以实际读回绑定目标 ELF。 |
-| 物理 UART、SWO | `f103ze-uart-swo`、`h743-uart-swo` | [接线与控制](selectio/README.md#物理串口swo-和-spi) · [ABI 2 端点证据](validation/usb-split-20261123/README.md)。 |
+| 物理 UART、SWO | `f103ze-uart-swo`、`h743-uart-swo`（历史证据） | [接线与控制](selectio/README.md#物理串口swo-和-spi) · [ABI 2 端点证据](validation/usb-split-20261123/README.md)。 |
 | SPI | `f103ze-spi-cdc`、`h743-spi-j7-rx`、`h743-spi-j7-tx`、`h743-spi-full-duplex`、`h743-spi-pad-diagnostic` | [主从持续结果](validation/h743-spi2-cdc-20261124/README.md#实板验收结果与收尾) · [100 MHz 诊断](validation/h743-spi2-100mhz-20261124/README.md)。按方向、模式、目标修订和配对引用。 |
 | ETM | `f103ze-etm`、`h743-etm` | [Trace CLI](Trace-CLI使用说明.md) · [H743 RAW4 严格复验](validation/h743-cdc-golden-requal-20261123/README.md#etm-对照)。目标 ELF 与探针 PS ELF 分开核对。 |
 | 构建、探针加载和发布 | `target-acceptance-build`、`probe-raw4-load`、`probe-qspi-release` | [目标构建](../firmware/target/README.md) · [探针配对索引](../prebuilt/README.md) · [发布流程](github-release.md)。 |
 
-用例角色为 `regular`（常用入口）、`diagnostic`（定向诊断）、`historical`（历史条件或复现）。下列命令只查询数据，`project case` 输出脚本、产物、证据和含 `--dry-run` 的参数数组。
+用例角色为 `regular`（常用入口）、`diagnostic`（定向诊断）、`historical`（历史条件或复现）。下列命令只查询数据。有独立入口的用例会给出脚本及含 `--dry-run` 的参数数组。`entry: null` 的条目只用于查历史证据。
 
 ```powershell
 python -X utf8 toolbox.py project cases --board h743 --feature spi
@@ -23,6 +23,8 @@ python -X utf8 toolbox.py project case hpm6800evk-rtt
 ```
 
 知道工具名时用 `project describe <入口>`。具体参数以原脚本的 `--help` 为准。增加或变更用例时维护入口、参数和证据引用。文件 SHA-256 由产物 manifest 维护，问题状态由问题表维护。`targetElf` 缺省表示要从实际读回核对。固定历史资料写为 `提交号:路径`，可用 `git show` 查看。
+
+标准 Web 板测先用 `toolbox.py --runtime <目录> serve --native-probe --bit <探针bit> --zynq-elf <探针PS ELF>` 启动匹配的本机工作台，再把同一个 `--runtime` 传给验收脚本。共用 SPI 脚本的用例按 `resultRows` 读对应报告行。
 
 ## 配对与手册
 

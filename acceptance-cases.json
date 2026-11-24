@@ -36,6 +36,12 @@
         "f103ze",
         "--pair",
         "{pair}",
+        "--clock",
+        "100000000",
+        "--rtt-ring-bytes",
+        "8192",
+        "--rtt-chunk",
+        "2048",
         "--only",
         "memory",
         "--only",
@@ -82,7 +88,10 @@
         "ZL-321",
         "ZL-324"
       ],
-      "note": "HCLK60 功能验收。从 50 MHz SWD 起。HCLK240 和 JTAG 用独立同条件证据。"
+      "note": "HCLK60 功能验收。从 50 MHz SWD 起。HCLK240 和 JTAG 用独立同条件证据。",
+      "prerequisites": [
+        "以实际板上镜像读回和 RCC 核对 CDC60 Golden ELF、CPU/HCLK60 与探针 RAW4 配对。"
+      ]
     },
     {
       "id": "hpm6800evk-rtt",
@@ -104,6 +113,8 @@
         "rtt-viewer",
         "--only",
         "rtt-forward",
+        "--runtime",
+        "<matching-workbench-runtime>",
         "--out",
         "<new-output>"
       ],
@@ -114,7 +125,10 @@
       "evidence": [
         "03b6a1da:docs/validation/hpm6800evk-board-20261115/README.md"
       ],
-      "note": "历史工作点为 JTAG 25 MHz 和 QSPI 0.8-nonce32。历史板上 ELF 是本机派生映像，使用前以 Flash 读回核对并填写 <matched-target-elf>。RAW4/原生 ARM SRAM 路径不用于这个用例。"
+      "note": "历史工作点为 JTAG 25 MHz 和 QSPI 0.8-nonce32。历史板上 ELF 是本机派生映像，使用前以 Flash 读回核对并填写 <matched-target-elf>。RAW4/原生 ARM SRAM 路径不用于这个用例。",
+      "prerequisites": [
+        "按配对启动本机工作台，并准备与板上镜像匹配的目标 ELF。"
+      ]
     },
     {
       "id": "hpm6800evk-scope",
@@ -134,6 +148,8 @@
         "{targetElf}",
         "--only",
         "jscope",
+        "--runtime",
+        "<matching-workbench-runtime>",
         "--out",
         "<new-output>"
       ],
@@ -144,7 +160,10 @@
       "evidence": [
         "03b6a1da:docs/validation/hpm6800evk-board-20261115/README.md"
       ],
-      "note": "历史 JTAG 25 MHz单路与八路长窗。先核对实际 Flash 并填写匹配 ELF。"
+      "note": "历史 JTAG 25 MHz单路与八路长窗。先核对实际 Flash 并填写匹配 ELF。",
+      "prerequisites": [
+        "按配对启动本机工作台，并准备与板上镜像匹配的目标 ELF。"
+      ]
     },
     {
       "id": "f103ze-debug-flash",
@@ -166,6 +185,8 @@
         "debug",
         "--only",
         "flash",
+        "--runtime",
+        "<matching-workbench-runtime>",
         "--out",
         "<new-output>"
       ],
@@ -174,7 +195,11 @@
       "evidence": [
         "docs/板卡精简验收与交付.md"
       ],
-      "note": "使用标准 Web 验收入口及对应工作台。Flash 擦写权限和目标身份按当前任务另核对。"
+      "note": "使用标准 Web 验收入口及对应工作台。Flash 擦写权限和目标身份按当前任务另核对。",
+      "prerequisites": [
+        "按配对启动本机工作台，并准备与板上镜像匹配的目标 ELF。",
+        "执行 Flash 项前按任务授权确认 --allow-flash。"
+      ]
     },
     {
       "id": "h743-debug-flash",
@@ -196,6 +221,8 @@
         "debug",
         "--only",
         "flash",
+        "--runtime",
+        "<matching-workbench-runtime>",
         "--out",
         "<new-output>"
       ],
@@ -206,7 +233,11 @@
       "evidence": [
         "docs/板卡精简验收与交付.md"
       ],
-      "note": "使用标准 Web 验收入口。按计划选用 CPU480/HCLK240 的匹配 ELF，先读回确认。"
+      "note": "使用标准 Web 验收入口。按计划选用 CPU480/HCLK240 的匹配 ELF，先读回确认。",
+      "prerequisites": [
+        "按配对启动本机工作台，并准备与板上镜像匹配的目标 ELF。",
+        "执行 Flash 项前按任务授权确认 --allow-flash。"
+      ]
     },
     {
       "id": "hpm6800evk-debug-flash",
@@ -228,6 +259,12 @@
         "debug",
         "--only",
         "flash",
+        "--openocd",
+        "<sdk-openocd>",
+        "--openocd-scripts",
+        "<sdk-openocd-scripts>",
+        "--runtime",
+        "<matching-workbench-runtime>",
         "--out",
         "<new-output>"
       ],
@@ -238,7 +275,11 @@
       "evidence": [
         "03b6a1da:docs/validation/hpm6800evk-board-20261115/README.md"
       ],
-      "note": "历史结果为 JTAG 25 MHz。填写与当前 Flash 读回匹配的 ELF，并使用 SDK OpenOCD；烧录另需授权。"
+      "note": "历史结果为 JTAG 25 MHz。填写与当前 Flash 读回匹配的 ELF，并使用 SDK OpenOCD；烧录另需授权。",
+      "prerequisites": [
+        "按配对启动本机工作台，并准备与板上镜像匹配的目标 ELF。",
+        "执行 Flash 项前按任务授权确认 --allow-flash。"
+      ]
     },
     {
       "id": "f103ze-uart-swo",
@@ -272,17 +313,9 @@
       "id": "h743-uart-swo",
       "board": "h743",
       "feature": "uart-swo",
-      "role": "regular",
+      "role": "historical",
       "title": "H743 ABI 2 物理 UART 和 SWO",
-      "entry": "tools/verify_selectio_usb_split_h743.py",
-      "args": [
-        "--transport",
-        "swd",
-        "--clock",
-        "50000000",
-        "--out",
-        "<new-output>"
-      ],
+      "entry": null,
       "probePair": "raw4",
       "targetElf": "prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf",
       "evidence": [
@@ -292,7 +325,10 @@
       "issues": [
         "ZL-318"
       ],
-      "note": "共用 H743 功能脚本。正式 EP2 NRZ/Manchester 实测与高速合成码源分别取证。"
+      "note": "独立临时码源和 COM/SWO 诊断的历史实测。正式 EP2 NRZ/Manchester 的证据见报告。",
+      "prerequisites": [
+        "复验时先准备并核对独立 UART 或 SWO 码源。"
+      ]
     },
     {
       "id": "f103ze-spi-cdc",
@@ -351,7 +387,10 @@
         "ZL-331",
         "ZL-332"
       ],
-      "note": "签收档为修订 3 的 50 MHz Mode 1/2 下的持续窗。修订 4 和诊断配对的 25 MHz 四模式、100 MHz 固定码型各用自己的证据。"
+      "note": "签收档为修订 3 的 50 MHz Mode 1/2 下的持续窗。修订 4 和诊断配对的 25 MHz 四模式、100 MHz 固定码型各用自己的证据。 按 resultRows 对应的报告行独立判定，共用脚本可运行其他方向。",
+      "resultRows": [
+        "j7_slave_sustained"
+      ]
     },
     {
       "id": "h743-spi-j7-tx",
@@ -372,7 +411,13 @@
         "docs/validation/h743-spi2-cdc-20261124/README.md",
         "docs/validation/h743-spi2-cdc-20261124/native-master-100-mode3.json"
       ],
-      "note": "通用脚本短筛入口。历史完整长窗条件为 Mode 3、4096 B、3×60 秒，详见原始证据。"
+      "note": "通用脚本短筛入口。历史完整长窗条件为 Mode 3、4096 B、3×60 秒，详见原始证据。 按 resultRows 对应的报告行独立判定，共用脚本可运行其他方向。",
+      "resultRows": [
+        "j7_native_master"
+      ],
+      "prerequisites": [
+        "三轮 60 秒由历史专用驱动取证，此处通用脚本用于短筛。"
+      ]
     },
     {
       "id": "h743-spi-full-duplex",
@@ -398,7 +443,10 @@
       "issues": [
         "ZL-332"
       ],
-      "note": "共用 SPI 脚本，原始波形路径约 25 MHz 四模式有通过记录。100 MHz 只收结果另列。"
+      "note": "共用 SPI 脚本，原始波形路径约 25 MHz 四模式有通过记录。100 MHz 只收结果另列。 按 resultRows 对应的报告行独立判定，共用脚本可运行其他方向。",
+      "resultRows": [
+        "j7_raw_duplex"
+      ]
     },
     {
       "id": "h743-spi-pad-diagnostic",
@@ -481,7 +529,9 @@
         "--seconds",
         "1",
         "--swd-khz",
-        "10000"
+        "10000",
+        "--gpio-speed",
+        "2"
       ],
       "probePair": "raw4",
       "targetElf": "prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf",
@@ -492,7 +542,7 @@
       "issues": [
         "ZL-316"
       ],
-      "note": "SWD 10 MHz、CPU/HCLK60、TRACECLK20。黄金 ELF 与板上镜像一致时使用。"
+      "note": "SWD 10 MHz、CPU/HCLK60、TRACECLK20、GPIO 速度档 2。黄金 ELF 与板上镜像一致时使用。"
     },
     {
       "id": "target-acceptance-build",
@@ -539,6 +589,8 @@
       "title": "正式 QSPI 固定包参考",
       "entry": "probe.flash",
       "args": [
+        "--image-dir",
+        "{pair}",
         "--dry-run"
       ],
       "probePair": "qspi-reference",

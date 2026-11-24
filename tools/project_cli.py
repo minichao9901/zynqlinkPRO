@@ -180,7 +180,7 @@ def resolve(name,root=ROOT):
 
 def acceptance_catalog(root=ROOT):
     catalog = json.loads((root / 'acceptance-cases.json').read_text(encoding='utf-8'))
-    if catalog['schemaVersion'] != 1:
+    if not isinstance(catalog, dict) or catalog.get('schemaVersion') != 1:
         raise ValueError('不支持的验收用例清单版本')
     return catalog
 
@@ -190,14 +190,12 @@ def acceptance_case(case_id, root=ROOT):
     case = next((item for item in catalog['cases'] if item['id'] == case_id), None)
     if case is None:
         raise ValueError('未知验收用例：' + case_id)
-    entry = resolve(case['entry'], root)
-    if not entry['runnable']:
-        raise ValueError('验收用例入口不可独立运行：' + case['entry'])
 
     tokens = {'{targetElf}': case.get('targetElf', '<matched-target-elf>')}
     pair = catalog['probePairs'].get(case.get('probePair'))
     if case.get('probePair') and pair is None:
         raise ValueError('验收用例引用了未知探针配对：' + case['probePair'])
+    details = dict(case)
     if pair:
         directory = Path(pair['manifest']).parent
         files = {
@@ -211,17 +209,24 @@ def acceptance_case(case_id, root=ROOT):
             '{bit}': files['bit'],
             '{psElf}': files['psElf'],
         })
+        details['probeFiles'] = files
+    if case['entry'] is None:
+        return details
+
+    entry = resolve(case['entry'], root)
+    if not entry['runnable']:
+        raise ValueError('验收用例入口不可独立运行：' + case['entry'])
     unknown = [arg for arg in case['args'] if arg.startswith('{') and arg not in tokens]
     if unknown:
         raise ValueError('验收用例含未解析的依赖：' + ', '.join(unknown))
     args = [tokens.get(arg, arg) for arg in case['args']]
     prefix = ['python', '-X', 'utf8', 'toolbox.py', 'project', 'run', case['entry']]
+    help_args = args[:1] if args and not args[0].startswith('-') else []
     return {
-        **case,
+        **details,
         'script': entry['source'],
-        **({'probeFiles': files} if pair else {}),
         'preview': [*prefix, '--dry-run', '--', *args],
-        'help': [*prefix, '--', '--help'],
+        'help': [*prefix, '--', *help_args, '--help'],
     }
 
 
@@ -308,8 +313,11 @@ def main(argv=None):
                 if a.out:raise ValueError('实际执行保留工具原生输出；--out仅用于清单/描述/--dry-run')
                 return execute(value)
         output=json.dumps({'ok':True,'value':value},ensure_ascii=False,indent=2)+'\n'
-        if a.out:Path(a.out).write_text(output,encoding='utf8')
-        else:print(output,end='')
+        if a.out:
+            with Path(a.out).open('x', encoding='utf8') as destination:
+                destination.write(output)
+        else:
+            print(output,end='')
         return 0
     except (OSError,ValueError) as error:
         print(json.dumps({'ok':False,'error':str(error)},ensure_ascii=False));return 2
