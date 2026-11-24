@@ -24,7 +24,7 @@
 | SPI-02，J7 主机 100 MHz 四模式全速回包 | 待独立高速从机 | ST DS12110 的高速输入规格适用于 SPI 从机接收。3.3 V 下表列 SPI 从机发送/全双工上限 31 MHz，H743 不能作为额定 100 MHz 全速回包的验收源。 |
 | IO-03，独立连续 100 Mbit/s Manchester | 待合格码源 | J7 L14 需要 200 Mchip/s 的混合码型及源端计数。现场 dbgstress 没有该连续码流，当前 HSI 64 MHz 配置也未提供该速率。 |
 
-[ST DS12110 SPI 动态规格](https://www.st.com/resource/en/datasheet/stm32h743ai.pdf) · [J7 引脚与 SPI CDC 验收口径](../../../selectio/README.md#spi-从机接收并转发到-cdc)
+[ST DS12110 SPI 动态规格](https://www.st.com/resource/en/datasheet/stm32h743ai.pdf) · [J7 引脚与 SPI CDC 验收口径](../../../selectio/README.md#历史-abi-1-的-spi-从机接收转发)
 
 ## 现场收尾
 

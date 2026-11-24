@@ -53,7 +53,7 @@ CDC48 的 24 MHz TRACECLK 运行态 ETM，完整 1.000 秒窗口、19,389,488 B 
 
 定向补跑的 14 个功能项均通过并核对恢复，与首轮合并后覆盖统一入口的 **36 项**。两轮的 bit、PS ELF 及初始化 Tcl 哈希一致。F103ZE 为原 CDC48 目标，SWCLK/TCK 读回均为 99,999,998 Hz。JTAG SRAM 的相同跨页条件读／写／交替中位数为 **4.716/4.566/4.603 MB/s**。IF4 RTT 使用运行态 8 KiB 环、2 KiB 请求，每条链路三轮各 60 秒并逐字核对。SWD／JTAG 的 CLI 全程中位数分别为 **6.156/3.997 MB/s**，传输窗口中位数与逐轮字节数见原始记录。这个套件覆盖 CDC48 统一入口，96/128 MHz 筛选及独立高速源用例另有各自的计时与硬件条件。 [合并判定](board-acceptance-union.json) · [复跑原始汇总](cli-retest-board-summary.json) · [JTAG SRAM](jtag-sram-100.json) · [RTT 逐轮数据](rtt-if4-100.json)
 
-复现入口见 [CLI](../../selectio/README.md#spi-从机接收转发到-com) 与 [Case 表](../../selectio/fusion-performance-cases.md)。
+复现入口见 [CLI](../../selectio/README.md#历史-abi-1-的-spi-从机接收转发) 与 [Case 表](../../selectio/fusion-performance-cases.md)。
 
 ## 100 MHz 异步参考漂移复测
 

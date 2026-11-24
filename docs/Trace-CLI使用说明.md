@@ -40,7 +40,7 @@ H743已单独完成CPU/HCLK60MHz、TRACECLK20MHz、SWD10MHz的10/200/500/1000ms�
 ```powershell
 # 硬件示例：先核对空闲并加载同一配对；输出目录须不存在。
 $pair = 'prebuilt/selectio-usb-split-raw4-20261123'
-python -X utf8 toolbox.py trace capture --elf prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf --bit "$pair/probe.bit" --zynq-elf "$pair/application.elf" --out build/trace-capture-new --seconds 1 --swd-khz 10000
+python -X utf8 toolbox.py trace capture --elf prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf --bit "$pair/probe.bit" --zynq-elf "$pair/application.elf" --out build/trace-capture-new --seconds 1 --swd-khz 10000 --gpio-speed 2
 ```
 
 新会话协作规则见根 [AGENTS.md](../AGENTS.md)。遇到异常或验收缺口时，同步更新 [项目问题跟踪列表](项目问题跟踪列表.md)，原始证据保留在`docs/validation/`对应目录。

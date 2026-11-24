@@ -27,6 +27,7 @@ Bulk 的高速最大包为 512 B，CDC 通知为 64 B。IF0、IF3 分别声明 M
 - 通道 0 为控制。通道 1 的大块读写及通道 7 的私有 DDR 压测走 EP6；内存会话建立、结束和计数走 EP5。通道 2 的 RTT UP 拉取走 EP7，通道 8 的终端 SRAM 事务也走 EP7。通道 3 的 HSS 拉取在 EP5 提交、从 EP8 返回。通道 4 走 EP10。通道 6 的并发 RTT/HSS 各走 EP7、EP8，其控制响应走 EP5。通道 9 的 ETM 控制可走 EP5，ETM 数据从 EP9 下载。
 - RTT 和 HSS 使用独立的拉取请求及 IN 完成计数，同一流每次保留一个取流请求在途。并发可先发两个拉取，再独立读取数据端点。STOP 后用各流的最终计数和状态核对收尾。独立 HSS 还检查终端 STAT 帧。SWO 和 ETM 的数据端点使用各自已有的原始流格式。
 - RTT/HSS 可以各自排队向主机交付。目标 AP、采集时钟和 J7 引脚的仲裁由探针固件管理。
+- ABI 2 的控制通道 0 操作 3 接收单字节 CDC 绑定或释放。SPI 从机收数走 IF3 的通道 4 和 EP10。H743 复验入口见 [SPI ABI 2 用例](selectio/README.md#abi-2-的-spi-从机接收)。
 
 ## 历史 ABI 1 的 USB 边界
 
@@ -36,9 +37,11 @@ Windows 自动为 MI_04 加载 WinUSB。其 DeviceInterfaceGUID 为 `{9DC2A831-F
 
 主线 PL 与后续启用原生流路由的 PS 配对，在 SWD 实际约 50 MHz 的 F103ZE 上，从 IF4 采集 Flash 首字 1 秒，收到 52,224 B，状态报告生成 10,002 组、跳拍 0。此处验证原生传输通路；100 MHz 融合 PHY 的验证见集成报告。
 
+在支持 SPI→CDC 的 ABI 1 配对上，控制通道 0 操作 3 另有三字节 SPI 绑定 `[3, mode, mosi_tap]`。绑定后在 CDC DTR 有效时申请引脚。操作 4 的八字状态中，首字为 3 表示 SPI 接收绑定。数据走原有 CDC `0x83 IN`。 [历史命令](selectio/README.md#历史-abi-1-的-spi-从机接收转发)
+
 ## 命令
 
-控制通道 0 的操作 3 仍接受单字节 CDC 绑定和释放。SPI 从机接收使用三字节 `[3, mode, mosi_tap]`，返回成功后在 CDC DTR 有效时申请引脚。操作 4 的八字状态保持原长，首字为 3 时代表 SPI 接收绑定，数据从原有 `0x83 IN` 发出。RTT＋HSS 的通道 6 启动计划可在变量地址表后附加一个小端 u32 请求频率，50/100 MHz 客户端继续使用原表长。
+RTT＋HSS 的通道 6 启动计划可在变量地址表后附加一个小端 u32 请求频率，50/100 MHz 客户端继续使用原表长。
 
 性能验证固件的通道 7 操作 7 测量探针端 CDMA 与 SWD 载荷 BRAM 的短突发。请求为三个小端 u32，依次为字节数（4–1024 且按字对齐）、重复次数（1–256）、时钟选项（0 使用当前 FCLK0，1 临时选择约 133.333 MHz 并恢复）。回复依次为七个小端 u64（定时器 Hz、上传总／最小／最大 tick、下载总／最小／最大 tick），再接三个 u32（FCLK0 Hz、SelectIO 参考 Hz、队列签名）。测量期间独占 CDMA，忙时返回状态 2。CLI 为 `python -X utf8 tools/selectio_dma_latency.py --out build/dma-latency`。
 
