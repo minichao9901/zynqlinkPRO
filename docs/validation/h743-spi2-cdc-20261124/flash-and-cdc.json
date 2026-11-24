@@ -1,0 +1,57 @@
+{
+  "date": "2026-11-24",
+  "zynq": {
+    "pair": "prebuilt/selectio-usb-split-raw4-20261123",
+    "load_method": "HS3 JTAG/RAM",
+    "hs3_serial": "210299008529",
+    "probe_usb_serial": "12345678",
+    "bit_sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc",
+    "elf_sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49",
+    "physical_ocm_matched_bytes": 80668,
+    "fclk0_hz_readback": 133333332,
+    "firmware_abi": 2,
+    "spi_usb_endpoints": [
+      "0x0a",
+      "0x8a"
+    ]
+  },
+  "h743": {
+    "swd_identity": {
+      "transport": "swd",
+      "requested_hz": 1000000,
+      "dp_id": "0x6ba02477",
+      "cpuid": "0x411fc271"
+    },
+    "flash": {
+      "image": "fw.bin",
+      "base": "0x08000000",
+      "bytes": 39064,
+      "sha256": "a1a3d7164a59641a6820cc2917e8b8843e272b23408c45a69231ddd9854025e7",
+      "readback_sha256": "a1a3d7164a59641a6820cc2917e8b8843e272b23408c45a69231ddd9854025e7",
+      "verified": true,
+      "probe_serial": "12345678",
+      "swd_requested_hz": 1000000
+    },
+    "usb_cdc": {
+      "h743_com": "COM52",
+      "j7_serial": "12345678",
+      "rows": [],
+      "fixture": "H743SPI/1 kernel_hz=200000000 div=2,4,8,16,32,64,128,256 max_bytes=32768 max_ms=120000",
+      "initial_status": {
+        "state": "idle",
+        "role": "slave",
+        "mode": 0,
+        "sck_hz": 0,
+        "frames": 0,
+        "tx_dma": 0,
+        "rx": 0,
+        "bad": 0,
+        "first_bad": 4294967295,
+        "spi": 0,
+        "dma": 0,
+        "ms": 0
+      }
+    }
+  },
+  "spi_bus_tested": false
+}

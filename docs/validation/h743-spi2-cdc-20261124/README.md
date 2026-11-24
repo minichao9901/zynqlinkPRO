@@ -19,3 +19,9 @@
 2026-11-24，按用户要求只恢复 HS3 驱动，SPI 验收暂缓。使用 Xilinx SDK 2018.3 随附的 Digilent 签名安装程序。Windows 驱动库已导入同包的 Microsoft 签名 FTDI `ftdibus.inf` 2.12.28.0，发布名 `oem6.inf`，并确认为 `0403:6014`、序列号 `210299008529` 的最佳匹配。复查时该设备实例仍显示 `Disconnected`，XSCT 未列出 JTAG 目标。H743 原固件仍枚举为 `COM33`，Zynq 装载、目标 Flash 和 SPI 实板验收留待恢复后继续。
 
 同日，更换 USB 端口后，Windows 已将 `oem6.inf` / `FTDIBUS` 绑定到 HS3，状态正常。XSCT 枚举到 `Digilent JTAG-HS3 210299008529`、`arm_dap` 和 `xc7z020`，两颗 Cortex-A9 显示 Running。此次只核对 JTAG 枚举，J7 探针 USB 仍未出现。
+
+## H743 Flash 与 USB CDC 验证
+
+按用户要求先完成烧录，再交由用户切换实体接线。HS3 临时加载 RAW4 ABI 2 的 bit/ELF，物理 MEM-AP0 对拍 OCM 执行段 80,668 B。读回 FCLK0 为 133,333,332 Hz，J7 USB 序列号 `12345678` 与 EP10 双向端点均已枚举。探针 QSPI 未写入。
+
+通过 J7 SWD 1 MHz 确认 Cortex-M7 和 STM32H74x/75x，经 OpenOCD 写入 H743 Bank 1 首扇区。镜像从 `0x08000000` 起共 39,064 B，编程校验和独立读回 SHA-256 均通过。软件复位后 H743 以 `F055:7432`、`H743SPI0001` 枚举为 `COM52`。`PING`、`SPI INFO` 和 `SPI STOP` 响应通过，SPI2 内核时钟报告 200 MHz，总线处于空闲。此时仍是 SWD 接线，SPI 实际收发及限速待切线后验收。 [实板证据](flash-and-cdc.json)
