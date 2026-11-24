@@ -136,6 +136,19 @@ class FusionAcceptanceTests(unittest.TestCase):
             self.assertEqual(len(result['captures']), 3)
             self.assertEqual(capture.call_count, 6)
 
+    def test_clock_profile_tolerates_reference_rounding_and_rtt_truncation(self):
+        from fusion_evidence import Blocked
+        from fusion_performance import matching_clock, matching_rtt_clock
+
+        matching_clock(49_999_999, 50_000_000)
+        matching_clock(99_999_998, 100_000_000)
+        matching_rtt_clock(49, 50_000_000)
+        matching_rtt_clock(72, 72_727_273)
+        with self.assertRaises(Blocked):
+            matching_clock(49_000_000, 50_000_000)
+        with self.assertRaises(Blocked):
+            matching_rtt_clock(48, 50_000_000)
+
     def test_binary_checks_reject_gap_truncation_or_wrong_pattern(self):
         with tempfile.TemporaryDirectory() as directory:
             actual = Path(directory) / 'capture.bin'

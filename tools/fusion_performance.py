@@ -8,9 +8,20 @@ from fusion_evidence import Blocked, u32_sequence
 from fusion_fixture import read_bytes, target_io
 
 
+# The rounded PS reference can yield 99,999,998 Hz for the 100 MHz profile.
+CLOCK_TOLERANCE_HZ = 2
+
+
 def matching_clock(actual, requested):
-    if actual is None or abs(actual - requested) > 1:
+    if actual is None or abs(actual - requested) > CLOCK_TOLERANCE_HZ:
         raise Blocked(f'Clock readback {actual} differs from requested {requested} Hz')
+
+
+def matching_rtt_clock(reported_mhz, requested_hz):
+    low = (requested_hz - CLOCK_TOLERANCE_HZ) // 1_000_000
+    high = (requested_hz + CLOCK_TOLERANCE_HZ) // 1_000_000
+    if not low <= reported_mhz <= high:
+        raise Blocked(f'RTT integer-MHz clock {reported_mhz} differs from requested {requested_hz} Hz')
 
 
 def check_scope(csv_path, channels):
@@ -216,8 +227,8 @@ def run_stream(case, image, serial, args, out):
                 state = status['status']
                 if state[3] != count or state[5] or state[10]:
                     raise RuntimeError(f'RTT STOP counters differ: {state}')
-                if state[11] >> 24 != args.rate // 1_000_000:
-                    raise Blocked(f'RTT integer-MHz clock {state[11] >> 24} differs from requested {args.rate} Hz')
+                row['reported_integer_mhz'] = state[11] >> 24
+                matching_rtt_clock(row['reported_integer_mhz'], args.rate)
             if runner == 'scope':
                 stats = export_scope(raw, waveform)
                 matching_clock(stats['definition']['link_hz'], args.rate)
