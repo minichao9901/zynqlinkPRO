@@ -17,6 +17,7 @@ enum { RX_SHIFT = 0, TX_SHIFT = 6, DMA_ALL = 0x3du, DMA_ERRORS = 0x0du, DMA_TC =
 static uint8_t tx[MAX_BYTES] __attribute__((aligned(32)));
 static uint8_t rx[MAX_BYTES] __attribute__((aligned(32)));
 static uint32_t kernel_hz;
+static uint32_t drive_speed = GPIO_SPEED_FREQ_VERY_HIGH;
 
 typedef struct {
     bool active, master, send, receive, stream;
@@ -39,7 +40,7 @@ static void pins(unsigned mask, uint32_t mode, uint32_t pull)
 {
     GPIO_InitTypeDef cfg = {
         .Pin = mask, .Mode = mode, .Pull = pull,
-        .Speed = GPIO_SPEED_FREQ_VERY_HIGH, .Alternate = 5,
+        .Speed = drive_speed, .Alternate = 5,
     };
     HAL_GPIO_Init(GPIOI, &cfg);
 }
@@ -133,10 +134,10 @@ static void start_frame(void)
     }
 }
 
-static void record_dma(void)
+static void record_dma(bool count_wrap)
 {
     uint32_t flags = DMA1->LISR;
-    if (state.stream && (flags & (DMA_TC << TX_SHIFT))) {
+    if (state.stream && count_wrap && (flags & (DMA_TC << TX_SHIFT))) {
         DMA1->LIFCR = DMA_TC << TX_SHIFT;
         state.wraps++;
     }
@@ -153,14 +154,22 @@ static void stop_frame(bool complete)
     }
     if (state.master)
         GPIOI->BSRR = NSS;
+    if (state.stream) {
+        /* Disabling an active DMA stream raises TCIF even on an incomplete
+         * lap. Snapshot the real wraps after CSUSP and before clearing EN. */
+        record_dma(true);
+        uint32_t remaining = DMA1_Stream1->NDTR;
+        if (DMA1->LISR & (DMA_TC << TX_SHIFT)) {
+            record_dma(true);
+            remaining = DMA1_Stream1->NDTR;
+        }
+        state.submitted = state.wraps * state.size + state.size - remaining * state.width;
+    }
     dma_disable(DMA1_Stream0);
     dma_disable(DMA1_Stream1);
-    record_dma();
-    if (state.send) {
+    record_dma(false);
+    if (state.send && !state.stream)
         state.submitted += state.size - DMA1_Stream1->NDTR * state.width;
-        if (state.stream)
-            state.submitted += state.wraps * state.size;
-    }
     if (state.receive) {
         uint32_t received = state.size - DMA1_Stream0->NDTR * state.width;
         __DMB();
@@ -192,7 +201,7 @@ void spi_fixture_poll(void)
 {
     if (!state.active)
         return;
-    record_dma();
+    record_dma(true);
     if (state.dma_errors || state.spi_errors) {
         finish("hardware_error", true);
     } else if (!state.stream && (SPI2->SR & SPI_SR_EOT) &&
@@ -308,8 +317,8 @@ void spi_fixture_command(char *line, char *reply, size_t capacity)
         snprintf(reply, capacity, "PONG H743SPI/1\r\n");
     } else if (!strcmp(line, "SPI INFO")) {
         snprintf(reply, capacity, "H743SPI/1 kernel_hz=%" PRIu32
-                 " div=2,4,8,16,32,64,128,256 max_bytes=%u max_ms=%u revision=2\r\n",
-                 kernel_hz, MAX_BYTES, MAX_MS);
+                 " div=2,4,8,16,32,64,128,256 max_bytes=%u max_ms=%u revision=3 drive=%" PRIu32 "\r\n",
+                 kernel_hz, MAX_BYTES, MAX_MS, drive_speed);
     } else if (!strcmp(line, "SPI STATUS")) {
         status(reply, capacity);
     } else if (!strcmp(line, "SPI STOP")) {
@@ -318,6 +327,14 @@ void spi_fixture_command(char *line, char *reply, size_t capacity)
         status(reply, capacity);
     } else if (state.active) {
         snprintf(reply, capacity, "ERR busy\r\n");
+    } else if (!strncmp(line, "SPI DRIVE ", 10)) {
+        uint32_t speed;
+        if (!number(line + 10, &speed) || speed > GPIO_SPEED_FREQ_VERY_HIGH) {
+            snprintf(reply, capacity, "ERR invalid_drive\r\n");
+        } else {
+            drive_speed = speed;
+            snprintf(reply, capacity, "SPI drive=%" PRIu32 "\r\n", drive_speed);
+        }
     } else if (!strcmp(line, "SPI READ")) {
         read_prefix(reply, capacity);
     } else if (!strcmp(line, "SPI PINS")) {

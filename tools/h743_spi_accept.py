@@ -102,8 +102,9 @@ def receive_on_j7(probe, h743, mode, divider, row, seconds=0):
         nonlocal total, first_bad
         if first_bad is None and data:
             offset = total % block_size
-            patterns = (expected + expected) if len(data) + offset > block_size else expected
-            match = patterns[offset:offset + len(data)]
+            end = offset + len(data)
+            repeats = (end + block_size - 1) // block_size
+            match = (expected * repeats)[offset:end]
             if match != data:
                 first_bad = total + next(i for i, (a, b) in enumerate(zip(match, data)) if a != b)
         total += len(data)
