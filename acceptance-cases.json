@@ -1,0 +1,497 @@
+{
+  "schemaVersion": 1,
+  "probePairs": {
+    "raw4": {
+      "manifest": "prebuilt/selectio-usb-split-raw4-20261123/manifest.json",
+      "readme": "prebuilt/selectio-usb-split-raw4-20261123/README.md"
+    },
+    "f103-cdc-abi1": {
+      "manifest": "prebuilt/selectio-spi-cdc-rx-guard-20261123/manifest.json",
+      "readme": "prebuilt/selectio-spi-cdc-rx-guard-20261123/README.md"
+    },
+    "spi-pad-diagnostic": {
+      "manifest": "prebuilt/selectio-spi-pad-diag-20261124/manifest.json",
+      "readme": "prebuilt/selectio-spi-pad-diag-20261124/README.md"
+    },
+    "qspi-reference": {
+      "manifest": "prebuilt/qspi-release/flash_manifest.json",
+      "readme": "prebuilt/qspi-release/README.md"
+    },
+    "release-ram": {
+      "manifest": "prebuilt/release-20261106/manifest.json",
+      "readme": "prebuilt/release-20261106/README.md"
+    }
+  },
+  "cases": [
+    {
+      "id": "f103ze-sram-rtt-scope",
+      "board": "f103ze",
+      "feature": "sram-rtt-scope",
+      "role": "regular",
+      "title": "F103ZE SRAM、RTT、J-Scope 和并发",
+      "entry": "board.accept",
+      "args": [
+        "--selectio",
+        "--board",
+        "f103ze",
+        "--pair",
+        "{pair}",
+        "--only",
+        "memory",
+        "--only",
+        "rtt",
+        "--only",
+        "scope",
+        "--only",
+        "combo",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "f103-cdc-abi1",
+      "targetElf": "prebuilt/golden/f103ze-cdc48.elf",
+      "evidence": [
+        "docs/validation/spi-cdc-20261123/README.md"
+      ],
+      "note": "CDC48 和已验证的 ABI 1 配对。临时 SRAM 夹具由脚本准备。RAW4 ABI 2 结果另计。"
+    },
+    {
+      "id": "h743-sram-rtt-scope",
+      "board": "h743",
+      "feature": "sram-rtt-scope",
+      "role": "regular",
+      "title": "H743 RAW4 SRAM、RTT、J-Scope 和并发",
+      "entry": "tools/verify_selectio_usb_split_h743.py",
+      "args": [
+        "--transport",
+        "swd",
+        "--clock",
+        "50000000",
+        "--combo-hz",
+        "250",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "raw4",
+      "targetElf": "prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf",
+      "evidence": [
+        "docs/validation/h743-cdc-golden-requal-20261123/README.md",
+        "docs/validation/h743-hclk-ab-20261123/README.md"
+      ],
+      "issues": [
+        "ZL-317",
+        "ZL-321",
+        "ZL-324"
+      ],
+      "note": "HCLK60 功能验收。从 50 MHz SWD 起。HCLK240 和 JTAG 用独立同条件证据。"
+    },
+    {
+      "id": "hpm6800evk-rtt",
+      "board": "hpm6800evk",
+      "feature": "sram-rtt-scope",
+      "role": "historical",
+      "title": "HPM6800EVK RTT Viewer 和转发",
+      "entry": "board.accept",
+      "args": [
+        "--board",
+        "hpm6800evk",
+        "--bit",
+        "{bit}",
+        "--zynq-elf",
+        "{psElf}",
+        "--target-elf",
+        "{targetElf}",
+        "--only",
+        "rtt-viewer",
+        "--only",
+        "rtt-forward",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "qspi-reference",
+      "referenceElfs": [
+        "prebuilt/targets/hpm6800-web-reference/dbgstress.elf"
+      ],
+      "evidence": [
+        "03b6a1da:docs/validation/hpm6800evk-board-20261115/README.md"
+      ],
+      "note": "历史工作点为 JTAG 25 MHz 和 QSPI 0.8-nonce32。历史板上 ELF 是本机派生映像，使用前以 Flash 读回核对并填写 <matched-target-elf>。RAW4/原生 ARM SRAM 路径不用于这个用例。"
+    },
+    {
+      "id": "f103ze-debug-flash",
+      "board": "f103ze",
+      "feature": "debug-flash",
+      "role": "regular",
+      "title": "F103ZE 调试与烧录验收入口",
+      "entry": "board.accept",
+      "args": [
+        "--board",
+        "f103ze",
+        "--bit",
+        "{bit}",
+        "--zynq-elf",
+        "{psElf}",
+        "--target-elf",
+        "{targetElf}",
+        "--only",
+        "debug",
+        "--only",
+        "flash",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "qspi-reference",
+      "targetElf": "prebuilt/golden/f103ze-cdc48.elf",
+      "evidence": [
+        "docs/板卡精简验收与交付.md"
+      ],
+      "note": "使用标准 Web 验收入口及对应工作台。Flash 擦写权限和目标身份按当前任务另核对。"
+    },
+    {
+      "id": "h743-debug-flash",
+      "board": "h743",
+      "feature": "debug-flash",
+      "role": "regular",
+      "title": "H743 调试与烧录验收入口",
+      "entry": "board.accept",
+      "args": [
+        "--board",
+        "h743",
+        "--bit",
+        "{bit}",
+        "--zynq-elf",
+        "{psElf}",
+        "--target-elf",
+        "{targetElf}",
+        "--only",
+        "debug",
+        "--only",
+        "flash",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "qspi-reference",
+      "referenceElfs": [
+        "firmware/target/h743/images/dbg-a/fw.elf"
+      ],
+      "evidence": [
+        "docs/板卡精简验收与交付.md"
+      ],
+      "note": "使用标准 Web 验收入口。按计划选用 CPU480/HCLK240 的匹配 ELF，先读回确认。"
+    },
+    {
+      "id": "hpm6800evk-debug-flash",
+      "board": "hpm6800evk",
+      "feature": "debug-flash",
+      "role": "historical",
+      "title": "HPM6800EVK 调试、恢复及烧录参考",
+      "entry": "board.accept",
+      "args": [
+        "--board",
+        "hpm6800evk",
+        "--bit",
+        "{bit}",
+        "--zynq-elf",
+        "{psElf}",
+        "--target-elf",
+        "{targetElf}",
+        "--only",
+        "debug",
+        "--only",
+        "flash",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "qspi-reference",
+      "referenceElfs": [
+        "prebuilt/targets/hpm6800-web-reference/dbgstress.elf"
+      ],
+      "evidence": [
+        "03b6a1da:docs/validation/hpm6800evk-board-20261115/README.md"
+      ],
+      "note": "历史结果为 JTAG 25 MHz。填写与当前 Flash 读回匹配的 ELF，并使用 SDK OpenOCD；烧录另需授权。"
+    },
+    {
+      "id": "f103ze-uart-swo",
+      "board": "f103ze",
+      "feature": "uart-swo",
+      "role": "regular",
+      "title": "F103ZE 物理 UART、ITM 与 SWO",
+      "entry": "board.accept",
+      "args": [
+        "--selectio",
+        "--board",
+        "f103ze",
+        "--pair",
+        "{pair}",
+        "--only",
+        "cdc",
+        "--only",
+        "itm",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "f103-cdc-abi1",
+      "targetElf": "prebuilt/golden/f103ze-cdc48.elf",
+      "evidence": [
+        "docs/validation/spi-cdc-20261123/README.md",
+        "docs/validation/selectio-integration/README.md"
+      ],
+      "note": "物理 UART 与标准 SWO 分别接线。ITM 源由临时 SRAM 夹具生成。"
+    },
+    {
+      "id": "h743-uart-swo",
+      "board": "h743",
+      "feature": "uart-swo",
+      "role": "regular",
+      "title": "H743 ABI 2 物理 UART 和 SWO",
+      "entry": "tools/verify_selectio_usb_split_h743.py",
+      "args": [
+        "--transport",
+        "swd",
+        "--clock",
+        "50000000",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "raw4",
+      "targetElf": "prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf",
+      "evidence": [
+        "docs/validation/h743-cdc-golden-requal-20261123/README.md",
+        "docs/validation/usb-split-20261123/README.md"
+      ],
+      "issues": [
+        "ZL-318"
+      ],
+      "note": "共用 H743 功能脚本。正式 EP2 NRZ/Manchester 实测与高速合成码源分别取证。"
+    },
+    {
+      "id": "h743-spi-j7-rx",
+      "board": "h743",
+      "feature": "spi",
+      "role": "regular",
+      "title": "H743 发送、J7 EP10 从机接收",
+      "entry": "tools/h743_spi_accept.py",
+      "args": [
+        "--j7-slave-only",
+        "--modes",
+        "1",
+        "2",
+        "--dividers",
+        "4",
+        "--seconds",
+        "60",
+        "--repeats",
+        "3",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "raw4",
+      "targetElf": "prebuilt/targets/stm32h743-spi2-cdc-r3-20261124/fw.elf",
+      "evidence": [
+        "docs/validation/h743-spi2-cdc-20261124/README.md",
+        "docs/validation/h743-spi2-cdc-20261124/spi-acceptance-final.json",
+        "docs/validation/h743-spi2-100mhz-20261124/README.md"
+      ],
+      "issues": [
+        "ZL-331",
+        "ZL-332"
+      ],
+      "note": "签收档为修订 3 的 50 MHz Mode 1/2 下的持续窗。修订 4 和诊断配对的 25 MHz 四模式、100 MHz 固定码型各用自己的证据。"
+    },
+    {
+      "id": "h743-spi-j7-tx",
+      "board": "h743",
+      "feature": "spi",
+      "role": "historical",
+      "title": "J7 原生主机 100 MHz、H743 MOSI 只收",
+      "entry": "tools/h743_spi_accept.py",
+      "args": [
+        "--modes",
+        "3",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "raw4",
+      "targetElf": "prebuilt/targets/stm32h743-spi2-cdc-r2-20261124/fw.elf",
+      "evidence": [
+        "docs/validation/h743-spi2-cdc-20261124/README.md",
+        "docs/validation/h743-spi2-cdc-20261124/native-master-100-mode3.json"
+      ],
+      "note": "通用脚本短筛入口。历史完整长窗条件为 Mode 3、4096 B、3×60 秒，详见原始证据。"
+    },
+    {
+      "id": "h743-spi-full-duplex",
+      "board": "h743",
+      "feature": "spi",
+      "role": "regular",
+      "title": "H743 与 J7 四模式双向短事务",
+      "entry": "tools/h743_spi_accept.py",
+      "args": [
+        "--modes",
+        "0",
+        "1",
+        "2",
+        "3",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "raw4",
+      "targetElf": "prebuilt/targets/stm32h743-spi2-cdc-r3-20261124/fw.elf",
+      "evidence": [
+        "docs/validation/h743-spi2-cdc-20261124/README.md"
+      ],
+      "issues": [
+        "ZL-332"
+      ],
+      "note": "共用 SPI 脚本，原始波形路径约 25 MHz 四模式有通过记录。100 MHz 只收结果另列。"
+    },
+    {
+      "id": "h743-spi-pad-diagnostic",
+      "board": "h743",
+      "feature": "spi",
+      "role": "diagnostic",
+      "title": "H743 SPI 三线采样诊断",
+      "entry": "tools/spi_slave_pad_snapshot.py",
+      "args": [
+        "--cable-serial",
+        "<hs3-serial>",
+        "--mode",
+        "1",
+        "--divider",
+        "2",
+        "--fill",
+        "0x55",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "spi-pad-diagnostic",
+      "targetElf": "prebuilt/targets/stm32h743-spi2-cdc-r4-20261124/fw.elf",
+      "evidence": [
+        "docs/validation/h743-spi2-100mhz-20261124/README.md",
+        "docs/validation/h743-spi2-100mhz-20261124/r4-fixed-patterns/fill-1-0x55/report.json"
+      ],
+      "issues": [
+        "ZL-332"
+      ],
+      "note": "需独占已确认的 J7、HS3、COM 及 SPI 接线。记录 NSS/SCK/MOSI 槽和首个不一致点，诊断结果按源模式和码型引用。"
+    },
+    {
+      "id": "f103ze-etm",
+      "board": "f103ze",
+      "feature": "etm",
+      "role": "regular",
+      "title": "F103ZE CDC48 运行态 ETMv3",
+      "entry": "etm.cli",
+      "args": [
+        "capture",
+        "--elf",
+        "{targetElf}",
+        "--bit",
+        "{bit}",
+        "--zynq-elf",
+        "{psElf}",
+        "--out",
+        "<new-output>",
+        "--seconds",
+        "1",
+        "--swd-khz",
+        "10000",
+        "--running-window"
+      ],
+      "probePair": "f103-cdc-abi1",
+      "targetElf": "prebuilt/golden/f103ze-cdc48.elf",
+      "evidence": [
+        "docs/validation/selectio-fusion-20261121/README.md",
+        "docs/validation/spi-cdc-20261123/README.md"
+      ],
+      "note": "SWD 10 MHz、CPU/HCLK48、TRACECLK24、1 秒。历史 ABI 1 与 RAW4 ABI 2 结果分别记录。"
+    },
+    {
+      "id": "h743-etm",
+      "board": "h743",
+      "feature": "etm",
+      "role": "regular",
+      "title": "H743 CDC60 RAW4 ETMv4",
+      "entry": "etm.cli",
+      "args": [
+        "capture",
+        "--elf",
+        "{targetElf}",
+        "--bit",
+        "{bit}",
+        "--zynq-elf",
+        "{psElf}",
+        "--out",
+        "<new-output>",
+        "--seconds",
+        "1",
+        "--swd-khz",
+        "10000"
+      ],
+      "probePair": "raw4",
+      "targetElf": "prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf",
+      "evidence": [
+        "docs/validation/h743-cdc-golden-requal-20261123/README.md",
+        "docs/validation/h743-cdc-golden-requal-20261123/raw4-etm-evidence.json"
+      ],
+      "issues": [
+        "ZL-316"
+      ],
+      "note": "SWD 10 MHz、CPU/HCLK60、TRACECLK20。黄金 ELF 与板上镜像一致时使用。"
+    },
+    {
+      "id": "target-acceptance-build",
+      "board": "host",
+      "feature": "build-release",
+      "role": "regular",
+      "title": "三板目标固件编译",
+      "entry": "target.acceptance-build",
+      "args": [
+        "--board",
+        "all",
+        "--out",
+        "<new-output>"
+      ],
+      "evidence": [
+        "firmware/target/README.md"
+      ],
+      "note": "生成到新 build 目录。已交付 ELF、BIN、HEX 由各板 images/ 清单索引。"
+    },
+    {
+      "id": "probe-raw4-load",
+      "board": "host",
+      "feature": "build-release",
+      "role": "regular",
+      "title": "RAW4 探针 RAM 加载计划",
+      "entry": "probe.load-verify",
+      "args": [
+        "--pair",
+        "{pair}",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "raw4",
+      "evidence": [
+        "prebuilt/selectio-usb-split-raw4-20261123/README.md"
+      ],
+      "note": "实际烧录或加载前须单独检查占用、配对和序列号。这里引用临时加载。"
+    },
+    {
+      "id": "probe-qspi-release",
+      "board": "host",
+      "feature": "build-release",
+      "role": "regular",
+      "title": "正式 QSPI 固定包参考",
+      "entry": "probe.flash",
+      "args": [
+        "--dry-run"
+      ],
+      "probePair": "qspi-reference",
+      "evidence": [
+        "prebuilt/qspi-release/README.md",
+        "docs/github-release.md"
+      ],
+      "note": "以 QSPI 固定 manifest 和实体冷启动证据为准。"
+    }
+  ]
+}

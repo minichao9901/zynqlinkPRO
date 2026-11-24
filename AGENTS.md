@@ -12,7 +12,7 @@
 ## 新会话先读与现状核对
 
 1. 先执行 `git status --short`、`git log -5 --oneline`，辨认已有修改与当前分支；不要覆盖、清理或批量提交他人的工作。
-2. 阅读 [README.md](README.md)、[项目问题跟踪列表](docs/项目问题跟踪列表.md)、[CLI 工作台](docs/toolbox-cli-ai.md) 和 [Trace CLI](docs/Trace-CLI使用说明.md)。按任务再读对应 `docs/validation/` 报告、交接和产物 manifest。
+2. 从[工程入口](docs/README.md)按任务找到命令和证据。需要精确的脚本、参数、探针配对或目标 ELF 时查根目录的 [acceptance-cases.json](acceptance-cases.json)。按任务阅读对应问题、报告和产物 manifest；涉及硬件前核对当前现场。
 3. 问题表是当前状态索引，历史报告保留当时结论；若矛盾，追查较新证据及实际配对，不把历史“待验”或单次通过直接当成现状。
 4. 任何报告中的“最后板上状态”都是带时间的快照。切换分支/worktree、启动另一目录的脚本或 EXE，都不会自动切换板上 bit/ELF。
 
@@ -25,7 +25,7 @@
 | `etm-service/trace.py` | Zynq原生采集/doctor入口；离线查询、解码、导出转交保留的Trace CLI |
 | `etm-service/tools/trace_cli.py` | 完整Trace命令实现；底层参数以各入口的 `--help` 为准 |
 | `tools/` | 构建、加载、身份核对、回归和板测脚本；优先经 `toolbox.py project` 发现入口 |
-| `fpga/`、`firmware/xusbps_daplink_dma/` | PL RTL/构建及Zynq PS固件；目标MCU源码在 `firmware/target/` |
+| `fpga/`、`firmware/xusbps_daplink_dma/` | PL RTL/构建及 Zynq PS 固件。目标 MCU 源码和各板已编译镜像从 [目标固件首页](firmware/target/README.md) 进入 |
 | `prebuilt/` | 已版本管理的交付或明确命名的实验配对，身份/范围以各 manifest、README 为准 |
 | `dist/zynq-etm-bridge/` | 用户本机程序入口；更新由 `python toolbox.py bridge-build` 完成 |
 | `docs/validation/`、`build/` | 已归档证据、工作输出；`build/` 可能混有历史/共享缓存，不能整目录删除或add |
