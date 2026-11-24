@@ -4,6 +4,9 @@
 这里收录 MCU 目标源码。J7 bit/PS ELF、目标 MCU ELF 和上位机版本各有独立身份。
 [新版构建产物](../../prebuilt/targets/efficiency-acceptance-20261124/manifest.json) 标明装载地址、工具链、哈希和验证范围。
 
+按板卡打开固件索引可直接找到 ELF、BIN 和 HEX。
+[HPM6800EVK](hpm6800evk/README.md) · [F103ZE](f103ze/README.md) · [H743](h743/README.md)。
+
 ## 固件清单
 
 表中频率为 CPU/HCLK，单位 MHz。HPM 单列 hart0 和计时器时钟。
