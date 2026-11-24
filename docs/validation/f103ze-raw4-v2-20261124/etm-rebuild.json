@@ -1,0 +1,415 @@
+{
+  "case": {
+    "campaign": {
+      "plan": "fusion-full-acceptance-v2",
+      "serial": "12345678",
+      "probe": {
+        "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+        "files": {
+          "probe.bit": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+            "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+          },
+          "application.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+            "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+          },
+          "ps7_init.tcl": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+            "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+          }
+        }
+      }
+    },
+    "case": "fusion-f103ze-etm-rebuild",
+    "receipt": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+      "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+    },
+    "point": {
+      "image": null,
+      "transport": null,
+      "rate": null,
+      "tap": null,
+      "slot": null,
+      "idle": null,
+      "channels": null,
+      "group_rate": null,
+      "encoding": null,
+      "spi_mode": null,
+      "frame_bytes": null
+    },
+    "target": {
+      "image": "etm",
+      "manifest": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\etm\\manifest.json",
+      "files": {
+        "fw.elf": {
+          "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\etm\\fw.elf",
+          "sha256": "0aa69e56bf757b2bbe5271354f4c19285c88669edebbf643777df50537cdd503"
+        },
+        "fw.bin": {
+          "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\etm\\fw.bin",
+          "sha256": "a98ad9472c420a31e1a7136a2605a5282ee81160ad4ca68e176320e739e94bc6"
+        },
+        "fw.hex": {
+          "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\etm\\fw.hex",
+          "sha256": "3a652a6fbb93cf352a0288cdda2b13cf38c05aae6a3825d6ccffa79f0be64322"
+        }
+      }
+    },
+    "status": "pending",
+    "captures": [
+      {
+        "milliseconds": 1000,
+        "round": 1,
+        "record": "build\\runs\\fusion-f103ze-etm-rebuild\\20261124-raw4-v2\\capture-1000ms-1"
+      },
+      {
+        "milliseconds": 1000,
+        "round": 2,
+        "record": "build\\runs\\fusion-f103ze-etm-rebuild\\20261124-raw4-v2\\capture-1000ms-2"
+      },
+      {
+        "milliseconds": 1000,
+        "round": 3,
+        "record": "build\\runs\\fusion-f103ze-etm-rebuild\\20261124-raw4-v2\\capture-1000ms-3"
+      }
+    ],
+    "remaining": [
+      "Attach the pre/post target CDC, clocks, workload and restoration evidence before signing off."
+    ]
+  },
+  "flash": {
+    "serial": "12345678",
+    "fixture": "etm",
+    "elf_sha256": "0aa69e56bf757b2bbe5271354f4c19285c88669edebbf643777df50537cdd503",
+    "start": "0x8000000",
+    "stop": "0x8005000",
+    "passed": true,
+    "restored": false,
+    "prior_flash_segments": [
+      {
+        "address": 134217728,
+        "bytes": 20040,
+        "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1"
+      },
+      {
+        "address": 134237768,
+        "bytes": 128,
+        "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+      }
+    ],
+    "prior_rcc": 5309450,
+    "original_flash_sha256": "48f226217497607c696a156addbb363925577499b00ee64f187bd5eea7a94499",
+    "program_seconds": 2.030489699998725,
+    "fixture_flash_verified": true,
+    "boot": {
+      "resumed": true,
+      "resetDHCSR": "0x3010001",
+      "seconds": 0.31396740000127465,
+      "loaded": [
+        {
+          "address": 134217728,
+          "bytes": 20024,
+          "sha256": "2f3285a2925497e06fdeac606861a569dec46fa2c4b37cc974a642dc2a3bb56d"
+        },
+        {
+          "address": 134237752,
+          "bytes": 128,
+          "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+        }
+      ],
+      "heartbeat": [
+        239464,
+        259562
+      ]
+    },
+    "child_exit": 0,
+    "restore_seconds": 1.189088700000866,
+    "flash_restored": true,
+    "restored_boot": {
+      "resumed": true,
+      "resetDHCSR": "0x3010001",
+      "seconds": 0.3142428999999538,
+      "loaded": [
+        {
+          "address": 134217728,
+          "bytes": 20040,
+          "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1"
+        },
+        {
+          "address": 134237768,
+          "bytes": 128,
+          "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+        }
+      ],
+      "heartbeat": [
+        239791,
+        259810
+      ]
+    },
+    "restore_error": "RuntimeError('Original RCC or FPB differs after restore')"
+  },
+  "fpbRecovery": {
+    "path": "build\\runs\\f103ze-debug-flash\\20261124-case\\swd-flash\\fixture\\fpb.private.bin",
+    "baseline": "60020000c02067323c56ed9d20825849302c2587106862cb248e959868c509863c6bb00ffce9c00d",
+    "verified": true,
+    "afterNativeProgrammer": "60020000e02067320000000000000000000000000000000000000000000000000000000000000000",
+    "readback": "60020000c02067323c56ed9d20825849302c2587106862cb248e959868c509863c6bb00ffce9c00d",
+    "heartbeat": [
+      105657452,
+      105802736
+    ],
+    "rcc": "0x51040a",
+    "dhcsr": "0x1010001"
+  },
+  "windows": [
+    {
+      "round": 1,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 4,
+        "captureNonce": 18307770764740184385,
+        "loss": false,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": true,
+        "requestedWindowComplete": true,
+        "completionReason": "time",
+        "ended": true,
+        "records": 963967,
+        "hardwareTicks": 199999998,
+        "requestedTicks": 199999998,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 1.0,
+        "hardwareStartBracketUnix": [
+          1795518951.554189,
+          1795518951.5547314
+        ],
+        "stopReason": 0,
+        "formatterBytes": 15423472,
+        "tailBytes": 0,
+        "tailAmbiguous": true,
+        "usbSeconds": 0.4022270999994362,
+        "usbPayloadMBps": 38.34518360404264,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 0,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 1,
+          "observedFrames": 963967,
+          "capacityReached": false,
+          "writerError": 0
+        },
+        "fclk": 133333332,
+        "tckKhz": 9523.809428571429
+      },
+      "decoded": {
+        "packets": 3854312,
+        "ranges": 19188063,
+        "instructions": 19188063,
+        "executed": 17270320,
+        "sourceMapped": 19188063,
+        "exceptions": 1000,
+        "gaps": 1,
+        "packetIssues": 0,
+        "unknownExecution": 1,
+        "functions": {
+          "cdc_poll": 8630466,
+          "main": 8629829,
+          "HAL_IncTick": 7000,
+          "SysTick_Handler": 3000,
+          "trace_hook_mark": 23,
+          "HAL_GPIO_WritePin": 2
+        }
+      },
+      "rccBefore": [
+        50548355,
+        5309450
+      ],
+      "rccCapture": [
+        50548355,
+        5309450
+      ],
+      "rccAfter": [
+        50548355,
+        5309450
+      ],
+      "targetRestored": true,
+      "fpbRestored": true,
+      "verify": {
+        "passed": true,
+        "failures": {},
+        "terminalBoundaryPackets": [],
+        "note": "尾部INCOMPLETE_EOT单列保留；初始化未同步/条件未知不视作已证实执行；字节核算不等于无损证明"
+      }
+    },
+    {
+      "round": 2,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 5,
+        "captureNonce": 3873031982495138715,
+        "loss": false,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": true,
+        "requestedWindowComplete": true,
+        "completionReason": "time",
+        "ended": true,
+        "records": 963443,
+        "hardwareTicks": 199999998,
+        "requestedTicks": 199999998,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 1.0,
+        "hardwareStartBracketUnix": [
+          1795518962.7526927,
+          1795518962.7532747
+        ],
+        "stopReason": 0,
+        "formatterBytes": 15415095,
+        "tailBytes": 7,
+        "tailAmbiguous": false,
+        "usbSeconds": 0.40302710000105435,
+        "usbPayloadMBps": 38.24828404829271,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 0,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 1,
+          "observedFrames": 963443,
+          "capacityReached": false,
+          "writerError": 0
+        },
+        "fclk": 133333332,
+        "tckKhz": 9523.809428571429
+      },
+      "decoded": {
+        "packets": 3854493,
+        "ranges": 19189021,
+        "instructions": 19189021,
+        "executed": 17271182,
+        "sourceMapped": 19189021,
+        "exceptions": 1000,
+        "gaps": 1,
+        "packetIssues": 0,
+        "unknownExecution": 0,
+        "functions": {
+          "cdc_poll": 8630911,
+          "main": 8630271,
+          "HAL_IncTick": 7000,
+          "SysTick_Handler": 3000
+        }
+      },
+      "rccBefore": [
+        50548355,
+        5309450
+      ],
+      "rccCapture": [
+        50548355,
+        5309450
+      ],
+      "rccAfter": [
+        50548355,
+        5309450
+      ],
+      "targetRestored": true,
+      "fpbRestored": true,
+      "verify": {
+        "passed": true,
+        "failures": {},
+        "terminalBoundaryPackets": [],
+        "note": "尾部INCOMPLETE_EOT单列保留；初始化未同步/条件未知不视作已证实执行；字节核算不等于无损证明"
+      }
+    },
+    {
+      "round": 3,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 6,
+        "captureNonce": 3717452166343959513,
+        "loss": false,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": true,
+        "requestedWindowComplete": true,
+        "completionReason": "time",
+        "ended": true,
+        "records": 964001,
+        "hardwareTicks": 199999998,
+        "requestedTicks": 199999998,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 1.0,
+        "hardwareStartBracketUnix": [
+          1795518972.5362175,
+          1795518972.5368834
+        ],
+        "stopReason": 0,
+        "formatterBytes": 15424027,
+        "tailBytes": 11,
+        "tailAmbiguous": true,
+        "usbSeconds": 0.4040428000007523,
+        "usbPayloadMBps": 38.17424045168305,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 0,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 1,
+          "observedFrames": 964001,
+          "capacityReached": false,
+          "writerError": 0
+        },
+        "fclk": 133333332,
+        "tckKhz": 9523.809428571429
+      },
+      "decoded": {
+        "packets": 3854341,
+        "ranges": 19188203,
+        "instructions": 19188203,
+        "executed": 17270447,
+        "sourceMapped": 19188203,
+        "exceptions": 1000,
+        "gaps": 1,
+        "packetIssues": 0,
+        "unknownExecution": 1,
+        "functions": {
+          "cdc_poll": 8630527,
+          "main": 8629893,
+          "HAL_IncTick": 7000,
+          "SysTick_Handler": 3000,
+          "trace_hook_mark": 23,
+          "HAL_GPIO_WritePin": 4
+        }
+      },
+      "rccBefore": [
+        50548355,
+        5309450
+      ],
+      "rccCapture": [
+        50548355,
+        5309450
+      ],
+      "rccAfter": [
+        50548355,
+        5309450
+      ],
+      "targetRestored": true,
+      "fpbRestored": true,
+      "verify": {
+        "passed": true,
+        "failures": {},
+        "terminalBoundaryPackets": [],
+        "note": "尾部INCOMPLETE_EOT单列保留；初始化未同步/条件未知不视作已证实执行；字节核算不等于无损证明"
+      }
+    }
+  ]
+}
