@@ -84,3 +84,7 @@ JTAG 72.727 MHz RTT 在 tap16／slot28 改 idle33 再次复现 0 B，退出 `ff`
 ## SWD100 动态 J-Scope 网格
 
 128 MHz 新性能镜像、实际 SWD 99,999,998 Hz，单路和八路在 1／10／25／50／100 k组/s 的十个组合均通过三轮 60 秒。各点核对动态值、时戳、跳拍和 STOP，内外层恢复确认。[SWD100 全网格](scope-swd100-grid.json)
+
+## JTAG50 动态 J-Scope 网格
+
+同一 128 MHz 目标镜像、tap16／slot28／idle17，单路 1–100 k组/s 和八路到 50 k组/s 共九个组合各三轮通过。八路 100 k组/s 首窗跳 2,999,672 组，超限。十个组合均完成现场恢复。 [JTAG50 全网格](scope-jtag50-grid.json)
