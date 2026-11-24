@@ -88,3 +88,9 @@ JTAG 72.727 MHz RTT 在 tap16／slot28 改 idle33 再次复现 0 B，退出 `ff`
 ## JTAG50 动态 J-Scope 网格
 
 同一 128 MHz 目标镜像、tap16／slot28／idle17，单路 1–100 k组/s 和八路到 50 k组/s 共九个组合各三轮通过。八路 100 k组/s 首窗跳 2,999,672 组，超限。十个组合均完成现场恢复。 [JTAG50 全网格](scope-jtag50-grid.json)
+
+## 用户停止验收后的归档
+
+收到停测要求后，在正在进行的 JTAG 72.727 MHz、八路 25 k组/s 档结束并完成两级恢复时退出调度。性能网格共 50/70 个不同档位得到结果，含失败和部分证据。JTAG 72.727 MHz Scope 已测到单路五档、八路 1／10／25 k组/s，后续网格未继续。UART 与 SPI 尚未执行，清单原列的阻塞项继续保留。[停测矩阵和现场证据](stopped-campaign.json)
+
+最后独立回读原 CDC48 的装载区、RCC 和运行态，应用心跳继续前进。物理 MEM-AP0 回读 RAW4 PS ELF 的 80,668 B OCM 执行代码，PL、DDR 及 DMA 空闲。J7 留在 RAW4 JTAG/RAM 临时加载状态。收尾为只读复核，未继续开展用例。
