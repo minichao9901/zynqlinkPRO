@@ -19,11 +19,17 @@ python -X utf8 toolbox.py project run build.inventory -- --out build/retention-n
 | `spi-cdc-rx-guard-board-full` | 5.15 | CDC OUT 防护后的实板回归。保留原始窗口及恢复证据。 |
 | `h743-cdc-golden-requal-20261123` | 3.18 | 现行报告直接引用的原始 HSS 窗口和工作产物。保留原路径及哈希。 |
 | `spi-cdc-board-full` | 2.97 | 先校对已归档报告和本地恢复资料，再分离编译缓存。 |
-| `target-acceptance-e0ae985c` | 1.55 | 三板 ELF/BIN/HEX 与板卡 `images/` 可逐个对拍。HPM 子目录中的 `sdk-build/` 为可重建候选，先保留每个映像的构建日志、清单及已交付映像。 |
+| `target-acceptance-e0ae985c` | 1.55（清理前） | HPM 的六个 `sdk-build/` 已清理。映像、清单和构建日志已复核保留。 |
 | `target-acceptance-hpm-dev2` | 1.41 | 中间开发构建。先核对调试记录引用以及可重建范围，单独决定是否留档。 |
 | `target-migration-20261124/local` | — | 原目录迁移时保存的本地文件与 SHA-256 清单，保留。 |
 
 原始板测数据及恢复备份以实际记录为准。进行中的 SPI 工作及对应输出由当前任务继续接管。已知追溯路径见 [SPI 证据](spi-cdc-20261123/README.md)、[H743 RAW4 长窗](h743-cdc-golden-requal-20261123/README.md) 和 [板卡镜像](../../firmware/target/README.md)。
+
+## HPM SDK 中间产物清理回执
+
+2026-11-24 14:58（上海时间），用户手动执行清理。核对 `target-acceptance-e0ae985c/hpm6800evk` 下 `dbg-a`、`dbg-b`、`dbg-ram`、`performance-ahb`、`performance-axi`、`uart` 的六个 `sdk-build/` 均已移除。文件逻辑大小为 1,490,450,253 字节，E 盘可用空间由 73,213,706,240 字节增至 74,705,821,696 字节，净增 **1,492,115,456 字节（约 1.39 GiB）**。
+
+复核保留的构建日志和清单，并对本地及已交付的 36 个 ELF、BIN、HEX 文件逐个校验 SHA-256。清理报告存于本机 `build/efficiency-hpm-sdk-manual-cleanup.json`。
 
 ## 新运行的约定
 
