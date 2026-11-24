@@ -706,5 +706,1756 @@
       ],
       "note": "以 QSPI 固定 manifest 和实体冷启动证据为准。"
     }
-  ]
+  ],
+  "fusionAcceptance": {
+    "id": "fusion-full-acceptance-v1",
+    "purpose": "三板新目标镜像与同一批准的融合 bit/PS ELF 的实板功能和性能签收。",
+    "entry": {
+      "tool": "fusion.accept",
+      "planArgs": [
+        "describe",
+        "{caseId}"
+      ],
+      "runArgs": [
+        "run",
+        "{caseId}",
+        "--campaign",
+        "{campaignJson}",
+        "--out",
+        "{newEvidenceDir}"
+      ],
+      "executeArgs": [
+        "--execute",
+        "--hs3-serial",
+        "{hs3Serial}",
+        "--probe-load-receipt",
+        "{loadResultJson}"
+      ],
+      "additionalArgsByRunner": {
+        "sram": [
+          "--image",
+          "--transport",
+          "--rate",
+          "--tap",
+          "--slot",
+          "--idle"
+        ],
+        "rtt": [
+          "--image",
+          "--transport",
+          "--rate",
+          "--tap",
+          "--slot",
+          "--idle"
+        ],
+        "scope": [
+          "--image",
+          "--transport",
+          "--rate",
+          "--tap",
+          "--slot",
+          "--idle",
+          "--group-rate",
+          "--channels"
+        ],
+        "combo": [
+          "--image",
+          "--transport",
+          "--rate",
+          "--tap",
+          "--slot",
+          "--idle",
+          "--group-rate",
+          "--channels"
+        ],
+        "flash": [
+          "--image"
+        ],
+        "uart": [
+          "--rate"
+        ],
+        "swo-itm": [
+          "--encoding",
+          "--rate"
+        ],
+        "swo-source": [
+          "--encoding",
+          "--rate"
+        ],
+        "spi-target-tx": [
+          "--spi-mode",
+          "--rate",
+          "--tap",
+          "--manual-spi-switch"
+        ],
+        "spi-target-rx": [
+          "--spi-mode",
+          "--rate",
+          "--tap",
+          "--frame-bytes",
+          "--manual-spi-switch"
+        ],
+        "spi-duplex": [
+          "--spi-mode",
+          "--rate",
+          "--tap",
+          "--frame-bytes",
+          "--manual-spi-switch"
+        ]
+      }
+    },
+    "probe": {
+      "abi": 2,
+      "candidate": "prebuilt/selectio-spi-pad-filter-v2-20261124/manifest.json",
+      "selection": "执行时必须显式提供当前批准配对目录。此路径是当前可选候选，不自动加载。一次验收的所有必验项目锁定同一 bit、PS ELF、初始化 Tcl 的 SHA-256 和同一 J7 序列号。变更任一文件须开新验收批次。",
+      "live": [
+        "显式绑定 HS3 与 USB 序列号临时 JTAG/RAM 加载，保存 probe-load 的 result.json。执行前用可恢复的 JTAG timing 反查证明 HS3 与 USB 访问的是同一探针。",
+        "首次操作及每次重载/重枚举后，以物理 MEM-AP0 核对 OCM，并保存带序列号的原生 USB info。",
+        "验收的 ABI 为 2，dedicated_pipes=true。旧 ABI 1、正式 QSPI 启动包和历史报告只可作对照。"
+      ]
+    },
+    "rules": {
+      "state": [
+        "pending",
+        "pass",
+        "fail",
+        "blocked"
+      ],
+      "result": "用例里列出的每个镜像、方向、模式和档位须有独立结果。档位不支持或设备缺失记 blocked。检测出数据不一致记 fail。只在该行全部判据和恢复均通过时记 pass。",
+      "limits": "标为极限的网格必须记录每档和首个失败点。报告最高通过档及该档原始窗口。更高档失败保留其 fail。接收源达不到所请求速率时，该档为 blocked。频率按寄存器折算或实测分别标出。",
+      "evidence": [
+        "使用 build/runs/<用例ID>/<唯一运行ID>/，保留请求和实际值、完整原始比对、首个失败与恢复结果。",
+        "目标 ELF、探针 bit/PS ELF 和初始化 Tcl 均使用 SHA-256。验证运行目标的装载字节、板型、当前目标时钟和 SRAM 区。",
+        "历史证据只说明已知边界，验收表只收录本批次实际数据。原始首败和成功重试均保留。"
+      ],
+      "recovery": [
+        "执行前备份并记录所改 Flash、RAM、核心、目标外设、时钟和探针引脚所有权。",
+        "错误后先停止流和退出当前引脚所有者，再复查恢复。恢复失败停止剩余项目，保留现场和备份。",
+        "写目标 Flash / 改时钟 / 换接线需在本轮明确授权和现场准备范围内。"
+      ],
+      "pointExecution": "run 每次只执行指定镜像和必要的速率、通道、编码、SPI 模式组合。同一档按 parameters 运行多轮。执行器输出 pending 代表留下子项证据，签收整项仍核对完整矩阵与恢复。",
+      "failureHandling": "每次 run 使用新目录。summary.json 记录档位、探针配对、加载回执和状态。执行方检查恢复证据后再开始下一档。",
+      "pointExpansion": "性能按每个 targetImages 与 profile.links 的每个 (transport, requestedHz) 组合执行。Scope 和并发再交叉 parameters.channels 与 groupRates。SPI 用 modes × sckHz × frameBytes（如有）；SWO 把各编码与其速率表配对。每个点独立保存结果，镜像只有一个时可省略 --image。"
+    },
+    "profiles": {
+      "f103ze-performance": {
+        "cpuMHz": 128,
+        "hclkMHz": 128,
+        "load": "sram",
+        "sram": [
+          "SRAM"
+        ],
+        "links": [
+          {
+            "transport": "swd",
+            "requestedHz": [
+              50000000,
+              100000000
+            ]
+          },
+          {
+            "transport": "arm-jtag",
+            "requestedHz": [
+              50000000,
+              72727273,
+              100000000
+            ]
+          }
+        ]
+      },
+      "h743-performance": {
+        "cpuMHz": 480,
+        "hclkMHz": 240,
+        "load": "flash",
+        "sram": [
+          "AXI",
+          "DTCM"
+        ],
+        "links": [
+          {
+            "transport": "swd",
+            "requestedHz": [
+              50000000,
+              100000000
+            ]
+          },
+          {
+            "transport": "arm-jtag",
+            "requestedHz": [
+              50000000,
+              72727273,
+              100000000
+            ]
+          }
+        ]
+      },
+      "hpm6800evk-performance": {
+        "cpuMHz": 600,
+        "mchtmrMHz": 24,
+        "load": "flash",
+        "sram": [
+          "AXI",
+          "AHB"
+        ],
+        "links": [
+          {
+            "transport": "riscv-jtag",
+            "requestedHz": [
+              25000000,
+              50000000,
+              100000000
+            ]
+          }
+        ]
+      }
+    },
+    "cases": [
+      {
+        "id": "fusion-f103ze-sram",
+        "board": "f103ze",
+        "feature": "performance",
+        "targetImages": [
+          "performance"
+        ],
+        "clock": {
+          "profile": "f103ze-performance"
+        },
+        "runner": "sram",
+        "parameters": {
+          "seconds": 60,
+          "rounds": 3,
+          "payloadBytes": 4032,
+          "depth": 4,
+          "offsetFromAlignedPage": 32,
+          "directions": [
+            "read",
+            "write",
+            "mixed"
+          ],
+          "widthBytes": [
+            1,
+            2,
+            4
+          ],
+          "boundaryBytes": 1024
+        },
+        "pass": "对每个内存区和时钟验证跨 1 KiB、非对齐及 8/16/32 位。纯读和交替逐字节比对。纯写核对 PC/探针方向计数及独立末块读回。记录各方向有效 MB/s 和三轮中位数。测试区和保护字均回读恢复。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_performance.py",
+          "automated": "8/16 位真实 MEM-AP 访问、32 位原生 SRAM 三方向、跨页、末块和原样恢复",
+          "pending": "补全链路档位和 SRAM 区汇总"
+        }
+      },
+      {
+        "id": "fusion-f103ze-rtt",
+        "board": "f103ze",
+        "feature": "performance",
+        "targetImages": [
+          "performance"
+        ],
+        "clock": {
+          "profile": "f103ze-performance"
+        },
+        "runner": "rtt",
+        "parameters": {
+          "seconds": 60,
+          "rounds": 3,
+          "firmwareMode": 1,
+          "ringBytes": 8192,
+          "chunkBytes": 2048
+        },
+        "pass": "上行连续 little-endian u32 全量对拍。主机实收、探针 STOP 字节、目标发布和环上剩余量对账。测有效 MB/s。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_performance.py",
+          "automated": "固件序号、原始窗口、STOP 和主机/生产计数与尾包对拍",
+          "pending": "补整数 MHz 之外的精确链路速率证据与完整档位汇总"
+        }
+      },
+      {
+        "id": "fusion-f103ze-scope",
+        "board": "f103ze",
+        "feature": "performance",
+        "targetImages": [
+          "performance"
+        ],
+        "clock": {
+          "profile": "f103ze-performance"
+        },
+        "runner": "scope",
+        "parameters": {
+          "seconds": 60,
+          "rounds": 3,
+          "firmwareMode": 2,
+          "ringBytes": 8192,
+          "chunkBytes": 2048,
+          "groupRates": [
+            1000,
+            10000,
+            25000,
+            50000,
+            100000
+          ],
+          "channels": [
+            1,
+            8
+          ],
+          "maxSkippedFractionExclusive": 0.001
+        },
+        "pass": "运行态真实波形。核对 g_scope 变化、帧序、时间戳和实际组速，读错与尾差为零，跳拍率严格低于 0.1%。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_performance.py",
+          "automated": "动态变量、HSS 帧、尾帧及跳组率",
+          "pending": "核对实测速率来源及整张矩阵"
+        }
+      },
+      {
+        "id": "fusion-f103ze-combo",
+        "board": "f103ze",
+        "feature": "performance",
+        "targetImages": [
+          "performance"
+        ],
+        "clock": {
+          "profile": "f103ze-performance"
+        },
+        "runner": "combo",
+        "parameters": {
+          "seconds": 60,
+          "rounds": 3,
+          "firmwareMode": 3,
+          "ringBytes": 8192,
+          "chunkBytes": 2048,
+          "groupRates": [
+            250,
+            1000
+          ],
+          "channels": [
+            8
+          ],
+          "maxSkippedFractionExclusive": 0.001
+        },
+        "pass": "同时取两流。RTT 连续、HSS 有变化，实际组速和尾部分别对账。先 250 再 1000 组/秒。停任一消费端的短窗另核对另一端仍持续。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_performance.py",
+          "automated": "RTT 序号、同窗变量和双通道 STOP",
+          "pending": "核对生产计数及完整档位矩阵"
+        }
+      },
+      {
+        "id": "fusion-f103ze-gdb-rtt",
+        "board": "f103ze",
+        "feature": "gdb-rtt",
+        "targetImages": [
+          "dbg-a"
+        ],
+        "clock": {
+          "cpuMHz": 72,
+          "hclkMHz": 72,
+          "transport": "swd",
+          "requestedHz": 10000000
+        },
+        "runner": "gdb",
+        "parameters": {
+          "interrupt": "PendSV",
+          "commandReplies": [
+            "help",
+            "version",
+            "echo fixture"
+          ],
+          "watchWidths": [
+            8,
+            16,
+            32
+          ],
+          "repeats": 20
+        },
+        "pass": "源码步入/过/出均核对函数与行，执行断点命中/清除，寄存器、符号和调用栈可回读。H743 核对浮点异常栈，STM32 核对 DWT 数据观察点，HPM 验 RISC-V 执行触发器。RTT 命令与上/下行跨环逐字节对拍。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_boot.py",
+          "automated": "目标镜像、启动标识、运行进度和 RTT help/version/echo 逐条往返",
+          "pending": "GDB 单步、断点、异常栈、watchpoint 及释放验收待接入"
+        }
+      },
+      {
+        "id": "fusion-f103ze-flash-ab",
+        "board": "f103ze",
+        "feature": "boot",
+        "targetImages": [
+          "dbg-a",
+          "dbg-b"
+        ],
+        "clock": {
+          "cpuMHz": 72,
+          "hclkMHz": 72,
+          "transport": "swd",
+          "requestedHz": 10000000
+        },
+        "runner": "flash",
+        "parameters": {
+          "programTransport": "swd",
+          "programHz": 1000000,
+          "bootIds": [
+            "0x44424741",
+            "0x44424742"
+          ],
+          "cycles": 3
+        },
+        "pass": "备份实际擦除范围与保护区；A→B 逐段写入校验，复位后核对实际启动 ID、数据初始化和心跳。分别记录擦写校验与启动耗时。恢复原 Flash 并复核。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_boot.py",
+          "automated": "校验已启动 A/B 的 PT_LOAD、启动签名和运行进度",
+          "pending": "按 A/B 循环由板卡编程流程备份、烧录、冷复位和恢复"
+        }
+      },
+      {
+        "id": "fusion-f103ze-ram-launch",
+        "board": "f103ze",
+        "feature": "boot",
+        "targetImages": [
+          "dbg-ram"
+        ],
+        "clock": {
+          "cpuMHz": 72,
+          "hclkMHz": 72,
+          "transport": "swd",
+          "requestedHz": 10000000
+        },
+        "runner": "ram",
+        "parameters": {
+          "bootId": "0x44424752",
+          "initFlag": 1
+        },
+        "pass": "备份 ELF 段及栈。加载后逐字节回读，启动停在 main，继续后读取 g_boot_id、g_boot_data_verified 和心跳。保存并核对恢复状态。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_boot.py",
+          "automated": "校验已启动 RAM 版的 PT_LOAD、启动签名和运行进度",
+          "pending": "受控加载与复位恢复需独立取证"
+        }
+      },
+      {
+        "id": "fusion-f103ze-uart",
+        "board": "f103ze",
+        "feature": "uart",
+        "targetImages": [
+          "uart"
+        ],
+        "clock": {
+          "cpuMHz": 72,
+          "hclkMHz": 72,
+          "transport": "swd",
+          "requestedHz": 10000000
+        },
+        "runner": "uart",
+        "parameters": {
+          "wiring": "PA9 TX → J7-27，PA10 RX ← J7-25，共地",
+          "baud": [
+            115200,
+            230400,
+            460800,
+            1000000,
+            2000000,
+            4000000,
+            4500000
+          ],
+          "baudFraming": "8N1",
+          "directions": [
+            "echo",
+            "probe-to-target",
+            "target-to-probe",
+            "full-duplex"
+          ],
+          "edgeBytes": [
+            4095,
+            4096,
+            4097
+          ],
+          "seconds": 60,
+          "rounds": 3
+        },
+        "pass": "每方向验证连续载荷和计数。GPIO 回环作为探针测试单独保留。目标 UART 固件的数据以 USART/UART3 的实际配置值、对拍和错误计数为准。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_uart.py",
+          "automated": "目标回显、边界帧、FNV、接收错误及波特率恢复",
+          "pending": "独立持续 TX、RX 和全双工仍需准备流控与独立观测。有效波特率须外测"
+        }
+      },
+      {
+        "id": "fusion-h743-sram",
+        "board": "h743",
+        "feature": "performance",
+        "targetImages": [
+          "performance-axi",
+          "performance-dtcm"
+        ],
+        "clock": {
+          "profile": "h743-performance"
+        },
+        "runner": "sram",
+        "parameters": {
+          "seconds": 60,
+          "rounds": 3,
+          "payloadBytes": 4032,
+          "depth": 4,
+          "offsetFromAlignedPage": 32,
+          "directions": [
+            "read",
+            "write",
+            "mixed"
+          ],
+          "widthBytes": [
+            1,
+            2,
+            4
+          ],
+          "boundaryBytes": 1024
+        },
+        "pass": "对每个内存区和时钟验证跨 1 KiB、非对齐及 8/16/32 位。纯读和交替逐字节比对。纯写核对 PC/探针方向计数及独立末块读回。记录各方向有效 MB/s 和三轮中位数。测试区和保护字均回读恢复。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_performance.py",
+          "automated": "8/16 位真实 MEM-AP 访问、32 位原生 SRAM 三方向、跨页、末块和原样恢复",
+          "pending": "补全链路档位和 SRAM 区汇总"
+        }
+      },
+      {
+        "id": "fusion-h743-rtt",
+        "board": "h743",
+        "feature": "performance",
+        "targetImages": [
+          "performance-axi",
+          "performance-dtcm"
+        ],
+        "clock": {
+          "profile": "h743-performance"
+        },
+        "runner": "rtt",
+        "parameters": {
+          "seconds": 60,
+          "rounds": 3,
+          "firmwareMode": 1,
+          "ringBytes": 8192,
+          "chunkBytes": 2048
+        },
+        "pass": "上行连续 little-endian u32 全量对拍。主机实收、探针 STOP 字节、目标发布和环上剩余量对账。测有效 MB/s。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_performance.py",
+          "automated": "固件序号、原始窗口、STOP 和主机/生产计数与尾包对拍",
+          "pending": "补整数 MHz 之外的精确链路速率证据与完整档位汇总"
+        }
+      },
+      {
+        "id": "fusion-h743-scope",
+        "board": "h743",
+        "feature": "performance",
+        "targetImages": [
+          "performance-axi",
+          "performance-dtcm"
+        ],
+        "clock": {
+          "profile": "h743-performance"
+        },
+        "runner": "scope",
+        "parameters": {
+          "seconds": 60,
+          "rounds": 3,
+          "firmwareMode": 2,
+          "ringBytes": 8192,
+          "chunkBytes": 2048,
+          "groupRates": [
+            1000,
+            10000,
+            25000,
+            50000,
+            100000
+          ],
+          "channels": [
+            1,
+            8
+          ],
+          "maxSkippedFractionExclusive": 0.001
+        },
+        "pass": "运行态真实波形。核对 g_scope 变化、帧序、时间戳和实际组速，读错与尾差为零，跳拍率严格低于 0.1%。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_performance.py",
+          "automated": "动态变量、HSS 帧、尾帧及跳组率",
+          "pending": "核对实测速率来源及整张矩阵"
+        }
+      },
+      {
+        "id": "fusion-h743-combo",
+        "board": "h743",
+        "feature": "performance",
+        "targetImages": [
+          "performance-axi",
+          "performance-dtcm"
+        ],
+        "clock": {
+          "profile": "h743-performance"
+        },
+        "runner": "combo",
+        "parameters": {
+          "seconds": 60,
+          "rounds": 3,
+          "firmwareMode": 3,
+          "ringBytes": 8192,
+          "chunkBytes": 2048,
+          "groupRates": [
+            250,
+            1000
+          ],
+          "channels": [
+            8
+          ],
+          "maxSkippedFractionExclusive": 0.001
+        },
+        "pass": "同时取两流。RTT 连续、HSS 有变化，实际组速和尾部分别对账。先 250 再 1000 组/秒。停任一消费端的短窗另核对另一端仍持续。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_performance.py",
+          "automated": "RTT 序号、同窗变量和双通道 STOP",
+          "pending": "核对生产计数及完整档位矩阵"
+        }
+      },
+      {
+        "id": "fusion-h743-gdb-rtt",
+        "board": "h743",
+        "feature": "gdb-rtt",
+        "targetImages": [
+          "dbg-a"
+        ],
+        "clock": {
+          "cpuMHz": 480,
+          "hclkMHz": 240,
+          "transport": "swd",
+          "requestedHz": 10000000
+        },
+        "runner": "gdb",
+        "parameters": {
+          "interrupt": "PendSV+FPU",
+          "commandReplies": [
+            "help",
+            "version",
+            "echo fixture"
+          ],
+          "watchWidths": [
+            8,
+            16,
+            32
+          ],
+          "repeats": 20
+        },
+        "pass": "源码步入/过/出均核对函数与行，执行断点命中/清除，寄存器、符号和调用栈可回读。H743 核对浮点异常栈，STM32 核对 DWT 数据观察点，HPM 验 RISC-V 执行触发器。RTT 命令与上/下行跨环逐字节对拍。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_boot.py",
+          "automated": "目标镜像、启动标识、运行进度和 RTT help/version/echo 逐条往返",
+          "pending": "GDB 单步、断点、异常栈、watchpoint 及释放验收待接入"
+        }
+      },
+      {
+        "id": "fusion-h743-flash-ab",
+        "board": "h743",
+        "feature": "boot",
+        "targetImages": [
+          "dbg-a",
+          "dbg-b"
+        ],
+        "clock": {
+          "cpuMHz": 480,
+          "hclkMHz": 240,
+          "transport": "swd",
+          "requestedHz": 10000000
+        },
+        "runner": "flash",
+        "parameters": {
+          "programTransport": "swd",
+          "programHz": 1000000,
+          "bootIds": [
+            "0x44424741",
+            "0x44424742"
+          ],
+          "cycles": 3
+        },
+        "pass": "备份实际擦除范围与保护区；A→B 逐段写入校验，复位后核对实际启动 ID、数据初始化和心跳。分别记录擦写校验与启动耗时。恢复原 Flash 并复核。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_boot.py",
+          "automated": "校验已启动 A/B 的 PT_LOAD、启动签名和运行进度",
+          "pending": "按 A/B 循环由板卡编程流程备份、烧录、冷复位和恢复"
+        }
+      },
+      {
+        "id": "fusion-h743-ram-launch",
+        "board": "h743",
+        "feature": "boot",
+        "targetImages": [
+          "dbg-ram"
+        ],
+        "clock": {
+          "cpuMHz": 480,
+          "hclkMHz": 240,
+          "transport": "swd",
+          "requestedHz": 10000000
+        },
+        "runner": "ram",
+        "parameters": {
+          "bootId": "0x44424752",
+          "initFlag": 1
+        },
+        "pass": "备份 ELF 段及栈。加载后逐字节回读，启动停在 main，继续后读取 g_boot_id、g_boot_data_verified 和心跳。保存并核对恢复状态。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_boot.py",
+          "automated": "校验已启动 RAM 版的 PT_LOAD、启动签名和运行进度",
+          "pending": "受控加载与复位恢复需独立取证"
+        }
+      },
+      {
+        "id": "fusion-h743-uart",
+        "board": "h743",
+        "feature": "uart",
+        "targetImages": [
+          "uart"
+        ],
+        "clock": {
+          "cpuMHz": 480,
+          "hclkMHz": 240,
+          "transport": "swd",
+          "requestedHz": 10000000
+        },
+        "runner": "uart",
+        "parameters": {
+          "wiring": "PA9 TX → J7-27，PA10 RX ← J7-25，共地",
+          "baud": [
+            115200,
+            230400,
+            460800,
+            1000000,
+            2000000,
+            4000000,
+            6000000,
+            7500000
+          ],
+          "baudFraming": "8N1",
+          "directions": [
+            "echo",
+            "probe-to-target",
+            "target-to-probe",
+            "full-duplex"
+          ],
+          "edgeBytes": [
+            4095,
+            4096,
+            4097
+          ],
+          "seconds": 60,
+          "rounds": 3
+        },
+        "pass": "每方向验证连续载荷和计数。GPIO 回环作为探针测试单独保留。目标 UART 固件的数据以 USART/UART3 的实际配置值、对拍和错误计数为准。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_uart.py",
+          "automated": "目标回显、边界帧、FNV、接收错误及波特率恢复",
+          "pending": "独立持续 TX、RX 和全双工仍需准备流控与独立观测。有效波特率须外测"
+        }
+      },
+      {
+        "id": "fusion-hpm6800evk-sram",
+        "board": "hpm6800evk",
+        "feature": "performance",
+        "targetImages": [
+          "performance-axi",
+          "performance-ahb"
+        ],
+        "clock": {
+          "profile": "hpm6800evk-performance"
+        },
+        "runner": "sram",
+        "parameters": {
+          "seconds": 60,
+          "rounds": 3,
+          "payloadBytes": 4032,
+          "depth": 4,
+          "offsetFromAlignedPage": 32,
+          "directions": [
+            "read",
+            "write",
+            "mixed"
+          ],
+          "widthBytes": [
+            1,
+            2,
+            4
+          ],
+          "boundaryBytes": 1024
+        },
+        "pass": "对每个内存区和时钟验证跨 1 KiB、非对齐及 8/16/32 位。纯读和交替逐字节比对。纯写核对 PC/探针方向计数及独立末块读回。记录各方向有效 MB/s 和三轮中位数。测试区和保护字均回读恢复。",
+        "execution": {
+          "mode": "blocked",
+          "script": "tools/fusion_fixture.py",
+          "pending": "要求 RISC-V 原生高速数据面及各档实际 TCK。当前执行器只接入 ARM SWD/JTAG；SBA 可用于目标身份和调试读写。"
+        }
+      },
+      {
+        "id": "fusion-hpm6800evk-rtt",
+        "board": "hpm6800evk",
+        "feature": "performance",
+        "targetImages": [
+          "performance-axi",
+          "performance-ahb"
+        ],
+        "clock": {
+          "profile": "hpm6800evk-performance"
+        },
+        "runner": "rtt",
+        "parameters": {
+          "seconds": 60,
+          "rounds": 3,
+          "firmwareMode": 1,
+          "ringBytes": 16384,
+          "chunkBytes": 2048
+        },
+        "pass": "上行连续 little-endian u32 全量对拍。主机实收、探针 STOP 字节、目标发布和环上剩余量对账。测有效 MB/s。",
+        "execution": {
+          "mode": "blocked",
+          "script": "tools/fusion_fixture.py",
+          "pending": "要求 RISC-V 原生高速数据面及各档实际 TCK。当前执行器只接入 ARM SWD/JTAG；SBA 可用于目标身份和调试读写。"
+        }
+      },
+      {
+        "id": "fusion-hpm6800evk-scope",
+        "board": "hpm6800evk",
+        "feature": "performance",
+        "targetImages": [
+          "performance-axi",
+          "performance-ahb"
+        ],
+        "clock": {
+          "profile": "hpm6800evk-performance"
+        },
+        "runner": "scope",
+        "parameters": {
+          "seconds": 60,
+          "rounds": 3,
+          "firmwareMode": 2,
+          "ringBytes": 16384,
+          "chunkBytes": 2048,
+          "groupRates": [
+            1000,
+            10000,
+            25000,
+            50000,
+            100000
+          ],
+          "channels": [
+            1,
+            8
+          ],
+          "maxSkippedFractionExclusive": 0.001
+        },
+        "pass": "运行态真实波形。核对 g_scope 变化、帧序、时间戳和实际组速，读错与尾差为零，跳拍率严格低于 0.1%。",
+        "execution": {
+          "mode": "blocked",
+          "script": "tools/fusion_fixture.py",
+          "pending": "要求 RISC-V 原生高速数据面及各档实际 TCK。当前执行器只接入 ARM SWD/JTAG；SBA 可用于目标身份和调试读写。"
+        }
+      },
+      {
+        "id": "fusion-hpm6800evk-combo",
+        "board": "hpm6800evk",
+        "feature": "performance",
+        "targetImages": [
+          "performance-axi",
+          "performance-ahb"
+        ],
+        "clock": {
+          "profile": "hpm6800evk-performance"
+        },
+        "runner": "combo",
+        "parameters": {
+          "seconds": 60,
+          "rounds": 3,
+          "firmwareMode": 3,
+          "ringBytes": 16384,
+          "chunkBytes": 2048,
+          "groupRates": [
+            250,
+            1000
+          ],
+          "channels": [
+            8
+          ],
+          "maxSkippedFractionExclusive": 0.001
+        },
+        "pass": "同时取两流。RTT 连续、HSS 有变化，实际组速和尾部分别对账。先 250 再 1000 组/秒。停任一消费端的短窗另核对另一端仍持续。",
+        "execution": {
+          "mode": "blocked",
+          "script": "tools/fusion_fixture.py",
+          "pending": "要求 RISC-V 原生高速数据面及各档实际 TCK。当前执行器只接入 ARM SWD/JTAG；SBA 可用于目标身份和调试读写。"
+        }
+      },
+      {
+        "id": "fusion-hpm6800evk-gdb-rtt",
+        "board": "hpm6800evk",
+        "feature": "gdb-rtt",
+        "targetImages": [
+          "dbg-a"
+        ],
+        "clock": {
+          "cpuMHz": 600,
+          "transport": "riscv-jtag",
+          "requestedHz": 25000000
+        },
+        "runner": "gdb",
+        "parameters": {
+          "interrupt": null,
+          "commandReplies": [
+            "help",
+            "version",
+            "echo fixture"
+          ],
+          "watchWidths": [],
+          "repeats": 20
+        },
+        "pass": "源码步入/过/出均核对函数与行，执行断点命中/清除，寄存器、符号和调用栈可回读。H743 核对浮点异常栈，STM32 核对 DWT 数据观察点，HPM 验 RISC-V 执行触发器。RTT 命令与上/下行跨环逐字节对拍。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_boot.py",
+          "automated": "目标镜像、启动标识、运行进度和 RTT help/version/echo 逐条往返",
+          "pending": "GDB 单步、断点、异常栈、watchpoint 及释放验收待接入"
+        }
+      },
+      {
+        "id": "fusion-hpm6800evk-flash-ab",
+        "board": "hpm6800evk",
+        "feature": "boot",
+        "targetImages": [
+          "dbg-a",
+          "dbg-b"
+        ],
+        "clock": {
+          "cpuMHz": 600,
+          "transport": "riscv-jtag",
+          "requestedHz": 25000000
+        },
+        "runner": "flash",
+        "parameters": {
+          "programTransport": "riscv-jtag",
+          "programHz": 10000000,
+          "bootIds": [
+            "0x44424741",
+            "0x44424742"
+          ],
+          "cycles": 3
+        },
+        "pass": "备份实际擦除范围与保护区；A→B 逐段写入校验，复位后核对实际启动 ID、数据初始化和心跳。分别记录擦写校验与启动耗时。恢复原 Flash 并复核。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_boot.py",
+          "automated": "校验已启动 A/B 的 PT_LOAD、启动签名和运行进度",
+          "pending": "按 A/B 循环由板卡编程流程备份、烧录、冷复位和恢复"
+        }
+      },
+      {
+        "id": "fusion-hpm6800evk-ram-launch",
+        "board": "hpm6800evk",
+        "feature": "boot",
+        "targetImages": [
+          "dbg-ram"
+        ],
+        "clock": {
+          "cpuMHz": 600,
+          "transport": "riscv-jtag",
+          "requestedHz": 25000000
+        },
+        "runner": "ram",
+        "parameters": {
+          "bootId": "0x44424752",
+          "initFlag": 1
+        },
+        "pass": "备份 ELF 段及栈。加载后逐字节回读，启动停在 main，继续后读取 g_boot_id、g_boot_data_verified 和心跳。保存并核对恢复状态。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_boot.py",
+          "automated": "校验已启动 RAM 版的 PT_LOAD、启动签名和运行进度",
+          "pending": "受控加载与复位恢复需独立取证"
+        }
+      },
+      {
+        "id": "fusion-hpm6800evk-uart",
+        "board": "hpm6800evk",
+        "feature": "uart",
+        "targetImages": [
+          "uart"
+        ],
+        "clock": {
+          "cpuMHz": 600,
+          "transport": "riscv-jtag",
+          "requestedHz": 25000000
+        },
+        "runner": "uart",
+        "parameters": {
+          "wiring": "PE15 TX → J7-27，PE14 RX ← J7-25，共地。用 JTAG 准备目标后释放 JTAG 再接管 UART。",
+          "baud": [
+            115200,
+            230400,
+            460800,
+            1000000,
+            2000000,
+            4000000,
+            6000000
+          ],
+          "baudFraming": "8N1",
+          "directions": [
+            "echo",
+            "probe-to-target",
+            "target-to-probe",
+            "full-duplex"
+          ],
+          "edgeBytes": [
+            4095,
+            4096,
+            4097
+          ],
+          "seconds": 60,
+          "rounds": 3
+        },
+        "pass": "每方向验证连续载荷和计数。GPIO 回环作为探针测试单独保留。目标 UART 固件的数据以 USART/UART3 的实际配置值、对拍和错误计数为准。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_uart.py",
+          "automated": "目标回显、边界帧、FNV、接收错误及波特率恢复",
+          "pending": "独立持续 TX、RX 和全双工仍需准备流控与独立观测。有效波特率须外测"
+        }
+      },
+      {
+        "id": "fusion-f103ze-swo-itm",
+        "board": "f103ze",
+        "feature": "swo",
+        "targetImages": [
+          "swo"
+        ],
+        "clock": {
+          "cpuMHz": 48,
+          "hclkMHz": 48,
+          "transport": "swd",
+          "requestedHz": 10000000
+        },
+        "runner": "swo-itm",
+        "parameters": {
+          "pin": "PB3→J7-27",
+          "nrZBaud": [
+            3000000,
+            48000000
+          ],
+          "manchesterBitRate": [
+            1500000,
+            24000000
+          ],
+          "words": 500000,
+          "port": 0,
+          "rounds": 3
+        },
+        "pass": "EP2 对拍 ITM 源包端口、宽度、每个 u32 和尾差。记录实际码率及最高稳定档。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_swo.py",
+          "automated": "实际 ITM 固件序号、标准 SWO 原始数据、STOP、TPIU 恢复",
+          "pending": "补两种编码的实测线速与每档归纳"
+        }
+      },
+      {
+        "id": "fusion-f103ze-spi-target-tx",
+        "board": "f103ze",
+        "feature": "spi",
+        "targetImages": [
+          "spi"
+        ],
+        "clock": {
+          "cpuMHz": 128,
+          "hclkMHz": 128
+        },
+        "runner": "spi-target-tx",
+        "parameters": {
+          "modes": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "sckHz": [
+            1000000,
+            4000000,
+            8000000,
+            16000000,
+            32000000
+          ],
+          "seconds": 60,
+          "rounds": 3,
+          "payloadSeed": 1
+        },
+        "pass": "目标真实 SPI1/SPI2 主机发，J7 EP10 原生接收。按模式逐字节对拍。记录连续有效 MB/s，丢弃、成帧和数据错均为零。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_f103_spi.py",
+          "pending": "5 秒内切换隔离夹具至 SPI，补物理 SCK/NSS 与实板取证",
+          "automated": "SPI1 DMA 持续主发，J7 逐字节对拍、STOP 计数及目标 SRAM 恢复",
+          "wiringGate": "SWDIO 和 SWCLK 与 SPI NSS/SCK 共用。使用隔离夹具并加 --manual-spi-switch，在交互终端逐次确认。"
+        }
+      },
+      {
+        "id": "fusion-f103ze-spi-target-rx",
+        "board": "f103ze",
+        "feature": "spi",
+        "targetImages": [
+          "spi"
+        ],
+        "clock": {
+          "cpuMHz": 128,
+          "hclkMHz": 128
+        },
+        "runner": "spi-target-rx",
+        "parameters": {
+          "modes": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "sckHz": [
+            1000000,
+            4000000,
+            8000000,
+            16000000,
+            18000000,
+            32000000,
+            36000000
+          ],
+          "frameBytes": [
+            1,
+            5,
+            4096
+          ],
+          "rounds": 3,
+          "seconds": 60
+        },
+        "pass": "目标真实 SPI 从机只收。记录独立主机的数据、实际 SCK 与片选时间。四模式按长度逐字节对拍。F103 36 MHz 由外部主机供钟并记录超规格边界。",
+        "execution": {
+          "mode": "blocked",
+          "script": "tools/fusion_evidence.py",
+          "pending": "需要指定发送器，核对目标接收哈希，采集每档双端计数与实际 SCK"
+        }
+      },
+      {
+        "id": "fusion-f103ze-spi-full-duplex",
+        "board": "f103ze",
+        "feature": "spi",
+        "targetImages": [
+          "spi"
+        ],
+        "clock": {
+          "cpuMHz": 128,
+          "hclkMHz": 128
+        },
+        "runner": "spi-duplex",
+        "parameters": {
+          "modes": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "sckHz": [
+            1000000,
+            4000000,
+            8000000,
+            16000000,
+            18000000
+          ],
+          "frameBytes": [
+            1,
+            5,
+            256,
+            4096
+          ],
+          "seconds": 60,
+          "rounds": 3
+        },
+        "pass": "逐模式、逐长度核对双向独立载荷、片选边界与引脚释放。记录实际 SCK 和 PC 有效吞吐。",
+        "execution": {
+          "mode": "blocked",
+          "script": "tools/fusion_evidence.py",
+          "pending": "需要双端控制与持续同步，记录双向字节、片选、方向和实际 SCK"
+        }
+      },
+      {
+        "id": "fusion-f103ze-etm-golden",
+        "board": "f103ze",
+        "feature": "etm",
+        "targetImages": [],
+        "clock": {
+          "cpuMHz": 48,
+          "hclkMHz": 48,
+          "transport": "swd",
+          "requestedHz": 10000000,
+          "traceMHz": 24,
+          "gpioSpeed": 1
+        },
+        "runner": "etm",
+        "parameters": {
+          "windowsMs": [
+            1000
+          ],
+          "rounds": 3,
+          "mode": "running-window"
+        },
+        "pass": "捕获完整并严格验解码。对拍真实 CDC 负载，保留最大峰值的硬件窗、EP9 下载、解码索引及首屏计时。复核目标、Trace 和探针恢复。",
+        "targetElf": "prebuilt/golden/f103ze-cdc48.elf",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_acceptance_run.py",
+          "automated": "原生采集窗口与 trace verify",
+          "pending": "补目标时钟、工作负载、CDC、实际窗口吞吐及恢复"
+        }
+      },
+      {
+        "id": "fusion-f103ze-etm-rebuild",
+        "board": "f103ze",
+        "feature": "etm",
+        "targetImages": [
+          "etm"
+        ],
+        "clock": {
+          "cpuMHz": 48,
+          "hclkMHz": 48,
+          "transport": "swd",
+          "requestedHz": 10000000,
+          "traceMHz": 24,
+          "gpioSpeed": 1
+        },
+        "runner": "etm",
+        "parameters": {
+          "windowsMs": [
+            1000
+          ],
+          "rounds": 3,
+          "mode": "running-window"
+        },
+        "pass": "捕获完整并严格验解码。对拍真实 CDC 负载，保留最大峰值的硬件窗、EP9 下载、解码索引及首屏计时。复核目标、Trace 和探针恢复。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_acceptance_run.py",
+          "automated": "原生采集窗口与 trace verify",
+          "pending": "补目标时钟、工作负载、CDC、实际窗口吞吐及恢复"
+        }
+      },
+      {
+        "id": "fusion-h743-swo-itm",
+        "board": "h743",
+        "feature": "swo",
+        "targetImages": [
+          "swo"
+        ],
+        "clock": {
+          "cpuMHz": 60,
+          "hclkMHz": 60,
+          "transport": "swd",
+          "requestedHz": 10000000
+        },
+        "runner": "swo-itm",
+        "parameters": {
+          "pin": "PB3→J7-27",
+          "nrZBaud": [
+            250000,
+            1000000
+          ],
+          "manchesterBitRate": [
+            500000,
+            750000
+          ],
+          "words": 500000,
+          "port": 0,
+          "rounds": 3
+        },
+        "pass": "EP2 对拍 ITM 源包端口、宽度、每个 u32 和尾差。记录实际码率及最高稳定档。",
+        "execution": {
+          "mode": "blocked",
+          "script": "tools/fusion_swo.py",
+          "pending": "H743 需要按实际芯片配置并回读 ITM/TPIU、PB3 及复原；当前执行器只实现 F103ZE"
+        }
+      },
+      {
+        "id": "fusion-h743-spi-target-tx",
+        "board": "h743",
+        "feature": "spi",
+        "targetImages": [
+          "spi"
+        ],
+        "clock": {
+          "cpuMHz": 480,
+          "hclkMHz": 240
+        },
+        "runner": "spi-target-tx",
+        "parameters": {
+          "modes": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "sckHz": [
+            781250,
+            3125000,
+            12500000,
+            25000000,
+            50000000,
+            100000000
+          ],
+          "seconds": 60,
+          "rounds": 3,
+          "payloadSeed": 1
+        },
+        "pass": "目标真实 SPI1/SPI2 主机发，J7 EP10 原生接收。按模式逐字节对拍。记录连续有效 MB/s，丢弃、成帧和数据错均为零。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_acceptance_run.py",
+          "automated": "SPI2 r3 主发、J7 收、持续字节比较和 STOP",
+          "pending": "补线速实测及接线复原核对",
+          "wiringGate": "SWDIO 和 SWCLK 与 SPI NSS/SCK 共用。使用隔离夹具并加 --manual-spi-switch，在交互终端逐次确认。"
+        }
+      },
+      {
+        "id": "fusion-h743-spi-target-rx",
+        "board": "h743",
+        "feature": "spi",
+        "targetImages": [
+          "spi"
+        ],
+        "clock": {
+          "cpuMHz": 480,
+          "hclkMHz": 240
+        },
+        "runner": "spi-target-rx",
+        "parameters": {
+          "modes": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "sckHz": [
+            12500000,
+            25000000,
+            50000000,
+            100000000
+          ],
+          "frameBytes": [
+            1,
+            5,
+            4096
+          ],
+          "rounds": 3,
+          "seconds": 60
+        },
+        "pass": "目标真实 SPI 从机只收。记录独立主机的数据、实际 SCK 与片选时间。四模式按长度逐字节对拍。F103 36 MHz 由外部主机供钟并记录超规格边界。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_acceptance_run.py",
+          "pending": "持续 60 秒的方向性测试、实际 SCK 和恢复仍需补证据。全双工波形遇到频率或 4096 槽容量限制时记 blocked。",
+          "automated": "使用目标 SPI r3 与指定 J7 做有限帧双端数据核对",
+          "wiringGate": "SWDIO 和 SWCLK 与 SPI NSS/SCK 共用。使用隔离夹具并加 --manual-spi-switch，在交互终端逐次确认。"
+        }
+      },
+      {
+        "id": "fusion-h743-spi-full-duplex",
+        "board": "h743",
+        "feature": "spi",
+        "targetImages": [
+          "spi"
+        ],
+        "clock": {
+          "cpuMHz": 480,
+          "hclkMHz": 240
+        },
+        "runner": "spi-duplex",
+        "parameters": {
+          "modes": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "sckHz": [
+            12500000,
+            20000000,
+            25000000
+          ],
+          "frameBytes": [
+            1,
+            5,
+            24
+          ],
+          "seconds": 60,
+          "rounds": 3
+        },
+        "pass": "逐模式、逐长度核对双向独立载荷、片选边界与引脚释放。记录实际 SCK 和 PC 有效吞吐。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_acceptance_run.py",
+          "pending": "持续 60 秒的方向性测试、实际 SCK 和恢复仍需补证据。全双工波形遇到频率或 4096 槽容量限制时记 blocked。",
+          "automated": "使用目标 SPI r3 与指定 J7 做有限帧双端数据核对",
+          "wiringGate": "SWDIO 和 SWCLK 与 SPI NSS/SCK 共用。使用隔离夹具并加 --manual-spi-switch，在交互终端逐次确认。"
+        }
+      },
+      {
+        "id": "fusion-h743-etm-golden",
+        "board": "h743",
+        "feature": "etm",
+        "targetImages": [],
+        "clock": {
+          "cpuMHz": 60,
+          "hclkMHz": 60,
+          "transport": "swd",
+          "requestedHz": 10000000,
+          "traceMHz": 20,
+          "gpioSpeed": 2
+        },
+        "runner": "etm",
+        "parameters": {
+          "windowsMs": [
+            10,
+            200,
+            500,
+            1000
+          ],
+          "rounds": 3,
+          "mode": "continuous"
+        },
+        "pass": "捕获完整并严格验解码。对拍真实 CDC 负载，保留最大峰值的硬件窗、EP9 下载、解码索引及首屏计时。复核目标、Trace 和探针恢复。",
+        "targetElf": "prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_acceptance_run.py",
+          "automated": "原生采集窗口与 trace verify",
+          "pending": "补目标时钟、工作负载、CDC、实际窗口吞吐及恢复"
+        }
+      },
+      {
+        "id": "fusion-h743-etm-rebuild",
+        "board": "h743",
+        "feature": "etm",
+        "targetImages": [
+          "etm"
+        ],
+        "clock": {
+          "cpuMHz": 60,
+          "hclkMHz": 60,
+          "transport": "swd",
+          "requestedHz": 10000000,
+          "traceMHz": 20,
+          "gpioSpeed": 2
+        },
+        "runner": "etm",
+        "parameters": {
+          "windowsMs": [
+            10,
+            200,
+            500,
+            1000
+          ],
+          "rounds": 3,
+          "mode": "continuous"
+        },
+        "pass": "捕获完整并严格验解码。对拍真实 CDC 负载，保留最大峰值的硬件窗、EP9 下载、解码索引及首屏计时。复核目标、Trace 和探针恢复。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_acceptance_run.py",
+          "automated": "原生采集窗口与 trace verify",
+          "pending": "补目标时钟、工作负载、CDC、实际窗口吞吐及恢复"
+        }
+      },
+      {
+        "id": "fusion-h743-swo-source",
+        "board": "h743",
+        "feature": "swo",
+        "targetImages": [
+          "swo-source"
+        ],
+        "clock": {
+          "cpuMHz": 480,
+          "hclkMHz": 240
+        },
+        "runner": "swo-source",
+        "parameters": {
+          "nrZBaud": [
+            15000000
+          ],
+          "manchesterBitRate": [
+            7500000
+          ],
+          "payloadBytes": 256,
+          "repeats": 48,
+          "rounds": 3
+        },
+        "pass": "TIM2/DMA 产生已知线码。EP2 逐字节对拍并确认发送端无欠载或 DMA 错误。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_swo.py",
+          "pending": "补物理符号率、接线、两编码实板证据",
+          "automated": "H743 TIM2/DMA 启动、NRZ/Manchester 重复负载、字节和 STOP 对账、恢复控制邮箱"
+        }
+      },
+      {
+        "id": "fusion-f103ze-etm-sram",
+        "board": "f103ze",
+        "feature": "etm",
+        "targetImages": [
+          "etm-ram"
+        ],
+        "clock": {
+          "cpuMHz": 72,
+          "hclkMHz": 72,
+          "traceMHz": 36,
+          "requestedHz": 10000000
+        },
+        "runner": "etm-variant",
+        "parameters": {
+          "mode": "running-window",
+          "windowMs": 1000,
+          "rounds": 3
+        },
+        "pass": "按对应 SRAM ELF 的实际入口及装载身份取证。环形 Fault 例核对 UDF、触发、20 ms 窗口和异常返回恢复。",
+        "requiresScopeApproval": "TRACECLK36 MHz 历史研究保持暂停，单独获得明确授权前记 blocked。",
+        "execution": {
+          "mode": "blocked",
+          "script": "tools/run_f103_ram_fixture.py",
+          "pending": "TRACECLK36 MHz 历史研究保持暂停，单独获得明确授权前记 blocked。"
+        }
+      },
+      {
+        "id": "fusion-f103ze-etm-loop",
+        "board": "f103ze",
+        "feature": "etm",
+        "targetImages": [
+          "etm-loop"
+        ],
+        "clock": {
+          "cpuMHz": 48,
+          "hclkMHz": 48,
+          "traceMHz": 24,
+          "requestedHz": 10000000
+        },
+        "runner": "etm-variant",
+        "parameters": {
+          "mode": "running-window",
+          "windowMs": 1000,
+          "rounds": 3
+        },
+        "pass": "按对应 SRAM ELF 的实际入口及装载身份取证。环形 Fault 例核对 UDF、触发、20 ms 窗口和异常返回恢复。",
+        "execution": {
+          "mode": "blocked",
+          "script": "tools/run_f103_ram_fixture.py",
+          "pending": "需要将现有 F103 RAM/Fault 夹具流程接到选定序列号、触发证据和恢复闭环"
+        }
+      },
+      {
+        "id": "fusion-f103ze-etm-fault",
+        "board": "f103ze",
+        "feature": "etm",
+        "targetImages": [
+          "etm-fault"
+        ],
+        "clock": {
+          "cpuMHz": 48,
+          "hclkMHz": 48,
+          "traceMHz": 24,
+          "requestedHz": 10000000
+        },
+        "runner": "etm-variant",
+        "parameters": {
+          "mode": "fault",
+          "windowMs": 20,
+          "rounds": 3
+        },
+        "pass": "按对应 SRAM ELF 的实际入口及装载身份取证。环形 Fault 例核对 UDF、触发、20 ms 窗口和异常返回恢复。",
+        "execution": {
+          "mode": "blocked",
+          "script": "tools/run_f103_ram_fixture.py",
+          "pending": "需要将现有 F103 RAM/Fault 夹具流程接到选定序列号、触发证据和恢复闭环"
+        }
+      },
+      {
+        "id": "fusion-host-probe-self",
+        "board": "host",
+        "feature": "probe",
+        "targetImages": [],
+        "clock": {},
+        "runner": "probe-self",
+        "parameters": {
+          "seconds": 60,
+          "rounds": 3
+        },
+        "pass": "ABI 2 和端点枚举匹配，WinUSB 自检及 DDR 回环逐字节通过。重新打开后新会话与旧数据分离。",
+        "execution": {
+          "mode": "scripted-point",
+          "script": "tools/fusion_acceptance_run.py",
+          "automated": "USB 原生回环和私有 DDR 队列读、写、混合三轮逐帧对拍",
+          "pending": "流运行期间的句柄关闭、重开与资源恢复待接入"
+        }
+      },
+      {
+        "id": "fusion-host-uart-ceiling",
+        "board": "host",
+        "feature": "uart",
+        "targetImages": [],
+        "clock": {},
+        "runner": "external",
+        "parameters": {
+          "baud": [
+            100000000
+          ],
+          "seconds": 60,
+          "rounds": 3,
+          "directions": [
+            "full-duplex"
+          ]
+        },
+        "pass": "独立对端或物理回环，在 100 Mbaud 的配置与实测一致时逐字节对拍并核对收尾。",
+        "execution": {
+          "mode": "blocked",
+          "script": "tools/fusion_evidence.py",
+          "pending": "缺少可证明所请求线速的独立双向设备或独立码源；可用离线比较器核对取得的原始字节"
+        }
+      },
+      {
+        "id": "fusion-host-swo-ceiling",
+        "board": "host",
+        "feature": "swo",
+        "targetImages": [],
+        "clock": {},
+        "runner": "external",
+        "parameters": {
+          "nrZBaud": [
+            50000000,
+            100000000
+          ],
+          "manchesterBitRate": [
+            50000000,
+            100000000
+          ],
+          "seconds": 60,
+          "rounds": 3
+        },
+        "pass": "独立码源供混合码并实测时序。100 Mbit/s Manchester 对应 200 Msymbol/s。按两种编码分别记录首个失败档。",
+        "execution": {
+          "mode": "blocked",
+          "script": "tools/fusion_evidence.py",
+          "pending": "缺少可证明所请求线速的独立双向设备或独立码源；可用离线比较器核对取得的原始字节"
+        }
+      },
+      {
+        "id": "fusion-f103ze-handoff",
+        "board": "f103ze",
+        "feature": "handoff",
+        "targetImages": [
+          "performance"
+        ],
+        "clock": {
+          "transport": "swd",
+          "requestedHz": 10000000
+        },
+        "runner": "handoff",
+        "parameters": {
+          "rounds": 3,
+          "order": [
+            "idle",
+            "rtt",
+            "scope",
+            "combo",
+            "debug",
+            "idle"
+          ],
+          "loseOwner": "close USB handle during scope"
+        },
+        "pass": "三轮中验证切换后的同一实载身份、端点收尾、恢复后的 SRAM/时钟和探针空闲。活动会话中禁止未经允许的换档。",
+        "execution": {
+          "mode": "blocked",
+          "script": "tools/fusion_acceptance_run.py",
+          "pending": "需要可复现的流中断、Windows 句柄恢复及目标现场核对脚本"
+        }
+      },
+      {
+        "id": "fusion-h743-handoff",
+        "board": "h743",
+        "feature": "handoff",
+        "targetImages": [
+          "performance-axi"
+        ],
+        "clock": {
+          "transport": "swd",
+          "requestedHz": 10000000
+        },
+        "runner": "handoff",
+        "parameters": {
+          "rounds": 3,
+          "order": [
+            "idle",
+            "rtt",
+            "scope",
+            "combo",
+            "debug",
+            "idle"
+          ],
+          "loseOwner": "close USB handle during scope"
+        },
+        "pass": "三轮中验证切换后的同一实载身份、端点收尾、恢复后的 SRAM/时钟和探针空闲。活动会话中禁止未经允许的换档。",
+        "execution": {
+          "mode": "blocked",
+          "script": "tools/fusion_acceptance_run.py",
+          "pending": "需要可复现的流中断、Windows 句柄恢复及目标现场核对脚本"
+        }
+      },
+      {
+        "id": "fusion-hpm6800evk-handoff",
+        "board": "hpm6800evk",
+        "feature": "handoff",
+        "targetImages": [
+          "performance-axi"
+        ],
+        "clock": {
+          "transport": "riscv-jtag",
+          "requestedHz": 25000000
+        },
+        "runner": "handoff",
+        "parameters": {
+          "rounds": 3,
+          "order": [
+            "idle",
+            "rtt",
+            "scope",
+            "combo",
+            "debug",
+            "idle"
+          ],
+          "loseOwner": "close USB handle during scope"
+        },
+        "pass": "三轮中验证切换后的同一实载身份、端点收尾、恢复后的 SRAM/时钟和探针空闲。活动会话中禁止未经允许的换档。",
+        "execution": {
+          "mode": "blocked",
+          "script": "tools/fusion_acceptance_run.py",
+          "pending": "需要可复现的流中断、Windows 句柄恢复及目标现场核对脚本"
+        }
+      }
+    ]
+  }
 }

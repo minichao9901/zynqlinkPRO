@@ -37,6 +37,8 @@ ALIASES={
  'bench.hss':'tools/benchmark_hss_matrix.py','bench.sota':'tools/run_sota_regression.py',
  'board.accept':'tools/run_board_acceptance.py',
  'board.selectio-performance':'tools/selectio_f103_performance.py',
+ 'fusion.accept':'tools/fusion_acceptance.py',
+ 'fusion.evidence':'tools/fusion_evidence.py',
  'hpm.web':'tools/validate_hpm6800_web.py','hpm.web-stress':'tools/stress_hpm6800_web.py',
  'hpm.usb-diagnose':'tools/diagnose_hpm6800_usb.py','hpm.usb-fixture':'tools/hpm6800_usb_fixture.py',
  'hpm.cdc-sequence':'tools/validate_hpm6800_cdc_sequence.py','usb.pcap-analyze':'tools/analyze_usbpcap_cdc.py',

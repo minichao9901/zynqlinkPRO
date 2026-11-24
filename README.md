@@ -36,7 +36,7 @@ ETM 采集时同时声明探针 bit、探针 PS ELF 和目标 MCU ELF。目标 E
 | COM 与 SWO | COM 双向，SWO NRZ 和 Manchester 实板逐字节对拍 |
 | SPI | [新版滤波配对](prebuilt/selectio-spi-pad-filter-v2-20261124/README.md)上，H743 → J7 EP10 在 50 MHz 四模式各 3×60 秒通过，12 轮零错字节、零成帧、零丢弃。同配对约 25 MHz 全双工四模式短测通过。100 MHz 任意数据从机接收仍待验。 |
 
-[验收索引](docs/validation/README.md) · [SPI 四模式长窗](docs/validation/h743-spi2-100mhz-20261124/README.md#50-mhz-持续验收) · [当前问题](docs/项目问题跟踪列表.md)
+[新融合配对的三板验收](docs/selectio/fusion-acceptance.md) · [实板证据索引](docs/validation/README.md) · [SPI 四模式长窗](docs/validation/h743-spi2-100mhz-20261124/README.md#50-mhz-持续验收) · [当前问题](docs/项目问题跟踪列表.md)
 
 [用例清单](acceptance-cases.json)关联参数、配对、目标 ELF 和证据。三块 MCU 的已编译镜像、接线与极限测速条件见[目标固件总表](firmware/target/README.md)。
 

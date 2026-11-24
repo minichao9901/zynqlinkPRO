@@ -1,21 +1,34 @@
-if {[llength $argv] < 2 || [llength $argv] > 3} {error "Expected ELF and BIT paths, optionally PS init Tcl"}
+if {[llength $argv] < 2 || [llength $argv] > 4} {error "Expected ELF and BIT paths, optionally PS init Tcl and JTAG cable serial"}
 set elf [file normalize [lindex $argv 0]]
 set bit [file normalize [lindex $argv 1]]
 if {![file exists $elf]} {error "ELF does not exist: $elf"}
 if {![file exists $bit]} {error "BIT does not exist: $bit"}
+
+proc select_target {pattern} {
+    global argv
+    set filter [format {name =~ "%s"} $pattern]
+    if {[llength $argv] == 4} {
+        set serial [lindex $argv 3]
+        if {![regexp {^[A-Za-z0-9_.:-]+$} $serial]} {error "Invalid JTAG cable serial"}
+        append filter [format { && jtag_cable_serial == "%s"} $serial]
+        set matches [targets -target-properties -filter $filter]
+        if {[llength $matches] != 1} {error "Expected one '$pattern' target on cable $serial"}
+    }
+    targets -set -filter $filter
+}
 
 # Connect to an already running hw_server, otherwise start one.
 if {[catch {connect -url tcp:127.0.0.1:3121} err]} {
     connect
 }
 puts [targets]
-targets -set -filter {name =~ "APU"}
+select_target "APU"
 rst -system
 after 1000
 
 set root [file normalize [file join [file dirname [info script]] ..]]
 set init [file join [file dirname $elf] ps7_init.tcl]
-if {[llength $argv] == 3} {
+if {[llength $argv] >= 3} {
     set init [file normalize [lindex $argv 2]]
     if {![file exists $init]} {error "Explicit PS init does not exist: $init"}
 }
@@ -30,10 +43,10 @@ source $init
 ps7_init
 ps7_post_config
 
-targets -set -filter {name =~ "xc7z020"}
+select_target "xc7z020"
 fpga -f $bit
 after 300
-targets -set -filter {name =~ "ARM*#0"}
+select_target "ARM*#0"
 rst -processor
 configparams force-mem-access 1
 set feature_value [mrd -value 0x4001004c]

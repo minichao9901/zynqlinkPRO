@@ -6,7 +6,7 @@ from test_probe_board import Memory
 
 
 @contextmanager
-def f103_swo(serial,encoding,rate,stimulus_mask):
+def f103_swo(serial,encoding,rate,stimulus_mask,*,expected_cfgr=0x0051040a,swd_khz=1000):
     dev,tx,rx=open_dap(serial)
     mem=Memory(tx,rx)
     saved={}
@@ -15,9 +15,9 @@ def f103_swo(serial,encoding,rate,stimulus_mask):
         mem.write_word(addr,value)
     unlocked=False
     try:
-        setup(tx,rx,1000,"swd")
-        if mem.word(0xe0042000)&0xfff!=0x414 or mem.word(0x40021004)!=0x0051040a:
-            raise RuntimeError("automatic setup requires the F103ZE CDC48 HCLK profile")
+        setup(tx,rx,swd_khz,"swd")
+        if mem.word(0xe0042000)&0xfff!=0x414 or mem.word(0x40021004)!=expected_cfgr:
+            raise RuntimeError("target does not match the requested F103ZE HCLK48 profile")
         symbol_rate=rate*(2 if encoding=="manchester" else 1)
         if symbol_rate<=0 or 48000000%symbol_rate or not 1<=48000000//symbol_rate<=8192:
             raise ValueError("requested bit rate needs an integer F103 trace divider in 1..8192")

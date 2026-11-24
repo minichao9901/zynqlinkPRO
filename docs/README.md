@@ -2,7 +2,9 @@
 
 ## 从任务找入口
 
-先核对当前 Git worktree 和分支。用根目录 [acceptance-cases.json](../acceptance-cases.json) 的 Case ID 找入口、参数、配对、目标 ELF 和证据。用例库涵盖优先复用的工作路径、常用诊断和明确保留的历史对照，更细的测试组合见对应验收报告。
+先核对当前 Git worktree 和分支。新融合探针配对的三板签收使用 `fusionAcceptance.cases`。用 `project run fusion.accept -- list` 查必验矩阵，用 `describe <用例ID>` 查目标镜像、档位、脚本与判据。一次验收锁定一套新融合 bit/PS ELF，并逐档采集原始证据。详见[融合验收手册](selectio/fusion-acceptance.md)和[验收清单](../acceptance-cases.json)。
+
+下表是探针回归、诊断与历史证据的检索入口。用 `project case <用例ID>` 查询原有用例。
 
 `validationScope: "probe-regression"` 标出这六个 F103ZE 探针回归用例。三板新目标镜像的实板签收应明确融合 bit/PS ELF，按 [板卡镜像索引](../firmware/target/README.md) 选目标 ELF，核对装载段，再测镜像本身的功能与速率。QSPI 正式配对用于旧工作台对照。 [F103ZE 回归范围](validation/f103ze-cases-20261124/README.md#本报告的验证范围)
 

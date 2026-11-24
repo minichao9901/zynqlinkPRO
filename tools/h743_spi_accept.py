@@ -170,15 +170,14 @@ def receive_on_j7(probe, h743, mode, divider, row, seconds=0, tap=0):
         release(h743, probe)
 
 
-def receive_on_h743(probe, h743, mode, length, row):
-    hz = 100_000_000
+def receive_on_h743(probe, h743, mode, length, row, *, hz=100_000_000, tap=0):
     seed = 0x4C20A5DF ^ (mode << 23) ^ length
     row.update(sck_hz=hz, sck_source="J7 native SPI configured clock", size=length)
     started = h743.state(f"SPI SLAVE RX {mode} {length} 5000 0 {seed}")
     configured = False
     try:
         require(started["state"] == "active", f"H743 did not arm: {started}")
-        probe.exchange(CHANNEL, 0, spi_config(0, mode, hz, slot=18 + 2 * (mode & 1)))
+        probe.exchange(CHANNEL, 0, spi_config(0, mode, hz, slot=18 + 2 * (mode & 1), tap=tap))
         configured = True
         probe.exchange(CHANNEL, 2, payload(seed, length))
         probe.exchange(CHANNEL, 3)
@@ -215,10 +214,11 @@ def raw_wave(mode, half, data):
     return packed, samples
 
 
-def raw_duplex(probe, h743, mode, reference, row):
+def raw_duplex(probe, h743, mode, reference, row, *, hz=25_000_000, length=None):
     # Use J7's raw SelectIO waveform path to go below the 31 MHz H743 slave TX limit.
-    half = (reference + 24_999_999) // 25_000_000
-    length = min(24, (4096 - 120) // (16 * half))
+    half = (reference + hz - 1) // hz
+    if length is None:
+        length = min(24, (4096 - 120) // (16 * half))
     tx_seed, rx_seed = 0x958A13CE ^ mode, 0x6EC21475 ^ mode
     output, indices = raw_wave(mode, half, payload(tx_seed, length))
     row.update(sck_hz=reference // half, sck_source="J7 raw sample reference and waveform period", size=length)

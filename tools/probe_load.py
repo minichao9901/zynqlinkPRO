@@ -109,13 +109,14 @@ if {($isolation & 15) == 15 && ($reset & 15) == 0} {
     return {key: hex(value) for key, value in values.items()}
 
 
-def check_streams():
+def check_streams(serial=None):
     import hid
     from probe_stream import Probe
 
-    if not any(device['usage_page'] == 0xff00 for device in hid.enumerate(0x0d28, 0x0204)):
+    if not any(device['usage_page'] == 0xff00 and (not serial or device['serial_number'] == serial)
+               for device in hid.enumerate(0x0d28, 0x0204)):
         return {}
-    probe = Probe()
+    probe = Probe(serial)
     try:
         status = {}
         for name, service in [('rtt', 0x31), ('hss', 0x32)]:
@@ -141,8 +142,9 @@ def execute(plan, out, sdk):
     lease = None
     try:
         lease = Ownership()
-        result['streams'] = check_streams()
-        result['before'] = probe_state(Session(out, sdk, 'tcp:127.0.0.1:3121'))
+        result['streams'] = check_streams(plan.get('usbSerial'))
+        cable = plan.get('cableSerial')
+        result['before'] = probe_state(Session(out, sdk, 'tcp:127.0.0.1:3121', cable_serial=cable), cable_serial=cable)
         if plan['operation'] == 'check':
             result.update(stage='complete', passed=True)
             return 0
@@ -178,10 +180,14 @@ def main(argv=None):
     parser.add_argument('--ps-init', type=Path, help='配套初始化 Tcl，自选时默认取 ELF 同目录 ps7_init.tcl')
     parser.add_argument('--out', type=Path, help='新证据目录，默认 build/probe-load-<时间>')
     parser.add_argument('--sdk', type=Path, default=Path('E:/Xilinx/SDK/2018.3'), help='Xilinx SDK 2018.3 目录')
+    parser.add_argument('--cable-serial', help='绑定 XSCT 的 JTAG 下载线')
+    parser.add_argument('--usb-serial', help='绑定加载前查询的探针 USB 序列号')
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--dry-run', action='store_true', help='核对输入并显示计划，离线执行')
     mode.add_argument('--check-only', action='store_true', help='只读检查 JTAG、BOOT_MODE 和探针忙闲')
     args = parser.parse_args(argv)
+    if args.cable_serial and not re.fullmatch(r'[A-Za-z0-9_.:-]+', args.cable_serial):
+        parser.error('无效的 JTAG 下载线序列号')
     try:
         files = inputs(args)
     except (ValueError, IndexError, KeyError, OSError, struct.error) as error:
@@ -199,6 +205,12 @@ def main(argv=None):
     }
     plan = {'operation': 'check' if args.check_only else 'JTAG/RAM', 'dryRun': args.dry_run,
             'out': str(out), 'files': files}
+    if args.cable_serial:
+        plan['cableSerial'] = args.cable_serial
+        commands['load'].insert(-2, args.cable_serial)
+        commands['verify'].extend(('--cable-serial', args.cable_serial))
+    if args.usb_serial:
+        plan['usbSerial'] = args.usb_serial
     if not args.check_only:
         plan['commands'] = commands
     if args.dry_run:
