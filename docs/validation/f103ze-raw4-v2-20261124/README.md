@@ -63,3 +63,10 @@ SWD50 原 tap8／slot24／idle0 同档复跑第一轮就报告预填载荷不一
 SWD100 RTT 三个 60 秒完整窗口逐轮以物理 MEM-AP0 核对活动时钟为 99,999,998 Hz，序号、目标发布、STOP 与环余量对账通过。主机有效中位 6.197 MB/s，目标 SRAM、时钟和运行态恢复。
 
 JTAG100 在相同 tap16／slot28、idle33 时通过短校准，60 秒读窗约 4.710 MB/s，写窗仍报原生 status 1、detail 4，导致整档失败。保留 idle11 首败、idle33 复跑及两层恢复，根因仍待定位。 [RTT 与复跑](rtt-swd100-and-jtag100-retry.json)
+
+## JTAG RTT 长窗和 SWD50 新校准点的装载异常
+
+128 MHz 性能镜像在 JTAG50 和 JTAG100 的独立 RTT 各 3×60 秒，序号、发布、STOP、环余量对账通过。主机中位 2.584／4.705 MB/s。物理 AP0 在 50 MHz 后两轮、100 MHz 全三轮观察到相应精确档位。72.727 MHz 首轮原始文件为 0 B，退出时 DAP Disconnect 返回 `ff`，恢复确认。72.727 MHz 原生 SRAM 的通过证据单列。
+
+SWD50 替代 tap8／slot22／idle0 通过短窗校准。随后的正式长窗夹具未发布新 SRAM 镜像 ready 标志，启动步骤中止，核对原状态已经恢复。这个尝试未进入正式长窗。
+[逐档与恢复](rtt-jtag-and-swd50-startup.json)
