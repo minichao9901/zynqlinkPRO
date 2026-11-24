@@ -14,6 +14,13 @@ HS3 下载线 `210299008529`，J7 USB `12345678`、COM33，目标 CDC `F103CDC00
 | `f103ze-spi-cdc` | 清单中的历史复测，四模式各 16,384 B 全匹配，零成帧、溢出和尾量，F103 GPIO 源的 DWT 平均 SCK 约 1.35–1.64 MHz。四项夹具均恢复。 |
 | `f103ze-etm` | CDC48 ETMv3、TRACECLK 24 MHz，SWD 请求 10 MHz，FCLK 133.333332 MHz 与分频读回折算实际 SWCLK 9.523809 MHz。完整硬件窗 1.000 秒，USB 下载 formatter 15,422,987 B，35.125 MB/s。成帧、FIFO 丢帧、IDELAY ready 丢失及 DDR writer 错误均为 0。严格 `trace verify` 通过，17,270,812 条已执行指令，1 个初始 gap，0 个包错误。RCC、目标及 FPB 已恢复。 |
 
+## HCLK128 性能和调试烧录参考
+
+| 用例 | 实板结果 |
+|---|---|
+| `f103ze-hclk128-swd50` | `selectio-swd50-standard`，DWT 测得约 128.103 MHz，RCC 核对 HCLK128。FCLK 133.333332 MHz，物理寄存器折算 SWD 49,999,999.5 Hz。2 KiB CMSIS-DAP TransferBlock、队列深度 32、每方向 256 块、三次计时，读／写中位 **3.839／3.872 MB/s**。8 KiB 目标环及 2 KiB 搬运块，RTT→CDC 两轮约 60 秒，探针有效字节中位 **3.812 MB/s**，两轮全程累计 463,980,536 B，全量序号对拍且零传输错误。相对同口径基线，SRAM 读 −0.14%、写 +0.02%、RTT +0.01%。SRAM、RCC、核心及运行状态均已恢复。 [逐轮和恢复](hclk128-swd50.json) · [历史对照](../swd50-standard-20261122/README.md) |
+| `f103ze-debug-flash` | 清单指定的 `qspi-reference`，使用正式 QSPI 包的 bit、PS ELF 和初始化脚本经 HS3 临时加载，OCM 核对 85,716 B。源码工作台 v1.3.16，实际 SWD 59,999,999 Hz。原生／Web 烧录、校验分别 1.065／4.290 秒，NRST 和独立心跳确认 0.878 秒。受影响 20 KiB Flash 与原备份一致。连接、暂停、指令单步、变量刷新、硬件断点、源码跳过和跳出、读栈均通过，步入显示回退至指令级。终态为 CDC48 运行、探针引擎空闲。 [逐项及恢复](debug-flash-reference.json) |
+
 ## 起步对照
 
 开始时误用了通用 Web 全套和 `release-20261106` 的旧 RAM 配对。其结果按实载身份归档为[起步对照](preliminary-reference.json)，对应本机 `build/f103ze-full-20261124-standard`。这轮烧录端的 20 KiB Flash 独立读回与原备份一致，原应用复位心跳前进。最终目标处于运行态，探针采集及 DMA 空闲。旧包的单／八路原生 HSS 固定计数窗报错，网页窗口通过。旧网页 ETM 的严格核验记录 2 个 gap，另有记录 metadata 大小差异。三轮软件跨页各三项通过，实体 USB 项待验。上述数据不计入清单用例。

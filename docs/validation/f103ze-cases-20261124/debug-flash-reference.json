@@ -1,0 +1,405 @@
+{
+  "board": "f103ze",
+  "probeSerial": "12345678",
+  "seed": 680014,
+  "plan": [
+    {
+      "feature": "flash",
+      "transport": "swd",
+      "requestedHz": 60000000,
+      "id": "swd-flash"
+    },
+    {
+      "feature": "debug",
+      "transport": "swd",
+      "requestedHz": 60000000,
+      "id": "swd-debug"
+    }
+  ],
+  "files": {
+    "bit": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\qspi-release\\probe.bit",
+      "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+    },
+    "zynqElf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\qspi-release\\application.elf",
+      "sha256": "64d00fe597030175920b994e39ff51db8a683dbb8d5f907c0f8d73f8d55044b9"
+    },
+    "targetElf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\golden\\f103ze-cdc48.elf",
+      "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f"
+    }
+  },
+  "revision": "ca5811a68f6f0f59f619b1f72f5fe400fee52ccd",
+  "sourceDirty": false,
+  "startedAt": "2026-11-24T08:17:05.016833+00:00",
+  "status": "pass",
+  "results": [
+    {
+      "id": "preflight",
+      "status": "pass",
+      "secondsElapsed": 8.843,
+      "evidence": {
+        "probe": {
+          "serial": "12345678",
+          "usb": "CMSIS-DAP",
+          "hid": "zynqlinkPRO HID"
+        },
+        "target": {
+          "halted": false,
+          "clock": {
+            "name": "STM32F103",
+            "cpuid": "0x411fc231",
+            "device": "0x10036414",
+            "registers": {
+              "0x40021000": "0x3034e83",
+              "0x40021004": "0x51040a"
+            }
+          },
+          "dhcsr": 16842753,
+          "ccr": "0x0"
+        },
+        "clock": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0xcaa11",
+          "actual_link_Hz": 9999999.833333334,
+          "frequencyBasis": "probe PLL/divider register report",
+          "dpidr": "0x1ba01477"
+        },
+        "ocm": "ocm/result.json",
+        "usbAp0Identity": {
+          "usbSerial": "12345678",
+          "cableSerial": "210299008529",
+          "challenge": [
+            17,
+            1,
+            16
+          ],
+          "originalJtagTiming": 0,
+          "restored": true,
+          "livePlRegisters": {
+            "0x4001004c": "0x4450007f",
+            "0x40030048": "0x30f",
+            "0x40030050": "0x454c4431",
+            "0x40040000": "0x45444d31"
+          },
+          "declaredBitSha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+          "plVerification": "qualified live register profile"
+        },
+        "workbenchBuild": "版本　v1.3.16 (OpenOCD Wasm)\n构建时间　源码模式，未打包"
+      }
+    },
+    {
+      "feature": "flash",
+      "transport": "swd",
+      "requestedHz": 60000000,
+      "id": "swd-flash",
+      "status": "pass",
+      "secondsElapsed": 9.785,
+      "evidenceDirectory": "swd-flash",
+      "evidence": {
+        "nativeSeconds": 1.0654811999993399,
+        "webSeconds": 4.2904545000001235,
+        "clock": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0xa11",
+          "jtagSamplingMode": 0,
+          "jtagRoute": 0,
+          "actual_link_Hz": 59999999.0,
+          "basis": "physical MEM-AP0 readback of PLL/divider registers"
+        },
+        "bootSeconds": 0.877857600000425,
+        "verified": true,
+        "flashRestored": true,
+        "affectedSectorBytes": 20480,
+        "recoveryCoverageBytes": 20480,
+        "nativeInputBytes": 20480,
+        "webInputBytes": 20168,
+        "resetMethod": "J7 NRST",
+        "heartbeat": {
+          "address": "0x2000c00c",
+          "beforeReset": 439028915,
+          "firstAfterReset": 439029885,
+          "advancing": [
+            48511,
+            97517,
+            146424
+          ],
+          "before": 48511,
+          "after": 146424
+        },
+        "detail": "Both timings include erase, program and verify over the same affected Flash range",
+        "targetSysclkHz": 48000000,
+        "targetElf": {
+          "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\golden\\f103ze-cdc48.elf",
+          "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+          "verifiedLoadBytes": 20168
+        },
+        "recovery": {
+          "streams": {
+            "rtt": 65536,
+            "hss": 20
+          },
+          "engines": {
+            "PS_IDCODE": "0x23727093",
+            "LEVEL_SHIFTERS": "0xf",
+            "FPGA_RESET": "0x0",
+            "BOOT_MODE": "0x0",
+            "CAPTURE": "0x8",
+            "SWD": "0x2",
+            "PACKET": "0x0",
+            "DDR": "0x0",
+            "CDMA_BASE": "0x40020000",
+            "CDMA": "0x1002"
+          }
+        }
+      }
+    },
+    {
+      "feature": "debug",
+      "transport": "swd",
+      "requestedHz": 60000000,
+      "id": "swd-debug",
+      "status": "pass",
+      "secondsElapsed": 8.744,
+      "evidenceDirectory": "swd-debug",
+      "evidence": {
+        "clock": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0xa11",
+          "jtagSamplingMode": 0,
+          "jtagRoute": 2,
+          "actual_link_Hz": 59999999.0,
+          "basis": "physical MEM-AP0 readback of PLL/divider registers"
+        },
+        "pc": 134219162,
+        "steppedPc": 134219164,
+        "breakpointPc": 134219152,
+        "sourceSteps": {
+          "stepInto": {
+            "before": 134219152,
+            "after": 134219154,
+            "outcome": "单步进入（指令级）→ cmsis_gcc.h:386"
+          },
+          "stepOver": {
+            "before": 134219154,
+            "after": 134219158,
+            "outcome": "单步跳过 → cmsis_gcc.h:142（0x8000596）"
+          },
+          "stepOut": {
+            "before": 134219158,
+            "after": 134219790,
+            "outcome": "单步跳出 → main.c:464（0x800080e，按 LR 返回）"
+          }
+        },
+        "backtrace": {
+          "frames": [
+            {
+              "cfa": 536936448,
+              "kind": "current",
+              "known": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
+              ],
+              "loc": {
+                "addr": 134219790,
+                "end": 134219792,
+                "file": "E:/zynqlinkPRO/build/f103-target-source-zip/firmware/stm32f103_cdc_trace/src/main.c",
+                "idx": 264,
+                "isStmt": true,
+                "line": 464,
+                "prologueEnd": false,
+                "seq": 20,
+                "seqEnd": false
+              },
+              "lookup": 134219790,
+              "name": "main+0x62",
+              "pc": 134219790,
+              "regs": [
+                1073809408,
+                2,
+                1,
+                1443668,
+                536920064,
+                4286578111,
+                646952329,
+                3040397518,
+                4294963199,
+                4192190460,
+                966477800,
+                2328958936,
+                10,
+                536936440,
+                134219791,
+                134219790
+              ],
+              "sp": 536936440
+            },
+            {
+              "kind": "cfi",
+              "known": [
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                3,
+                14,
+                15,
+                13
+              ],
+              "loc": {
+                "addr": 134218358,
+                "end": 134218362,
+                "file": "E:/zynqlinkPRO/build/f103-target-source-zip/firmware/stm32f103_cdc_trace/sdk/Drivers/CMSIS/Device/ST/STM32F1xx/Source/Templates/gcc/startup_stm32f103xe.s",
+                "idx": 21,
+                "isStmt": true,
+                "line": 102,
+                "prologueEnd": false,
+                "seq": 0,
+                "seqEnd": false
+              },
+              "lookup": 134218360,
+              "name": "Reset_Handler+0x30",
+              "pc": 134218362,
+              "regs": [
+                0,
+                0,
+                0,
+                134218249,
+                536920064,
+                4286578111,
+                646952329,
+                3040397518,
+                4294963199,
+                4192190460,
+                966477800,
+                2328958936,
+                0,
+                536936448,
+                134218363,
+                134218363
+              ],
+              "sp": 536936448
+            }
+          ],
+          "reason": "ELF 缺少 .ARM.exidx 展开表；可用 bt scan 查看候选返回地址",
+          "scan": false
+        },
+        "register": 1073809408,
+        "connectSeconds": 2.147750799998903,
+        "haltSeconds": 0.12310900000011316,
+        "stepSeconds": 0.23586430000068503,
+        "watchSeconds": 0.10562670000035723,
+        "targetSysclkHz": 48000000,
+        "targetElf": {
+          "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\golden\\f103ze-cdc48.elf",
+          "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+          "verifiedLoadBytes": 20168
+        },
+        "recovery": {
+          "streams": {
+            "rtt": 65536,
+            "hss": 20
+          },
+          "engines": {
+            "PS_IDCODE": "0x23727093",
+            "LEVEL_SHIFTERS": "0xf",
+            "FPGA_RESET": "0x0",
+            "BOOT_MODE": "0x0",
+            "CAPTURE": "0x8",
+            "SWD": "0x2",
+            "PACKET": "0x0",
+            "DDR": "0x0",
+            "CDMA_BASE": "0x40020000",
+            "CDMA": "0x1002"
+          }
+        }
+      }
+    },
+    {
+      "id": "final-state",
+      "status": "pass",
+      "secondsElapsed": 0.644,
+      "evidence": {
+        "target": {
+          "halted": false,
+          "clock": {
+            "name": "STM32F103",
+            "cpuid": "0x411fc231",
+            "device": "0x10036414",
+            "registers": {
+              "0x40021000": "0x3034e83",
+              "0x40021004": "0x51040a"
+            }
+          },
+          "dhcsr": 16842753,
+          "ccr": "0x0"
+        },
+        "probe": {
+          "serial": "12345678",
+          "usb": "CMSIS-DAP",
+          "hid": "zynqlinkPRO HID"
+        },
+        "clock": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0xcaa11",
+          "actual_link_Hz": 9999999.833333334,
+          "frequencyBasis": "probe PLL/divider register report",
+          "dpidr": "0x1ba01477"
+        },
+        "streams": {
+          "rtt": 65536,
+          "hss": 20
+        },
+        "engines": {
+          "PS_IDCODE": "0x23727093",
+          "LEVEL_SHIFTERS": "0xf",
+          "FPGA_RESET": "0x0",
+          "BOOT_MODE": "0x0",
+          "CAPTURE": "0x8",
+          "SWD": "0x2",
+          "PACKET": "0x0",
+          "DDR": "0x0",
+          "CDMA_BASE": "0x40020000",
+          "CDMA": "0x1002"
+        }
+      }
+    }
+  ],
+  "scope": "selected",
+  "accepted": false,
+  "counts": {
+    "pass": 4,
+    "fail": 0,
+    "pending": 0,
+    "not-applicable": 0,
+    "blocked": 0
+  },
+  "finishedAt": "2026-11-24T08:17:33.048423+00:00",
+  "case": "f103ze-debug-flash",
+  "startup": "HS3 JTAG/RAM using the QSPI reference package pair",
+  "ocmVerifiedBytes": 85716,
+  "flashBackup": {
+    "address": "0x8000000",
+    "bytes": 20480,
+    "sha256": "1d90ea67ed4dc7175a916430915e836f560817ae9b957d0d53b402e58d69f000"
+  }
+}
