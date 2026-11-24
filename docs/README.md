@@ -6,10 +6,10 @@
 
 | 任务 | 从这里开始 | 配对与证据 |
 |---|---|---|
-| SRAM、RTT、J-Scope | `f103ze-sram-rtt-scope`、`h743-sram-rtt-scope`、`hpm6800evk-rtt` | [融合板测索引](validation/README.md)。F103ZE ABI 1、H743 RAW4 ABI 2、HPM QSPI 历史对照各有独立条件。 |
+| SRAM、RTT、J-Scope | `f103ze-sram-rtt-scope`、`h743-sram-rtt-scope`、`hpm6800evk-rtt`、`hpm6800evk-scope` | [融合板测索引](validation/README.md)。F103ZE ABI 1、H743 RAW4 ABI 2、HPM QSPI 历史对照各有独立条件。 |
 | 调试、烧录和复位 | 三板的 `*-debug-flash` | [统一入口与验收判据](板卡精简验收与交付.md) · [目标固件](../firmware/target/README.md)。实板启动前以实际读回绑定目标 ELF。 |
 | 物理 UART、SWO | `f103ze-uart-swo`、`h743-uart-swo` | [接线与控制](selectio/README.md#物理串口swo-和-spi) · [ABI 2 端点证据](validation/usb-split-20261123/README.md)。 |
-| SPI | `h743-spi-j7-rx`、`h743-spi-j7-tx`、`h743-spi-full-duplex`、`h743-spi-pad-diagnostic` | [主从持续结果](validation/h743-spi2-cdc-20261124/README.md#实板验收结果与收尾) · [100 MHz 诊断](validation/h743-spi2-100mhz-20261124/README.md)。按方向、模式、目标修订和配对引用。 |
+| SPI | `f103ze-spi-cdc`、`h743-spi-j7-rx`、`h743-spi-j7-tx`、`h743-spi-full-duplex`、`h743-spi-pad-diagnostic` | [主从持续结果](validation/h743-spi2-cdc-20261124/README.md#实板验收结果与收尾) · [100 MHz 诊断](validation/h743-spi2-100mhz-20261124/README.md)。按方向、模式、目标修订和配对引用。 |
 | ETM | `f103ze-etm`、`h743-etm` | [Trace CLI](Trace-CLI使用说明.md) · [H743 RAW4 严格复验](validation/h743-cdc-golden-requal-20261123/README.md#etm-对照)。目标 ELF 与探针 PS ELF 分开核对。 |
 | 构建、探针加载和发布 | `target-acceptance-build`、`probe-raw4-load`、`probe-qspi-release` | [目标构建](../firmware/target/README.md) · [探针配对索引](../prebuilt/README.md) · [发布流程](github-release.md)。 |
 
@@ -35,6 +35,7 @@ python -X utf8 toolbox.py project case hpm6800evk-rtt
 | 验收用例、实板结果和问题状态 | [融合性能用例](selectio/fusion-performance-cases.md) · [融合证据](validation/README.md) · [问题索引](项目问题跟踪列表.md) |
 | 固定 EXE、发布、QSPI 和回退 | [板卡精简验收与交付](板卡精简验收与交付.md) · [发布流程](github-release.md) · [产物索引](../prebuilt/README.md) |
 | 可运行的 ETM 离线示例 | [记录清单](retained-records.json) |
+| 本地构建输出、原始证据和清理候选 | [build/ 盘点与保留](validation/build-retention.md) |
 
 融合通用参考为 [RAW4 ABI 2](../prebuilt/selectio-usb-split-raw4-20261123/README.md)。`board.accept --selectio` 当前只支持 F103ZE，省略 `--pair` 时会选旧融合配对。按 Case 显式声明。对 AXI/DTCM、JTAG/SWD、J7 RAM/正式 QSPI 分别引用实测。
 

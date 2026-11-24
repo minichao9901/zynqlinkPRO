@@ -117,6 +117,36 @@
       "note": "历史工作点为 JTAG 25 MHz 和 QSPI 0.8-nonce32。历史板上 ELF 是本机派生映像，使用前以 Flash 读回核对并填写 <matched-target-elf>。RAW4/原生 ARM SRAM 路径不用于这个用例。"
     },
     {
+      "id": "hpm6800evk-scope",
+      "board": "hpm6800evk",
+      "feature": "sram-rtt-scope",
+      "role": "historical",
+      "title": "HPM6800EVK J-Scope",
+      "entry": "board.accept",
+      "args": [
+        "--board",
+        "hpm6800evk",
+        "--bit",
+        "{bit}",
+        "--zynq-elf",
+        "{psElf}",
+        "--target-elf",
+        "{targetElf}",
+        "--only",
+        "jscope",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "qspi-reference",
+      "referenceElfs": [
+        "prebuilt/targets/hpm6800-web-reference/dbgstress.elf"
+      ],
+      "evidence": [
+        "03b6a1da:docs/validation/hpm6800evk-board-20261115/README.md"
+      ],
+      "note": "历史 JTAG 25 MHz单路与八路长窗。先核对实际 Flash 并填写匹配 ELF。"
+    },
+    {
       "id": "f103ze-debug-flash",
       "board": "f103ze",
       "feature": "debug-flash",
@@ -263,6 +293,31 @@
         "ZL-318"
       ],
       "note": "共用 H743 功能脚本。正式 EP2 NRZ/Manchester 实测与高速合成码源分别取证。"
+    },
+    {
+      "id": "f103ze-spi-cdc",
+      "board": "f103ze",
+      "feature": "spi",
+      "role": "historical",
+      "title": "F103ZE GPIO SPI 源与 J7 从机 CDC 回归",
+      "entry": "board.accept",
+      "args": [
+        "--selectio",
+        "--board",
+        "f103ze",
+        "--pair",
+        "{pair}",
+        "--only",
+        "spi-cdc",
+        "--out",
+        "<new-output>"
+      ],
+      "probePair": "f103-cdc-abi1",
+      "targetElf": "prebuilt/golden/f103ze-cdc48.elf",
+      "evidence": [
+        "docs/validation/spi-cdc-20261123/README.md"
+      ],
+      "note": "ABI 1 四模式实体 GPIO 源和恢复回归。100 MHz 实体线速用独立源核对。"
     },
     {
       "id": "h743-spi-j7-rx",
