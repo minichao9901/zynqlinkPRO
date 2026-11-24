@@ -25,3 +25,15 @@
 按用户要求先完成烧录，再交由用户切换实体接线。HS3 临时加载 RAW4 ABI 2 的 bit/ELF，物理 MEM-AP0 对拍 OCM 执行段 80,668 B。读回 FCLK0 为 133,333,332 Hz，J7 USB 序列号 `12345678` 与 EP10 双向端点均已枚举。探针 QSPI 未写入。
 
 通过 J7 SWD 1 MHz 确认 Cortex-M7 和 STM32H74x/75x，经 OpenOCD 写入 H743 Bank 1 首扇区。镜像从 `0x08000000` 起共 39,064 B，编程校验和独立读回 SHA-256 均通过。软件复位后 H743 以 `F055:7432`、`H743SPI0001` 枚举为 `COM52`。`PING`、`SPI INFO` 和 `SPI STOP` 响应通过，SPI2 内核时钟报告 200 MHz，总线处于空闲。此时仍是 SWD 接线，SPI 实际收发及限速待切线后验收。 [实板证据](flash-and-cdc.json)
+
+## SPI 首轮定位与修订 2
+
+用户换到 SPI 接线后，H743 的 COM52 正常。Zynq ARM DAP 报 `0x30000021`，降低 JTAG 频率和 SRST 后仍无法访问 APU。用户将 Zynq 断电重上后，JTAG 恢复，确认 BOOT_MODE=0、PL 电平转换关闭并处于复位。重新临时加载 RAW4 ABI 2，物理 OCM 匹配 80,668 B，使用同一 USB 序列号接着验收。
+
+修订 1 的首轮 Mode 0 表现如下。
+
+- H743 主机八档均在送出首字节前报 `MODF=0x200`，J7 收到 0 B。固件将 MASTER 和 SSM 写入时内部 SSI 仍为低。修订 2 提前置 SSI。
+- J7 100 MHz 原生主机的 1、5、4,096 B 均有正确的 H743 RX 计数，数据不匹配。进一步对 Mode 0/3 和 1.5625/25/100 MHz 用 `00`、`FF`、`96` 做单字节对照，H743 全部收到 `FF`。根因待定位。
+- 25 MHz 原始波形全双工在发钟前触发 DMA1 TX Stream 1 的 FEIF。当时 TX 已提交 16 B，RX 为 0。修订 2 为 TX 启用 DMA FIFO，并保留错误检查。
+
+修订 2 已编译，新增 `SPI READ` 和 `SPI PINS`。修订 1 的失败证据保留。修订 2 的实板结论待重烧、接线和对拍。 [首轮数值](first-spi-attempt.json) · [修订 2 产物](../../../prebuilt/targets/stm32h743-spi2-cdc-r2-20261124/README.md)

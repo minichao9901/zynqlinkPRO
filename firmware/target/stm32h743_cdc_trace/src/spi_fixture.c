@@ -23,7 +23,7 @@ typedef struct {
     unsigned mode, prescaler, width;
     uint32_t size, frames, start_ms, limit_ms, seed, expected;
     uint32_t complete, bad, first_bad, spi_errors, dma_errors;
-    uint32_t wraps, submitted, received, elapsed_ms;
+    uint32_t wraps, submitted, received, elapsed_ms, last_rx_size;
     const char *result;
 } Transfer;
 
@@ -87,7 +87,8 @@ static void dma_config(DMA_Stream_TypeDef *stream, uint32_t peripheral, uint8_t 
     stream->PAR = peripheral;
     stream->M0AR = (uint32_t)(uintptr_t)buffer;
     stream->NDTR = count;
-    stream->FCR = 0;
+    /* Buffer TX requests before the peripheral starts consuming SPI data. */
+    stream->FCR = options & DMA_SxCR_DIR_0 ? DMA_SxFCR_DMDIS | DMA_SxFCR_FTH : 0;
     stream->CR = DMA_SxCR_PL | DMA_SxCR_MINC | options |
                  (width == 4 ? DMA_SxCR_MSIZE_1 | DMA_SxCR_PSIZE_1 : 0);
     __DMB();
@@ -96,7 +97,8 @@ static void dma_config(DMA_Stream_TypeDef *stream, uint32_t peripheral, uint8_t 
 
 static void start_frame(void)
 {
-    SPI2->CR1 = 0;
+    /* Soft NSS must already be inactive when CFG2 sets MASTER. */
+    SPI2->CR1 = state.master ? SPI_CR1_SSI : 0;
     SPI2->IFCR = SPI_CLEAR;
     DMA1->LIFCR = (DMA_ALL << RX_SHIFT) | (DMA_ALL << TX_SHIFT);
     SPI2->CR2 = state.stream ? 0 : state.size;
@@ -115,7 +117,7 @@ static void start_frame(void)
         dma_config(DMA1_Stream1, (uint32_t)(uintptr_t)&SPI2->TXDR, tx, state.size / state.width,
                    state.width, DMA_SxCR_DIR_0 | (state.stream ? DMA_SxCR_CIRC : 0));
     if (state.master) {
-        SPI2->CR1 = SPI_CR1_SSI | SPI_CR1_SPE;
+        SPI2->CR1 |= SPI_CR1_SPE;
         pins(SCK | MOSI, GPIO_MODE_AF_PP, GPIO_NOPULL);
         if (state.receive)
             pins(MISO, GPIO_MODE_AF_PP, GPIO_NOPULL);
@@ -169,6 +171,7 @@ static void stop_frame(bool complete)
                 state.bad++;
             }
         }
+        state.last_rx_size = received;
         state.received += received;
     }
     SPI2->CR1 = 0;
@@ -223,6 +226,20 @@ static void status(char *reply, size_t capacity)
              state.result, state.master ? "master" : "slave", state.mode, hz, state.complete,
              state.submitted, state.received, state.bad, state.first_bad, state.spi_errors,
              state.dma_errors, state.active ? HAL_GetTick() - state.start_ms : state.elapsed_ms);
+}
+
+static void read_prefix(char *reply, size_t capacity)
+{
+    enum { PREFIX_SIZE = 24 };
+    static const char digits[] = "0123456789abcdef";
+    char hex[2 * PREFIX_SIZE + 1];
+    unsigned count = state.last_rx_size < PREFIX_SIZE ? state.last_rx_size : PREFIX_SIZE;
+    for (unsigned i = 0; i < count; ++i) {
+        hex[2 * i] = digits[rx[i] >> 4];
+        hex[2 * i + 1] = digits[rx[i] & 15u];
+    }
+    hex[2 * count] = '\0';
+    snprintf(reply, capacity, "SPI last_rx=%" PRIu32 " head=%s\r\n", state.last_rx_size, hex);
 }
 
 static bool number(const char *arg, uint32_t *value)
@@ -291,7 +308,7 @@ void spi_fixture_command(char *line, char *reply, size_t capacity)
         snprintf(reply, capacity, "PONG H743SPI/1\r\n");
     } else if (!strcmp(line, "SPI INFO")) {
         snprintf(reply, capacity, "H743SPI/1 kernel_hz=%" PRIu32
-                 " div=2,4,8,16,32,64,128,256 max_bytes=%u max_ms=%u\r\n",
+                 " div=2,4,8,16,32,64,128,256 max_bytes=%u max_ms=%u revision=2\r\n",
                  kernel_hz, MAX_BYTES, MAX_MS);
     } else if (!strcmp(line, "SPI STATUS")) {
         status(reply, capacity);
@@ -301,6 +318,10 @@ void spi_fixture_command(char *line, char *reply, size_t capacity)
         status(reply, capacity);
     } else if (state.active) {
         snprintf(reply, capacity, "ERR busy\r\n");
+    } else if (!strcmp(line, "SPI READ")) {
+        read_prefix(reply, capacity);
+    } else if (!strcmp(line, "SPI PINS")) {
+        snprintf(reply, capacity, "SPI pins=0x%lx\r\n", (unsigned long)(GPIOI->IDR & SPI_PINS));
     } else {
         Transfer job = {0};
         if (kernel_hz != 200000000u || !parse(line, &job)) {
