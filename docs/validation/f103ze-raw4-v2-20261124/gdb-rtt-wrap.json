@@ -1,0 +1,484 @@
+{
+  "summary": {
+    "campaign": {
+      "plan": "fusion-full-acceptance-v2",
+      "serial": "12345678",
+      "probe": {
+        "manifest": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\manifest.json",
+        "files": {
+          "probe.bit": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\probe.bit",
+            "sha256": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc"
+          },
+          "application.elf": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+            "sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49"
+          },
+          "ps7_init.tcl": {
+            "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\ps7_init.tcl",
+            "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+          }
+        }
+      }
+    },
+    "case": "fusion-f103ze-gdb-rtt",
+    "receipt": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\runs\\fusion-campaign\\f103ze-raw4-20261124\\probe-load\\result.json",
+      "sha256": "3ce82093e7b0c2209015c94bb8707412b5bcb8a7bde9941c4fdf9200bbe00561"
+    },
+    "point": {
+      "image": null,
+      "transport": null,
+      "rate": null,
+      "tap": null,
+      "slot": null,
+      "idle": null,
+      "channels": null,
+      "group_rate": null,
+      "encoding": null,
+      "spi_mode": null,
+      "frame_bytes": null
+    },
+    "target": {
+      "image": "dbg-a",
+      "manifest": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\dbg-a\\manifest.json",
+      "files": {
+        "fw.elf": {
+          "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\dbg-a\\fw.elf",
+          "sha256": "d8e244f42bb0218bbc929c81b2c299291a23f41a4b5fad514ae3892b10e402c2"
+        },
+        "fw.bin": {
+          "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\dbg-a\\fw.bin",
+          "sha256": "d96991eea0333a6c7b85fa845149b02870f054b862e5cb2f33a04f6b61748073"
+        },
+        "fw.hex": {
+          "path": "E:\\zynqlinkPRO-efficiency\\firmware\\target\\f103ze\\images\\dbg-a\\fw.hex",
+          "sha256": "9c52c4ea889caf870f1843f6e9ba30f34ae6aa068d70cb8dd8d9d6a61089f65e"
+        }
+      }
+    },
+    "status": "pending",
+    "boot_id": "0x44424741",
+    "initialized_data": 1,
+    "ticks": [
+      86238,
+      86548
+    ],
+    "remaining": [
+      "源码步入/过/出均核对函数与行，执行断点命中/清除，寄存器、符号和调用栈可回读。H743 核对浮点异常栈，STM32 核对 DWT 数据观察点，HPM 验 RISC-V 执行触发器。RTT 命令与上/下行跨环逐字节对拍。"
+    ],
+    "rtt_commands": 60
+  },
+  "wrap": {
+    "before": {
+      "up": {
+        "size": 8192,
+        "write": 8190,
+        "read": 8190,
+        "offset": 36
+      },
+      "down": {
+        "size": 256,
+        "write": 254,
+        "read": 254,
+        "offset": 60
+      }
+    },
+    "after": {
+      "up": {
+        "size": 8192,
+        "write": 978,
+        "read": 978,
+        "offset": 36
+      },
+      "down": {
+        "size": 256,
+        "write": 6,
+        "read": 6,
+        "offset": 60
+      }
+    },
+    "counts": {
+      "up": 980,
+      "down": 520
+    },
+    "bothDirectionsWrapped": true,
+    "requestReplies": 60
+  },
+  "recovery": {
+    "serial": "12345678",
+    "fixture": "dbg-a",
+    "elf_sha256": "d8e244f42bb0218bbc929c81b2c299291a23f41a4b5fad514ae3892b10e402c2",
+    "start": "0x8000000",
+    "stop": "0x8003000",
+    "passed": true,
+    "restored": true,
+    "prior_flash_segments": [
+      {
+        "address": 134217728,
+        "bytes": 20040,
+        "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1"
+      },
+      {
+        "address": 134237768,
+        "bytes": 128,
+        "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+      }
+    ],
+    "prior_rcc": 5309450,
+    "fpb_before": "60020000c02067323c56ed9d20825849302c2587106862cb248e959868c509863c6bb00ffce9c00d",
+    "demcr_before": 16777216,
+    "original_flash_sha256": "48f226217497607c696a156addbb363925577499b00ee64f187bd5eea7a94499",
+    "program_seconds": 1.779487199997675,
+    "fixture_flash_verified": true,
+    "boot": {
+      "resumed": true,
+      "resetDHCSR": "0x3010001",
+      "seconds": 0.2110236000007717,
+      "loaded": [
+        {
+          "address": 134217728,
+          "bytes": 11500,
+          "sha256": "8cb4a6a555a51ea162e038bb596ec73b0c761d30f784937ede0605a817412414"
+        },
+        {
+          "address": 134229228,
+          "bytes": 104,
+          "sha256": "5d8f97c2954a302b78ce39e36e4d6a1aeeb230426a6b729d6fbf01c0e2534880"
+        }
+      ],
+      "heartbeat": [
+        1452,
+        1667
+      ]
+    },
+    "child_exit": 0,
+    "restore_seconds": 0.8287354999993113,
+    "flash_restored": true,
+    "restored_boot": {
+      "resumed": true,
+      "resetDHCSR": "0x3010001",
+      "seconds": 0.3192653000005521,
+      "loaded": [
+        {
+          "address": 134217728,
+          "bytes": 20040,
+          "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1"
+        },
+        {
+          "address": 134237768,
+          "bytes": 128,
+          "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+        }
+      ],
+      "heartbeat": [
+        242947,
+        264034
+      ]
+    },
+    "fpb_after_programmer": "60020000c02067320000000000000000000000000000000000000000000000000000000000000000",
+    "fpb_restored": "60020000c02067323c56ed9d20825849302c2587106862cb248e959868c509863c6bb00ffce9c00d"
+  },
+  "commands": [
+    {
+      "round": 1,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 1,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 1,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 2,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 2,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 2,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 3,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 3,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 3,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 4,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 4,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 4,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 5,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 5,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 5,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 6,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 6,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 6,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 7,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 7,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 7,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 8,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 8,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 8,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 9,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 9,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 9,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 10,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 10,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 10,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 11,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 11,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 11,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 12,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 12,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 12,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 13,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 13,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 13,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 14,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 14,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 14,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 15,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 15,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 15,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 16,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 16,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 16,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 17,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 17,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 17,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 18,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 18,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 18,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 19,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 19,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 19,
+      "command": "echo fixture",
+      "reply": "fixture"
+    },
+    {
+      "round": 20,
+      "command": "help",
+      "reply": "help version echo <text>"
+    },
+    {
+      "round": 20,
+      "command": "version",
+      "reply": "f103ze-dbg-a"
+    },
+    {
+      "round": 20,
+      "command": "echo fixture",
+      "reply": "fixture"
+    }
+  ]
+}
