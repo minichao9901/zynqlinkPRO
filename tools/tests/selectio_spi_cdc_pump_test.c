@@ -93,9 +93,28 @@ int selectio_clock_apply(unsigned divisor)
 
 void selectio_cdc_resume_rx(XUsbPs *usb) { (void)usb; assert(!"SPI receive has no deferred TX"); }
 
+/* The production AUX module also links the dedicated SWO path. An SPI/CDC
+ * test must never open its endpoint or send a non-CDC transfer. */
+void selectio_usb_enable_in(XUsbPs *usb, unsigned endpoint)
+{
+    (void)usb;
+    (void)endpoint;
+    assert(!"unexpected SWO endpoint reset");
+}
+
+int XUsbPs_EpBufferSend(XUsbPs *usb, u8 endpoint, u8 *data, u32 length)
+{
+    (void)usb;
+    (void)endpoint;
+    (void)data;
+    (void)length;
+    assert(!"unexpected SWO transfer");
+    return XST_FAILURE;
+}
+
 int XUsbPs_EpBufferSendWithZLT(XUsbPs *usb, u8 endpoint, u8 *data, u32 length)
 {
-    assert(usb == &device && endpoint == 3 && data == cdc_in_data);
+    assert(usb == &device && endpoint == USB_CDC_IN && data == cdc_in_data);
     assert(!in_flight_size && length && length <= sizeof cdc_in_data);
     for (uint32_t i = 0; i < length; i++)
         assert(data[i] == pattern(delivered+i));

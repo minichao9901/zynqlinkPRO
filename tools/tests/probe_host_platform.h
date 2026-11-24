@@ -35,6 +35,7 @@ typedef struct {u8 bmRequestType,bRequest;u16 wValue,wIndex,wLength;} XUsbPs_Set
 #define xil_printf(...) ((void)0)
 typedef struct {uint32_t x[8];} XUsbPs_dTD;
 typedef struct {uint32_t x[8];} XUsbPs_dQH;
+typedef struct XUsbPs_DeviceConfig XUsbPs_DeviceConfig;
 typedef struct {unsigned NumBufs,MaxPacketSize;} HostEpCfg;
 typedef struct {XUsbPs_dTD *dTDs;XUsbPs_dQH *dQH;} HostEp;
 typedef struct {
